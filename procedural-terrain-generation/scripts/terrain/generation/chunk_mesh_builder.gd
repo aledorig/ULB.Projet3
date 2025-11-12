@@ -15,7 +15,6 @@ func _init(p_chunk_size: int, p_vertex_spacing: float, p_terrain_gen: TerrainGen
 	vertex_spacing = p_vertex_spacing
 	terrain_gen = p_terrain_gen
 
-## Build a complete chunk mesh with seamless normals
 func build_chunk_mesh(chunk_position: Vector2) -> ArrayMesh:
 	var surface_tool = SurfaceTool.new()
 	surface_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -32,7 +31,6 @@ func build_chunk_mesh(chunk_position: Vector2) -> ArrayMesh:
 	# Step 4: Build final mesh with only inner vertices
 	return _build_final_mesh(vertices, vertex_normals)
 
-## Generate all vertices including overlap border
 func _generate_vertices(chunk_position: Vector2) -> Array:
 	var extended_size = chunk_size + 2 * OVERLAP
 	var vertices = []
@@ -50,7 +48,6 @@ func _generate_vertices(chunk_position: Vector2) -> Array:
 	
 	return vertices
 
-## Create triangles for the extended geometry
 func _create_triangles(surface_tool: SurfaceTool, vertices: Array) -> void:
 	var extended_size = chunk_size + 2 * OVERLAP
 	
@@ -71,7 +68,6 @@ func _create_triangles(surface_tool: SurfaceTool, vertices: Array) -> void:
 			surface_tool.add_vertex(vertices[bottom_right])
 			surface_tool.add_vertex(vertices[bottom_left])
 
-## Generate normals and extract them using MeshDataTool
 func _generate_and_extract_normals(surface_tool: SurfaceTool) -> Dictionary:
 	surface_tool.generate_normals()
 	surface_tool.index()
@@ -89,7 +85,6 @@ func _generate_and_extract_normals(surface_tool: SurfaceTool) -> Dictionary:
 	
 	return vertex_normals
 
-## Build the final mesh using only inner vertices with pre-computed normals
 func _build_final_mesh(vertices: Array, vertex_normals: Dictionary) -> ArrayMesh:
 	var surface_tool = SurfaceTool.new()
 	surface_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -130,7 +125,6 @@ func _build_final_mesh(vertices: Array, vertex_normals: Dictionary) -> ArrayMesh
 	surface_tool.index()
 	return surface_tool.commit()
 
-## Helper to get normal from lookup dictionary
 func _get_normal(vertex: Vector3, normals: Dictionary) -> Vector3:
 	var key = Vector3(round(vertex.x / vertex_spacing), 0, round(vertex.z / vertex_spacing))
 	return normals.get(key, Vector3.UP)

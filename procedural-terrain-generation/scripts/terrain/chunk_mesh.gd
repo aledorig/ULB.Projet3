@@ -1,9 +1,9 @@
 extends MeshInstance3D
 
-@export var chunk_size: int = 40
+@export var chunk_size:     int = 40
 @export var vertex_spacing: float = 2.0
-@export var height_scale: float = 10.0
-@export var terrain_seed: int = 1223334444
+@export var height_scale:   float = 10.0
+@export var terrain_seed:   int = 1223334444
 
 var terrain_generator: TerrainGenerator
 var mesh_builder: ChunkMeshBuilder

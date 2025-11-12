@@ -1,11 +1,11 @@
 extends Node3D
 
-@export var grass_mesh: Mesh
-@export var grass_density: float = 1.0
-@export var grass_height_range: Vector2 = Vector2(0.8, 1.2)
-@export var grass_scale_variance: float = 0.3
-@export var min_slope_for_grass: float = 0.7
-@export var spawn_radius: float = 2.0
+@export var grass_mesh:           Mesh
+@export var grass_density:        float   = 3.2
+@export var grass_height_range:   Vector2 = Vector2(0.8, 1.2)
+@export var grass_scale_variance: float   = 0.4
+@export var min_slope_for_grass:  float   = 0.9
+@export var spawn_radius:         float   = 1.2
 
 var terrain_manager: Node3D
 var grass_chunks: Dictionary = {}
@@ -101,31 +101,35 @@ func _generate_grass_positions(chunk_instance: Node3D) -> Array:
 			if normal.y < min_slope_for_grass:
 				continue
 			
-			# Randomly skip some grass based on density
-			if randf() > grass_density:
-				continue
+			# Spawn multiple grass blades per sample point when density > 1.0
+			var grass_count = int(grass_density)
+			var remainder_chance = grass_density - floor(grass_density)
 			
-			# Create transform for this grass blade
-			var grass_transform = Transform3D()
+			if randf() < remainder_chance:
+				grass_count += 1
 			
-			# Position (local to chunk)
-			grass_transform.origin = Vector3(local_x, height, local_z)
-			
-			# Random rotation around Y axis
-			var rotation_y = randf_range(0, TAU)
-			grass_transform.basis = grass_transform.basis.rotated(Vector3.UP, rotation_y)
-			
-			# Random scale
-			var rand_scale = randf_range(
-				grass_height_range.x * (1.0 - grass_scale_variance),
-				grass_height_range.y * (1.0 + grass_scale_variance)
-			)
-			grass_transform.basis = grass_transform.basis.scaled(Vector3(rand_scale, rand_scale, rand_scale))
-			
-			# Align to terrain normal
-			grass_transform.basis = _align_to_normal(grass_transform.basis, normal)
-			
-			transforms.append(grass_transform)
+			for i in range(grass_count):
+				# Create transform for this grass blade
+				var grass_transform = Transform3D()
+				
+				# Position (local to chunk) with slight offset for multiple blades
+				var offset_x = randf_range(-0.15, 0.15) if i > 0 else 0.0
+				var offset_z = randf_range(-0.15, 0.15) if i > 0 else 0.0
+				# Lower grass slightly into the ground (subtract a bit from Y)
+				grass_transform.origin = Vector3(local_x + offset_x, height - 0.15, local_z + offset_z)
+				
+				# Random rotation around Y axis
+				var rotation_y = randf_range(0, TAU)
+				grass_transform.basis = grass_transform.basis.rotated(Vector3.UP, rotation_y)
+				
+				# Random scale
+				var rand_scale = randf_range(
+					grass_height_range.x * (1.0 - grass_scale_variance),
+					grass_height_range.y * (1.0 + grass_scale_variance)
+				)
+				grass_transform.basis = grass_transform.basis.scaled(Vector3(rand_scale, rand_scale, rand_scale))
+				
+				transforms.append(grass_transform)
 	
 	return transforms
 
@@ -157,13 +161,6 @@ func _create_grass_multimesh(transforms: Array) -> MultiMesh:
 		multi_mesh.set_instance_transform(i, transforms[i])
 	
 	return multi_mesh
-
-func _align_to_normal(mesh_basis: Basis, normal: Vector3) -> Basis:
-	var up = normal
-	var right = mesh_basis.x
-	var forward = right.cross(up).normalized()
-	right = up.cross(forward).normalized()
-	return Basis(right, up, forward)
 
 func _find_mesh_instance(node: Node) -> MeshInstance3D:
 	if node is MeshInstance3D:

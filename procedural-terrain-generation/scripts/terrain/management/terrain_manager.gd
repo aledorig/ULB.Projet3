@@ -1,9 +1,9 @@
 extends Node3D
 
-@export var chunk_scene: PackedScene
+@export var chunk_scene:     PackedScene
 @export var render_distance: int = 2
-@export var chunk_size: int = 40
-@export var vertex_spacing: float = 2.0
+@export var chunk_size:      int = 40
+@export var vertex_spacing:  float = 2.0
 
 var chunks: Dictionary = {}
 var camera: Camera3D
@@ -16,10 +16,6 @@ func _ready():
 
 func _initialize_systems():
 	camera = get_node("MainCamera")
-	
-	if chunk_scene == null:
-		chunk_scene = load("res://scenes/terrain/chunk_mesh.tscn")
-	
 	material_manager = TerrainMaterialManager.new()
 	terrain_material = material_manager.create_terrain_material()
 
@@ -75,11 +71,7 @@ func spawn_chunk(chunk_pos: Vector2):
 		
 		# Position the parent container in world space
 		var chunk_world_size = (chunk_size - 1) * vertex_spacing
-		chunk_instance.position = Vector3(
-			chunk_pos.x * chunk_world_size, 
-			0, 
-			chunk_pos.y * chunk_world_size
-		)
+		chunk_instance.position = Vector3(chunk_pos.x * chunk_world_size, 0, chunk_pos.y * chunk_world_size)
 	
 	chunks[chunk_to_key(chunk_pos)] = chunk_instance
 
@@ -105,7 +97,6 @@ func _find_mesh_instance(node: Node) -> MeshInstance3D:
 	
 	return null
 
-## Get height at world position
 func get_height_at(world_pos: Vector3) -> float:
 	var chunk_pos = world_to_chunk(world_pos)
 	var chunk_key = chunk_to_key(chunk_pos)
