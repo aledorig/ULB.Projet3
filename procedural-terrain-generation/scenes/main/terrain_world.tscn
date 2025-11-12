@@ -1,10 +1,8 @@
-[gd_scene load_steps=10 format=3 uid="uid://0n10lr4rtcgt"]
+[gd_scene load_steps=8 format=3 uid="uid://0n10lr4rtcgt"]
 
 [ext_resource type="Script" uid="uid://urltxhw550bq" path="res://scripts/terrain/management/terrain_manager.gd" id="1_2nvvr"]
 [ext_resource type="PackedScene" uid="uid://cy2uy14fcvfrx" path="res://scenes/terrain/chunk_mesh.tscn" id="2_qld23"]
 [ext_resource type="Script" uid="uid://cuo62yjc33lxq" path="res://scripts/camera/camera_controller.gd" id="3_4p0at"]
-[ext_resource type="Script" uid="uid://bwrwikcrh83bg" path="res://scripts/environment/grass_spawner.gd" id="4_qld23"]
-[ext_resource type="ArrayMesh" uid="uid://duj6747nq4qsk" path="res://assets/environment/grass.res" id="5_4p0at"]
 [ext_resource type="Shader" uid="uid://cawelrhpylh3m" path="res://shaders/main/sky_shader.gdshader" id="6_qvro2"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_htxxt"]
@@ -22,7 +20,9 @@ ambient_light_source = 3
 ambient_light_color = Color(0.7, 0.75, 0.8, 1)
 ambient_light_energy = 0.35
 reflected_light_source = 2
-fog_light_color = Color(0.412, 0.882, 1, 1)
+fog_enabled = true
+fog_light_color = Color(0.7, 0.8, 0.9, 1)
+fog_density = 0.002
 fog_sky_affect = 0.505
 
 [node name="TerrainWorld" type="Node3D"]
@@ -30,11 +30,11 @@ script = ExtResource("1_2nvvr")
 chunk_scene = ExtResource("2_qld23")
 
 [node name="MainCamera" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.86602503, 0.4999998, 0, -0.4999998, 0.86602503, 0, 5, 0)
+transform = Transform3D(1, 0, 0, 0, 0.86602503, 0.4999998, 0, -0.4999998, 0.86602503, 0, 15, 0)
 fov = 90.0
 script = ExtResource("3_4p0at")
-move_speed = 15.0
-sprint_multiplier = 2.5
+move_speed = 20.0
+sprint_multiplier = 3.0
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, -0.75, 0.433013, 0, 10, 0)
@@ -44,10 +44,6 @@ shadow_enabled = true
 shadow_bias = 0.05
 directional_shadow_mode = 1
 directional_shadow_max_distance = 200.0
-
-[node name="GrassSpawner" type="Node3D" parent="."]
-script = ExtResource("4_qld23")
-grass_mesh = ExtResource("5_4p0at")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_4p0at")

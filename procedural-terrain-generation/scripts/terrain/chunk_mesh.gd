@@ -1,12 +1,12 @@
 extends MeshInstance3D
 
-@export var chunk_size:     int = 40
+@export var chunk_size:     int   = 40
 @export var vertex_spacing: float = 2.0
 @export var height_scale:   float = 10.0
-@export var terrain_seed:   int = 1223334444
+@export var terrain_seed:   int   = 9148748
 
 var terrain_generator: TerrainGenerator
-var mesh_builder: ChunkMeshBuilder
+var mesh_builder:      ChunkMeshBuilder
 
 func _ready():
 	_initialize_generators()
@@ -26,3 +26,9 @@ func get_height_at(world_x: float, world_z: float) -> float:
 	if not terrain_generator:
 		_initialize_generators()
 	return terrain_generator.get_height(world_x, world_z)
+
+## Public API: Get biome data at world position
+func get_biome_data_at(world_x: float, world_z: float) -> Dictionary:
+	if not terrain_generator:
+		_initialize_generators()
+	return terrain_generator.get_biome_data(world_x, world_z)
