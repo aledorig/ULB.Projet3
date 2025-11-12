@@ -16,7 +16,7 @@ var sea_level: float = 10.0
 # 3D grid parameters
 var grid_size_xz: int = 5
 var grid_size_y: int = 33
-var sample_spacing: float = 4.0
+var sample_spacing: float = 8.0
 
 var height_cache: Dictionary = {}
 
@@ -83,13 +83,17 @@ func get_height(world_x: float, world_z: float) -> float:
 	var local_x = (world_x - grid_x) / sample_spacing
 	var local_z = (world_z - grid_z) / sample_spacing
 	
-	# Cosine interpolation for smooth, non-blocky terrain
-	var h0 = _cosine_interpolate(h00, h10, local_x)
-	var h1 = _cosine_interpolate(h01, h11, local_x)
-	var final_height = _cosine_interpolate(h0, h1, local_z)
+	# Apply smoothstep
+	local_x = smoothstep(0.0, 1.0, local_x)
+	local_z = smoothstep(0.0, 1.0, local_z)
+	
+	# Bilinear interpolation with smoothed factors
+	var h0 = lerp(h00, h10, local_x)
+	var h1 = lerp(h01, h11, local_x)
+	var final_height = lerp(h0, h1, local_z)
 	
 	# Add small surface detail
-	var detail = detail_noise.get_noise_2d(world_x, world_z) * 0.5
+	var detail = detail_noise.get_noise_2d(world_x, world_z) * 0.2
 	final_height += detail
 	
 	return final_height
