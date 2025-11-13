@@ -1,6 +1,10 @@
 class_name TerrainGenerator
 extends RefCounted
 
+# ============================================================================
+# NOISE GENERATORS
+# ============================================================================
+
 # Noise generators
 var main_noise:      FastNoiseLite
 var min_limit_noise: FastNoiseLite
@@ -19,6 +23,10 @@ var grid_size_y: int = 33
 var sample_spacing: float = 8.0
 
 var height_cache: Dictionary = {}
+
+# ============================================================================
+# INITIALIZATION
+# ============================================================================
 
 func _init(p_seed: int = 9148748, p_height_scale: float = 10.0, p_vertex_spacing: float = 2.0):
 	height_scale   = p_height_scale
@@ -68,6 +76,10 @@ func setup_noise(terrain_seed: int) -> void:
 	ridge_noise.fractal_type    = FastNoiseLite.FRACTAL_RIDGED
 	ridge_noise.fractal_octaves = 3
 
+# ============================================================================
+# HEIGHT GENERATION
+# ============================================================================
+
 func get_height(world_x: float, world_z: float) -> float:
 	# Calculate which grid cell we're in
 	var grid_x = floor(world_x / sample_spacing) * sample_spacing
@@ -97,7 +109,7 @@ func get_height(world_x: float, world_z: float) -> float:
 	final_height += detail
 	
 	return final_height
-	
+
 func _cosine_interpolate(a: float, b: float, t: float) -> float:
 	# Cosine interpolation for smooth transitions
 	var t_smooth = (1.0 - cos(t * PI)) / 2.0
@@ -112,6 +124,10 @@ func _get_surface_height(grid_x: float, grid_z: float) -> float:
 	var height = _calculate_surface_from_3d_density(grid_x, grid_z)
 	height_cache[key] = height
 	return height
+
+# ============================================================================
+# 3D DENSITY CALCULATION
+# ============================================================================
 
 func _calculate_surface_from_3d_density(world_x: float, world_z: float) -> float:
 	# Get biome-blended parameters
@@ -200,6 +216,10 @@ func _get_target_height_for_biome(continental: float, erosion: float, world_x: f
 	
 	return base_height
 
+# ============================================================================
+# BIOME BLENDING
+# ============================================================================
+
 func _get_biome_blended_data(center_x: float, center_z: float) -> Dictionary:
 	# Minecraft's 5x5 biome blending approach
 	var total_weight = 0.0
@@ -234,6 +254,10 @@ func _get_biome_blended_data(center_x: float, center_z: float) -> Dictionary:
 func get_biome_data(world_x: float, world_z: float) -> Dictionary:
 	return biome_manager.get_biome_data(world_x, world_z)
 
+# ============================================================================
+# WATER & SURFACE PROPERTIES
+# ============================================================================
+
 func has_water_at(world_y: float) -> bool:
 	return world_y < sea_level
 
@@ -265,6 +289,10 @@ func get_surface_color(world_x: float, world_z: float, world_y: float) -> Color:
 		base_color = base_color.lerp(snow_color, snow_amount)
 	
 	return base_color
+
+# ============================================================================
+# UTILITY FUNCTIONS
+# ============================================================================
 
 func clear_cache():
 	height_cache.clear()

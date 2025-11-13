@@ -1,6 +1,10 @@
 class_name BiomeManager
 extends RefCounted
 
+# ============================================================================
+# ENUMS
+# ============================================================================
+
 # Climate zones (continental scale)
 enum ClimateZone {
 	TROPICAL   = 0,
@@ -30,6 +34,10 @@ enum BiomeType {
 	BEACH           = 11,
 	RIVER           = 12
 }
+
+# ============================================================================
+# CONSTANTS
+# ============================================================================
 
 # Biome colors (for vertex coloring)
 const BIOME_COLORS = {
@@ -65,6 +73,10 @@ const GRASS_DENSITY = {
 	BiomeType.RIVER:          0.0
 }
 
+# ============================================================================
+# NOISE LAYERS
+# ============================================================================
+
 # Noise layers (Minecraft approach)
 var continental_noise: FastNoiseLite  # Ocean vs land
 var erosion_noise:     FastNoiseLite  # Flat vs mountainous
@@ -73,6 +85,10 @@ var temperature_noise: FastNoiseLite  # Hot vs cold
 var humidity_noise:    FastNoiseLite  # Dry vs wet
 
 var seed_value: int
+
+# ============================================================================
+# INITIALIZATION
+# ============================================================================
 
 func _init(p_seed: int = 9148748):
 	seed_value = p_seed
@@ -128,6 +144,10 @@ func _setup_noise_maps():
 	humidity_noise.fractal_octaves    = 3
 	humidity_noise.fractal_lacunarity = 2.0
 	humidity_noise.fractal_gain       = 0.5
+
+# ============================================================================
+# BIOME SELECTION
+# ============================================================================
 
 func get_biome_data(world_x: float, world_z: float) -> Dictionary:
 	# Sample all noise parameters
@@ -246,6 +266,10 @@ func _select_biome(continental: float, erosion: float, pv: float, temperature: f
 	
 	return BiomeType.PLAINS
 
+# ============================================================================
+# BIOME BLENDING
+# ============================================================================
+
 func _calculate_blend_weights(primary_biome: BiomeType, continental: float, erosion: float, temperature: float) -> Dictionary:
 	# Initialize all weights to 0
 	var weights = {}
@@ -313,6 +337,10 @@ func _get_blended_grass_density(blend_weights: Dictionary) -> float:
 	for biome in blend_weights:
 		density += GRASS_DENSITY[biome] * blend_weights[biome]
 	return density
+
+# ============================================================================
+# SNOW CALCULATION
+# ============================================================================
 
 func get_snow_amount(world_y: float, biome_data: Dictionary) -> float:
 	var snow = 0.0

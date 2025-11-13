@@ -1,6 +1,10 @@
 class_name TerrainMaterialManager
 extends RefCounted
 
+# ============================================================================
+# MATERIAL CREATION
+# ============================================================================
+
 func create_terrain_material() -> StandardMaterial3D:
 	var mat = StandardMaterial3D.new()
 	
@@ -21,6 +25,10 @@ func create_terrain_material() -> StandardMaterial3D:
 	mat.shadow_to_opacity = false
 	
 	return mat
+
+# ============================================================================
+# SHADER CREATION
+# ============================================================================
 
 func create_biome_shader() -> Shader:
 	# Create a custom shader for better biome blending

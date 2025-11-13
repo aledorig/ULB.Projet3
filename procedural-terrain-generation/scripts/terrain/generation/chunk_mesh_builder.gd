@@ -1,17 +1,33 @@
 class_name ChunkMeshBuilder
 extends RefCounted
 
+# ============================================================================
+# CONSTANTS
+# ============================================================================
+
 # Overlap for seamless normals
 const OVERLAP: int = 1
+
+# ============================================================================
+# MEMBER VARIABLES
+# ============================================================================
 
 var chunk_size:     int
 var vertex_spacing: float
 var terrain_gen:    TerrainGenerator
 
+# ============================================================================
+# INITIALIZATION
+# ============================================================================
+
 func _init(p_chunk_size: int, p_vertex_spacing: float, p_terrain_gen: TerrainGenerator):
 	chunk_size = p_chunk_size
 	vertex_spacing = p_vertex_spacing
 	terrain_gen = p_terrain_gen
+
+# ============================================================================
+# MESH BUILDING
+# ============================================================================
 
 func build_chunk_mesh(chunk_position: Vector2) -> ArrayMesh:
 	var surface_tool = SurfaceTool.new()
@@ -30,6 +46,10 @@ func build_chunk_mesh(chunk_position: Vector2) -> ArrayMesh:
 	
 	# Step 4: Build final mesh with only inner vertices and colors
 	return _build_final_mesh(vertices, colors, vertex_normals)
+
+# ============================================================================
+# VERTEX GENERATION
+# ============================================================================
 
 func _generate_vertex_data(chunk_position: Vector2) -> Dictionary:
 	var extended_size = chunk_size + 2 * OVERLAP
@@ -58,6 +78,10 @@ func _generate_vertex_data(chunk_position: Vector2) -> Dictionary:
 		"colors": colors
 	}
 
+# ============================================================================
+# TRIANGLE CREATION
+# ============================================================================
+
 func _create_triangles(surface_tool: SurfaceTool, vertices: Array, colors: Array) -> void:
 	var extended_size = chunk_size + 2 * OVERLAP
 	
@@ -84,6 +108,10 @@ func _create_triangles(surface_tool: SurfaceTool, vertices: Array, colors: Array
 			surface_tool.set_color(colors[bottom_left])
 			surface_tool.add_vertex(vertices[bottom_left])
 
+# ============================================================================
+# NORMAL GENERATION
+# ============================================================================
+
 func _generate_and_extract_normals(surface_tool: SurfaceTool) -> Dictionary:
 	surface_tool.generate_normals()
 	surface_tool.index()
@@ -100,6 +128,10 @@ func _generate_and_extract_normals(surface_tool: SurfaceTool) -> Dictionary:
 		vertex_normals[key] = vertex_normal
 	
 	return vertex_normals
+
+# ============================================================================
+# FINAL MESH ASSEMBLY
+# ============================================================================
 
 func _build_final_mesh(vertices: Array, colors: Array, vertex_normals: Dictionary) -> ArrayMesh:
 	var surface_tool = SurfaceTool.new()
@@ -151,6 +183,10 @@ func _build_final_mesh(vertices: Array, colors: Array, vertex_normals: Dictionar
 	
 	surface_tool.index()
 	return surface_tool.commit()
+
+# ============================================================================
+# UTILITY FUNCTIONS
+# ============================================================================
 
 func _get_normal(vertex: Vector3, normals: Dictionary) -> Vector3:
 	var key = Vector3(round(vertex.x / vertex_spacing), 0, round(vertex.z / vertex_spacing))

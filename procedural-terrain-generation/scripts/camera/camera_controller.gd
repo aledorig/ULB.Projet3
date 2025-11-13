@@ -1,13 +1,25 @@
 extends Camera3D
 
+# ============================================================================
+# EXPORTS
+# ============================================================================
+
 @export var move_speed:        float = 10.0
 @export var sprint_multiplier: float = 2.0
 @export var mouse_sensitivity: float = 0.003
 @export var smooth_speed:      float = 10.0
 
+# ============================================================================
+# MEMBER VARIABLES
+# ============================================================================
+
 var velocity:   Vector3 = Vector3.ZERO
 var rotation_x: float   = 0.0
 var rotation_y: float   = 0.0
+
+# ============================================================================
+# INITIALIZATION
+# ============================================================================
 
 func _ready() -> void:
 	# Capture mouse for looking around
@@ -16,6 +28,10 @@ func _ready() -> void:
 	# Init rotation from curr transform
 	rotation_y = rotation.y
 	rotation_x = rotation.x
+
+# ============================================================================
+# INPUT HANDLING
+# ============================================================================
 
 func _input(event):
 	# Toggle mouse capture with Esc
@@ -30,6 +46,10 @@ func _input(event):
 		rotation_y -= event.relative.x * mouse_sensitivity
 		rotation_x -= event.relative.y * mouse_sensitivity
 		rotation_x = clamp(rotation_x, -PI/2, PI/2)
+
+# ============================================================================
+# CAMERA UPDATE
+# ============================================================================
 
 func _process(delta: float) -> void:
 	# Apply rotation
