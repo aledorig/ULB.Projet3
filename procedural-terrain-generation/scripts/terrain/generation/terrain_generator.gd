@@ -13,9 +13,9 @@ var detail_noise:    FastNoiseLite
 var ridge_noise:     FastNoiseLite
 
 var biome_manager: BiomeManager
-var height_scale: float
+#var height_scale: float
 var vertex_spacing: float
-var sea_level: float = 10.0
+var sea_level: float = TerrainConstants.BEACH_FLOOR
 
 # 3D grid parameters
 var grid_size_xz: int = 5
@@ -29,7 +29,7 @@ var height_cache: Dictionary = {}
 # ============================================================================
 
 func _init(p_seed: int = 9148748, p_height_scale: float = 10.0, p_vertex_spacing: float = 2.0):
-	height_scale   = p_height_scale
+	#height_scale   = p_height_scale
 	vertex_spacing = p_vertex_spacing
 	biome_manager  = BiomeManager.new(p_seed)
 	setup_noise(p_seed)
@@ -135,9 +135,9 @@ func _calculate_surface_from_3d_density(world_x: float, world_z: float) -> float
 	
 	# Generate a vertical column of density values (like Minecraft's 3D noise)
 	# We'll sample from bottom to top to find where density crosses zero
-	var min_y = -20.0
-	var max_y = 80.0
-	var y_step = 4.0
+	var min_y = TerrainConstants.MIN_HEIGHT
+	var max_y = TerrainConstants.MAX_HEIGHT
+	var y_step = 4
 	
 	var surface_y = sea_level
 	
@@ -148,6 +148,8 @@ func _calculate_surface_from_3d_density(world_x: float, world_z: float) -> float
 		if density > 0.0:
 			# Found solid terrain
 			surface_y = float(y)
+			#if surface_y>50:
+				#print("surface:", surface_y)
 			break
 	
 	return surface_y
@@ -157,16 +159,18 @@ func _calculate_3d_density(world_x: float, world_y: float, world_z: float, biome
 	# density > 0 = solid block, density <= 0 = air
 	
 	# Sample all three noise layers in 3D space
-	var main = main_noise.get_noise_3d(world_x, world_y, world_z)
-	var min_limit = min_limit_noise.get_noise_3d(world_x, world_y, world_z)
-	var max_limit = max_limit_noise.get_noise_3d(world_x, world_y, world_z)
+	var base_density = main_noise.get_noise_2d(world_x, world_z)
+	#var min_limit = min_limit_noise.get_noise_3d(world_x, world_y, world_z)
+	#var max_limit = max_limit_noise.get_noise_3d(world_x, world_y, world_z)
+	
+	#print("noise values:\n main: ", main, "\nmin_limit: ", min_limit, "\nmax_limit: ", max_limit)
 	
 	# Combine like Minecraft does
-	var selector = (main / 10.0 + 1.0) / 2.0  # Normalize to 0-1
-	selector = clamp(selector, 0.0, 1.0)
+	#var selector = (main + 1.0) / 2.0  # Normalize to 0-1 
+	#selector = clamp(selector, 0.0, 1.0)
 	
 	# Interpolate between min and max limits
-	var base_density = lerp(min_limit * 2.0, max_limit * 2.0, selector)
+	#var base_density = lerp(min_limit * 2.0, max_limit * 2.0, selector)
 	
 	# Apply height-based factor (terrain gets denser below, thins out above)
 	var continental = biome_data.continental
@@ -193,17 +197,17 @@ func _get_target_height_for_biome(continental: float, erosion: float, world_x: f
 	
 	# Continental offset (deep ocean to high mountains)
 	if continental < -0.45:
-		base_height += lerp(-15.0, -7.0, remap(continental, -1.0, -0.45, 0.0, 1.0))
+		base_height += lerp(TerrainConstants.DEEP_OCEAN_FLOOR, TerrainConstants.OCEAN_FLOOR, remap(continental, -1.0, -0.45, 0.0, 1.0))
 	elif continental < -0.15:
-		base_height += lerp(-7.0, -2.0, remap(continental, -0.45, -0.15, 0.0, 1.0))
+		base_height += lerp(TerrainConstants.OCEAN_FLOOR, TerrainConstants.RIVER_FLOOR, remap(continental, -0.45, -0.15, 0.0, 1.0))
 	elif continental < 0.0:
-		base_height += lerp(-2.0, 0.0, remap(continental, -0.15, 0.0, 0.0, 1.0))
+		base_height += lerp(TerrainConstants.RIVER_FLOOR, TerrainConstants.BEACH_FLOOR, remap(continental, -0.15, 0.0, 0.0, 1.0))
 	elif continental < 0.3:
-		base_height += lerp(0.0, 6.0, remap(continental, 0.0, 0.3, 0.0, 1.0))
+		base_height += lerp(TerrainConstants.BEACH_FLOOR, TerrainConstants.HILL_FLOOR, remap(continental, 0.0, 0.3, 0.0, 1.0))
 	elif continental < 0.6:
-		base_height += lerp(6.0, 18.0, remap(continental, 0.3, 0.6, 0.0, 1.0))
+		base_height += lerp(TerrainConstants.HILL_FLOOR, TerrainConstants.MOUNTAINS_FLOOR, remap(continental, 0.3, 0.6, 0.0, 1.0))
 	else:
-		base_height += lerp(18.0, 35.0, remap(continental, 0.6, 1.0, 0.0, 1.0))
+		base_height += lerp(TerrainConstants.MOUNTAINS_FLOOR, TerrainConstants.MOUNTAINS_PEAK, remap(continental, 0.6, 1.0, 0.0, 1.0))
 	
 	# Erosion modifies height variation
 	if erosion < -0.2:  # Mountains
