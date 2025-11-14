@@ -121,7 +121,7 @@ func _get_surface_height(grid_x: float, grid_z: float) -> float:
 		return height_cache[key]
 	
 	# Generate 3D density column and find surface
-	var height = _calculate_surface_from_3d_density(grid_x, grid_z)
+	var height = _calculate_surface_from_density(grid_x, grid_z)
 	height_cache[key] = height
 	return height
 
@@ -129,7 +129,7 @@ func _get_surface_height(grid_x: float, grid_z: float) -> float:
 # 3D DENSITY CALCULATION
 # ============================================================================
 
-func _calculate_surface_from_3d_density(world_x: float, world_z: float) -> float:
+func _calculate_surface_from_density(world_x: float, world_z: float) -> float:
 	# Get biome-blended parameters
 	var biome_data = _get_biome_blended_data(world_x, world_z)
 	
@@ -137,7 +137,7 @@ func _calculate_surface_from_3d_density(world_x: float, world_z: float) -> float
 	# We'll sample from bottom to top to find where density crosses zero
 	var min_y = TerrainConstants.MIN_HEIGHT
 	var max_y = TerrainConstants.MAX_HEIGHT
-	var y_step = 4
+	var y_step = 1
 	
 	var surface_y = sea_level
 	
@@ -240,7 +240,7 @@ func _get_biome_blended_data(center_x: float, center_z: float) -> Dictionary:
 			var sample_z = center_z + offset_z
 			
 			# Minecraft's distance-based weight formula
-			var weight = 10.0 / (sqrt(i * i + j * j) + 0.2)
+			var weight = 10.0 / (sqrt(i**2 + j**2) + 0.2)
 			
 			var sample_biome = biome_manager.get_biome_data(sample_x, sample_z)
 			
