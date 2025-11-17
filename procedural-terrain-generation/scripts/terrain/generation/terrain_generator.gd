@@ -28,7 +28,7 @@ var height_cache: Dictionary = {}
 # INITIALIZATION
 # ============================================================================
 
-func _init(p_seed: int = 9148748, p_height_scale: float = 10.0, p_vertex_spacing: float = 2.0):
+func _init(p_seed: int, p_vertex_spacing: float = 2.0):
 	#height_scale   = p_height_scale
 	vertex_spacing = p_vertex_spacing
 	biome_manager  = BiomeManager.new(p_seed)
@@ -44,23 +44,23 @@ func setup_noise(terrain_seed: int) -> void:
 	main_noise.fractal_octaves    = 8
 	main_noise.fractal_lacunarity = 2.0
 	main_noise.fractal_gain       = 0.5
-	
-	# Min limit noise - lower boundary of terrain
-	min_limit_noise                 = FastNoiseLite.new()
-	min_limit_noise.seed            = terrain_seed + 1000
-	min_limit_noise.noise_type      = FastNoiseLite.TYPE_PERLIN
-	min_limit_noise.frequency       = 0.01
-	min_limit_noise.fractal_type    = FastNoiseLite.FRACTAL_FBM
-	min_limit_noise.fractal_octaves = 16
-	
-	# Max limit noise - upper boundary of terrain
-	max_limit_noise                 = FastNoiseLite.new()
-	max_limit_noise.seed            = terrain_seed + 2000
-	max_limit_noise.noise_type      = FastNoiseLite.TYPE_PERLIN
-	max_limit_noise.frequency       = 0.01
-	max_limit_noise.fractal_type    = FastNoiseLite.FRACTAL_FBM
-	max_limit_noise.fractal_octaves = 16
-	
+	#
+	## Min limit noise - lower boundary of terrain
+	#min_limit_noise                 = FastNoiseLite.new()
+	#min_limit_noise.seed            = terrain_seed + 1000
+	#min_limit_noise.noise_type      = FastNoiseLite.TYPE_PERLIN
+	#min_limit_noise.frequency       = 0.01
+	#min_limit_noise.fractal_type    = FastNoiseLite.FRACTAL_FBM
+	#min_limit_noise.fractal_octaves = 16
+	#
+	## Max limit noise - upper boundary of terrain
+	#max_limit_noise                 = FastNoiseLite.new()
+	#max_limit_noise.seed            = terrain_seed + 2000
+	#max_limit_noise.noise_type      = FastNoiseLite.TYPE_PERLIN
+	#max_limit_noise.frequency       = 0.01
+	#max_limit_noise.fractal_type    = FastNoiseLite.FRACTAL_FBM
+	#max_limit_noise.fractal_octaves = 16
+	#
 	# Detail noise for surface variation
 	detail_noise                 = FastNoiseLite.new()
 	detail_noise.seed            = terrain_seed + 3000
@@ -105,8 +105,8 @@ func get_height(world_x: float, world_z: float) -> float:
 	var final_height = lerp(h0, h1, local_z)
 	
 	# Add small surface detail
-	var detail = detail_noise.get_noise_2d(world_x, world_z) * 0.2
-	final_height += detail
+	#var detail = detail_noise.get_noise_2d(world_x, world_z) * 0.2
+	#final_height += detail
 	
 	return final_height
 
@@ -148,8 +148,8 @@ func _calculate_surface_from_density(world_x: float, world_z: float) -> float:
 		if density > 0.0:
 			# Found solid terrain
 			surface_y = float(y)
-			#if surface_y>50:
-				#print("surface:", surface_y)
+			if surface_y>45:
+				print("surface height at x,z:",world_x, world_z, ": ", surface_y)
 			break
 	
 	return surface_y
@@ -158,12 +158,7 @@ func _calculate_3d_density(world_x: float, world_y: float, world_z: float, biome
 	# This mimics Minecraft's 3D noise combination
 	# density > 0 = solid block, density <= 0 = air
 	
-	# Sample all three noise layers in 3D space
 	var base_density = main_noise.get_noise_2d(world_x, world_z)
-	#var min_limit = min_limit_noise.get_noise_3d(world_x, world_y, world_z)
-	#var max_limit = max_limit_noise.get_noise_3d(world_x, world_y, world_z)
-	
-	#print("noise values:\n main: ", main, "\nmin_limit: ", min_limit, "\nmax_limit: ", max_limit)
 	
 	# Combine like Minecraft does
 	#var selector = (main + 1.0) / 2.0  # Normalize to 0-1 
@@ -183,8 +178,8 @@ func _calculate_3d_density(world_x: float, world_y: float, world_z: float, biome
 	var height_factor = (world_y - target_height) * 0.15
 	
 	# Apply steeper falloff at extreme heights (like Minecraft does at y > 29)
-	if world_y > target_height + 10.0:
-		var fade = (world_y - target_height - 10.0) / 10.0
+	if world_y > target_height + 20.0:
+		var fade = (world_y - target_height - 20.0) / 10.0
 		height_factor = lerp(height_factor, height_factor * 4.0, clamp(fade, 0.0, 1.0))
 	
 	var final_density = base_density - height_factor
@@ -210,12 +205,12 @@ func _get_target_height_for_biome(continental: float, erosion: float, world_x: f
 		base_height += lerp(TerrainConstants.MOUNTAINS_FLOOR, TerrainConstants.MOUNTAINS_PEAK, remap(continental, 0.6, 1.0, 0.0, 1.0))
 	
 	# Erosion modifies height variation
-	if erosion < -0.2:  # Mountains
+	if erosion > 0.2:  # Mountains
 		var ridge_val = ridge_noise.get_noise_2d(world_x, world_z)
 		var ridge_factor = 1.0 - abs(ridge_val)
 		ridge_factor = pow(ridge_factor, 1.5)
 		base_height += ridge_factor * 20.0
-	elif erosion < 0.1:  # Hills
+	elif erosion > -0.1:  # Hills
 		base_height += (0.1 - erosion) * 5.0
 	
 	return base_height
@@ -272,13 +267,13 @@ func get_surface_color(world_x: float, world_z: float, world_y: float) -> Color:
 	if has_water_at(world_y):
 		var primary_biome = biome_data.primary_biome
 		match primary_biome:
-			BiomeManager.BiomeType.DESERT, BiomeManager.BiomeType.BEACH:
+			TerrainConstants.BiomeType.DESERT, TerrainConstants.BiomeType.BEACH:
 				base_color = Color(0.85, 0.75, 0.5)
-			BiomeManager.BiomeType.OCEAN, BiomeManager.BiomeType.DEEP_OCEAN:
+			TerrainConstants.BiomeType.OCEAN, TerrainConstants.BiomeType.DEEP_OCEAN:
 				base_color = Color(0.4, 0.35, 0.3)
-			BiomeManager.BiomeType.FROZEN_OCEAN:
+			TerrainConstants.BiomeType.FROZEN_OCEAN:
 				base_color = Color(0.5, 0.5, 0.55)
-			BiomeManager.BiomeType.RIVER:
+			TerrainConstants.BiomeType.RIVER:
 				base_color = Color(0.45, 0.35, 0.25)
 			_:
 				base_color = Color(0.5, 0.4, 0.3)

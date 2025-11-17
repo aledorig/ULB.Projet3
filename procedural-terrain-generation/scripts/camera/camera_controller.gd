@@ -5,10 +5,10 @@ extends Camera3D
 # EXPORTS
 # ============================================================================
 
-@export var move_speed:        float = 10.0
-@export var sprint_multiplier: float = 2.0
+@export var move_speed:        float = 50.0
+@export var sprint_multiplier: float = 10.0
 @export var mouse_sensitivity: float = 0.003
-@export var smooth_speed:      float = 10.0
+@export var smooth_speed:      float = 50.0
 
 # ============================================================================
 # MEMBER VARIABLES

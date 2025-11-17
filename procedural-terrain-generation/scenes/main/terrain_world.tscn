@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bc843f6ej5jlt" path="res://scripts/terrain/management/chunk_manager.gd" id="1_2nvvr"]
 [ext_resource type="Script" uid="uid://cuo62yjc33lxq" path="res://scripts/camera/camera_controller.gd" id="3_4p0at"]
-[ext_resource type="Script" uid="uid://b4tbc0qvyfoe3" path="res://scripts/camera/debug_info.gd" id="4_qld23"]
+[ext_resource type="Script" uid="uid://b4tbc0qvyfoe3" path="res://scripts/debug_info.gd" id="4_qld23"]
 [ext_resource type="Shader" uid="uid://cawelrhpylh3m" path="res://shaders/main/sky_shader.gdshader" id="6_qvro2"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_htxxt"]

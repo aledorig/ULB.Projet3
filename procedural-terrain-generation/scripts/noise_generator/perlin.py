@@ -10,10 +10,14 @@ class Perlin:
 			(1, 1),
 			(-1, 1),
 			(1, -1),
-			(-1,-1)
+			(-1,-1),
+			(1, 0),
+			(-1, 0),
+			(0, 1),
+			(0, -1)
 		]
 	
-	def __init__(self, seed=666) -> None:
+	def __init__(self, seed: int | None = None) -> None:
 		self.seed = seed
 		self.table = []
 		self.build_perm_table(seed)
@@ -30,7 +34,7 @@ class Perlin:
 			table[i], table[j] = table[j], table[i]
 
 
-	def build_perm_table(self, seed: int) -> None:
+	def build_perm_table(self, seed: int | None) -> None:
 		table = list(range(256))
 		rng = Random(seed)
 
@@ -58,7 +62,7 @@ class Perlin:
 
 	def gradient_at(self, x: int, y: int) -> tuple:
 		hash = self.table[self.table[x] + y] # hash function, give a random number in the table
-		return self.DIRECTIONS[hash & 3] # take 2 LSB of hash as an int -> give random direction 
+		return self.DIRECTIONS[hash & 7] # take 3 LSB of hash as an int -> give random direction 
 
 	def dir_vector(self ,x0 : float, y0 : float, x1 : float, y1 : float ) -> tuple :
 		# Vector of (x0, y0) to (x1, y1) (not the other sens)

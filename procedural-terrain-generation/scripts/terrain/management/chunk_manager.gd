@@ -29,6 +29,9 @@ extends Node3D
 # INTERNAL STATE
 # ============================================================================
 
+#seed for random generation
+var p_seed = 1
+
 # Chunk storage (similar to Minecraft's id2ChunkMap)
 var loaded_chunks: Dictionary = {}   # Vector2i -> ChunkInstance
 var pending_chunks: Dictionary = {}  # Vector2i -> ChunkRequest
@@ -71,7 +74,7 @@ func _ready() -> void:
 
 func _initialize_systems() -> void:
 	# Find or create camera
-	camera = get_node_or_null("../MainCamera")
+	camera = get_node_or_null("/root/TerrainWorld/MainCamera")
 	if not camera:
 		camera = get_viewport().get_camera_3d()
 	
@@ -87,6 +90,10 @@ func _initialize_systems() -> void:
 	work_queue_mutex = Mutex.new()
 	results_queue_mutex = Mutex.new()
 	thread_pool_semaphore = Semaphore.new()
+	
+	#initialize seed
+	if not p_seed:
+		p_seed = randi()
 	
 	print("ChunkManager: Initialized with %d worker threads" % max_worker_threads)
 
@@ -223,7 +230,7 @@ func _generate_chunk_mesh(chunk_pos: Vector2i) -> ChunkResult:
 		return result
 	
 	# Create temporary generators (thread-local)
-	var terrain_gen = TerrainGenerator.new(9148748, 10.0, vertex_spacing)
+	var terrain_gen = TerrainGenerator.new(p_seed, vertex_spacing)
 	var mesh_builder = ChunkMeshBuilder.new(chunk_size, vertex_spacing, terrain_gen)
 	
 	# Generate mesh
