@@ -6,17 +6,16 @@ import numpy as np
 from perlin import Perlin
 
 
-noise = Perlin()
+noise = Perlin(num_octaves=8,fractal_gain=0.5,fractal_lacunarity=2, seed=666)
 
 width  = 300
 height = 300
-scale  = 0.05
 
 img = np.zeros((height, width))
 
 for y in range(height):
     for x in range(width):
-        n = noise.perlin(x * scale, y * scale)
+        n = noise.get_noise_2d(x, y)
         if abs(n) > 0.9:
             print(f"At ({x},{y}) -> {n}")
         img[y][x] = n

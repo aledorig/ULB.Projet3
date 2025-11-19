@@ -17,10 +17,13 @@ class Perlin:
 			(0, -1)
 		]
 	
-	def __init__(self, seed: int | None = None) -> None:
+	def __init__(self, num_octaves=1, fractal_gain=0.5, fractal_lacunarity=2.0, seed: int | None = None) -> None:
 		self.seed = seed
 		self.table = []
 		self.build_perm_table(seed)
+		self.fractal_octaves = num_octaves
+		self.fractal_gain = fractal_gain
+		self.fractal_lacunarity = fractal_lacunarity
 
 
 	def set_seed(self, seed):
@@ -89,7 +92,7 @@ class Perlin:
 		return self.dot_product(grad, vec)
 	
 
-	def perlin(self, x: float, y: float) -> float:
+	def _perlin(self, x: float, y: float) -> float:
 
 		# Which grid cell contains (x,y), get corners + get local remap of original (x,y)
 		x0, y0, x1, y1, local_x, local_y = self.find_grid_coordinates(x, y)
@@ -109,3 +112,15 @@ class Perlin:
 		ix1 = self.lerp(up_left, up_right,   horizontal_interp)
 
 		return self.lerp(ix0, ix1, vertical_interp)
+	
+	def get_noise_2d(self, x: float, y: float):
+		amplitude = 1.0
+		frequency = 0.05
+		noise_value = 0.0
+
+		for _ in range(self.fractal_octaves+1):
+			noise_value += self._perlin(x * frequency, y * frequency) * amplitude
+			amplitude *= self.fractal_gain
+			frequency *= self.fractal_lacunarity
+
+		return min(max(noise_value, -1.0), 1.0)  # Clamp to [-1, 1]
