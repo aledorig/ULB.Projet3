@@ -27,7 +27,7 @@ var blend_radius:       float = 16.0
 # INITIALIZATION
 # ============================================================================
 
-func _init(p_seed: int = 0) -> void:
+func _init(p_seed: int = TerrainConstants.GAME_SEED) -> void:
 	seed_value = p_seed
 	biome_manager = BiomeManager.new(p_seed)
 	_setup_height_noise()

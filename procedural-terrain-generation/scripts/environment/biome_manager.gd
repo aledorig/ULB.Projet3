@@ -19,7 +19,7 @@ var seed_value: int
 # INITIALIZATION
 # ============================================================================
 
-func _init(p_seed: int = 0) -> void:
+func _init(p_seed: int = TerrainConstants.GAME_SEED) -> void:
 	seed_value = p_seed
 	_setup_noise()
 

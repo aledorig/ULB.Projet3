@@ -8,9 +8,9 @@ extends MeshInstance3D
 # EXPORTS
 # ============================================================================
 
-@export var chunk_size:     int = 40
+@export var chunk_size:     int   = 40
 @export var vertex_spacing: float = 2.0
-@export var terrain_seed:   int = 9148748
+@export var terrain_seed:   int   = TerrainConstants.GAME_SEED
 
 # ============================================================================
 # REFERENCES
@@ -28,7 +28,7 @@ func _ready() -> void:
 
 
 func _initialize_generators() -> void:
-	terrain_generator = TerrainGenerator.new(terrain_seed, vertex_spacing)
+	terrain_generator = TerrainGenerator.new(terrain_seed)
 	mesh_builder = ChunkMeshBuilder.new(chunk_size, vertex_spacing, terrain_generator)
 
 # ============================================================================

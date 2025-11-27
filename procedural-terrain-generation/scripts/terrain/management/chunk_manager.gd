@@ -30,7 +30,7 @@ extends Node3D
 # ============================================================================
 
 #seed for random generation
-var p_seed = 1
+var p_seed: int = TerrainConstants.GAME_SEED
 
 # Chunk storage (similar to Minecraft's id2ChunkMap)
 var loaded_chunks:  Dictionary = {}  # Vector2i -> ChunkInstance
