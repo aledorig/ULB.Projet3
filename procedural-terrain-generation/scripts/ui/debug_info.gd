@@ -91,21 +91,17 @@ func _process(delta: float) -> void:
 	var chunk_pos := chunk_manager.world_to_chunk(pos)
 	var chunk_stats := chunk_manager.get_stats()
 
-	# Minecraft-style compact format
+	# Compact format
 	text = ""
 	text += "Procedural Terrain v0.1\n"
 	text += "%d fps (avg %.0f)\n" % [Engine.get_frames_per_second(), avg_fps]
 	text += "\n"
 	text += "XYZ: %.1f / %.1f / %.1f\n" % [pos.x, pos.y, pos.z]
-	text += "Chunk: %d %d\n" % [chunk_pos.x, chunk_pos.y]
+	text += "Chunk: %d %d, %d L, %d P\n" % [chunk_pos.x, chunk_pos.y, chunk_stats.loaded_chunks, chunk_stats.pending_chunks]
 	text += "Speed: %.1f (vel %.1f)\n" % [ship.forward_speed, ship.velocity.length()]
 	text += "\n"
 	text += "Biome: %s [%s]\n" % [debug_data.biome, debug_data.temp_category]
 	text += "Height: %.1f %s\n" % [debug_data.height, "(underwater)" if debug_data.underwater else ""]
-	text += "\n"
-	text += "Chunks: %d loaded, %d pending\n" % [chunk_stats.loaded_chunks, chunk_stats.pending_chunks]
-	text += "\n"
-	text += "[Shift+P] Performance report"
 
 # ============================================================================
 # HELPERS

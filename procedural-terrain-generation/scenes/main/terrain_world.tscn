@@ -6,8 +6,8 @@
 [ext_resource type="PackedScene" uid="uid://c4cju08nu26pq" path="res://scenes/ship/executioner.tscn" id="5_4p0at"]
 [ext_resource type="Script" uid="uid://dws2kl6rxbpa3" path="res://scripts/ui/map.gd" id="5_qvro2"]
 [ext_resource type="Shader" uid="uid://lu66d4khntu0" path="res://shaders/ui/pixelation.gdshader" id="6_htxxt"]
-[ext_resource type="Shader" uid="uid://cawelrhpylh3m" path="res://shaders/main/sky_shader.gdshader" id="6_qvro2"]
-[ext_resource type="Script" path="res://scripts/environment/water_manager.gd" id="7_water"]
+[ext_resource type="Shader" uid="uid://cawelrhpylh3m" path="res://shaders/environment/sky.gdshader" id="6_qvro2"]
+[ext_resource type="Script" uid="uid://8y80lskyu25x" path="res://scripts/environment/water_manager.gd" id="7_water"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_htxxt"]
 shader = ExtResource("6_qvro2")
@@ -82,5 +82,3 @@ grow_vertical = 2
 
 [node name="Water" type="MeshInstance3D" parent="."]
 script = ExtResource("7_water")
-water_size = 2000.0
-follow_camera = true
