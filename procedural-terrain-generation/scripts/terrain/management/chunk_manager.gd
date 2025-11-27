@@ -245,7 +245,7 @@ func _generate_chunk_mesh(chunk_pos: Vector2i) -> ChunkResult:
 		return result
 	
 	# Create temporary generators (thread-local)
-	var terrain_gen = TerrainGenerator.new(p_seed, vertex_spacing)
+	var terrain_gen = TerrainGenerator.new(p_seed)
 	var mesh_builder = ChunkMeshBuilder.new(chunk_size, vertex_spacing, terrain_gen)
 	
 	# Generate mesh

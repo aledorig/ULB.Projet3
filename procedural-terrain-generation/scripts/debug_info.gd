@@ -31,6 +31,7 @@ func _ready() -> void:
 	if ship == null:
 		push_error("DebugInfo: Ship not found!")
 		return
+	
 	if terrain_world == null:
 		push_error("DebugInfo: Couldn't get TerrainWorld node")
 		return
@@ -65,6 +66,7 @@ func _process(delta: float) -> void:
 func _format_fps_info(delta: float) -> String:
 	var current_fps: float = 1.0 / delta
 	fps_samples.append(current_fps)
+	
 	if fps_samples.size() > MAX_FPS_SAMPLES:
 		fps_samples.pop_front()
 	
@@ -91,21 +93,14 @@ func _format_player_info() -> String:
 
 func _format_biome_info() -> String:
 	var pos: Vector3 = ship.global_position
-	var biome_data: Dictionary = terrain_generator.get_biome_data(pos.x, pos.z)
+	var debug_data: Dictionary = terrain_generator.get_debug_info(pos.x, pos.z)
 	
 	var result: String = "Biome Info:\n"
-	result += "  Height Range: %d to %d\n" % [TerrainConstants.MIN_HEIGHT, TerrainConstants.MAX_HEIGHT]
-	result += "  Continental: %.2f | Erosion: %.2f | PV: %.2f\n" % [
-		biome_data.continental,
-		biome_data.erosion,
-		biome_data.pv
-	]
-	result += "  Biome: %s | Climate: %s\n" % [
-		TerrainConstants.BIOME_TYPE_STRING[biome_data.primary_biome],
-		TerrainConstants.CLIMATE_ZONE_STRING[biome_data.climate_zone]
-	]
-	result += "  Temperature: %.2f | Humidity: %.2f\n" % [
-		biome_data.temperature,
-		biome_data.humidity
-	]
+	result += "  Height Range: %.0f to %.0f\n" % [TerrainConstants.MIN_HEIGHT, TerrainConstants.MAX_HEIGHT]
+	result += "  Terrain Height: %.1f\n" % debug_data.height
+	result += "  Underwater: %s\n" % str(debug_data.underwater)
+	result += "  Biome: %s\n" % debug_data.biome
+	result += "  Temperature: %.2f\n" % debug_data.temperature
+	result += "  Moisture: %.2f\n" % debug_data.moisture
+	result += "  Continentalness: %.2f\n" % debug_data.continentalness
 	return result
