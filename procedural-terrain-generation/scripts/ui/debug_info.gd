@@ -1,7 +1,7 @@
 class_name DebugInfo
 extends Label
 
-## On-screen debug overlay displaying ship, terrain, and performance info
+## Minecraft-style debug overlay (F3 screen)
 
 # ============================================================================
 # CONSTANTS
@@ -21,7 +21,8 @@ const MAX_FPS_SAMPLES: int = 60
 # ============================================================================
 
 var terrain_generator: TerrainGenerator = null
-var fps_samples:       Array[float] = []
+var fps_samples: Array[float] = []
+var avg_fps: float = 0.0
 
 # ============================================================================
 # INITIALIZATION
@@ -31,12 +32,34 @@ func _ready() -> void:
 	if ship == null:
 		push_error("DebugInfo: Ship not found!")
 		return
-	
+
 	if terrain_world == null:
 		push_error("DebugInfo: Couldn't get TerrainWorld node")
 		return
-	
+
 	terrain_generator = TerrainGenerator.new(terrain_world.p_seed)
+	_setup_label_style()
+
+func _setup_label_style() -> void:
+	var settings := LabelSettings.new()
+
+	# Use system monospace font (pixel-style)
+	settings.font_size = 14
+
+	# White text with black outline for readability
+	settings.font_color = Color.WHITE
+	settings.outline_size = 2
+	settings.outline_color = Color.BLACK
+
+	# Shadow for extra depth
+	settings.shadow_size = 1
+	settings.shadow_color = Color(0, 0, 0, 0.5)
+	settings.shadow_offset = Vector2(1, 1)
+
+	label_settings = settings
+
+	# Position in top-left with padding
+	position = Vector2(8, 8)
 
 # ============================================================================
 # INPUT
@@ -46,6 +69,10 @@ func _unhandled_input(_event: InputEvent) -> void:
 	if Input.is_action_just_pressed("toggle_debug"):
 		visible = not visible
 
+	# P key = print performance stats
+	if Input.is_physical_key_pressed(KEY_P) and Input.is_key_pressed(KEY_SHIFT):
+		_print_performance_report()
+
 # ============================================================================
 # UPDATE
 # ============================================================================
@@ -53,54 +80,72 @@ func _unhandled_input(_event: InputEvent) -> void:
 func _process(delta: float) -> void:
 	if ship == null or not visible:
 		return
-	
-	text = "DEBUG INFO:\n\n"
-	text += _format_fps_info(delta)
-	text += _format_player_info()
-	text += _format_biome_info()
+
+	_update_fps(delta)
+
+	var pos := ship.global_position
+	var debug_data := terrain_generator.get_debug_info(pos.x, pos.z)
+
+	# Get chunk info from ChunkManager
+	var chunk_manager: ChunkManager = terrain_world
+	var chunk_pos := chunk_manager.world_to_chunk(pos)
+	var chunk_stats := chunk_manager.get_stats()
+
+	# Minecraft-style compact format
+	text = ""
+	text += "Procedural Terrain v0.1\n"
+	text += "%d fps (avg %.0f)\n" % [Engine.get_frames_per_second(), avg_fps]
+	text += "\n"
+	text += "XYZ: %.1f / %.1f / %.1f\n" % [pos.x, pos.y, pos.z]
+	text += "Chunk: %d %d\n" % [chunk_pos.x, chunk_pos.y]
+	text += "Speed: %.1f (vel %.1f)\n" % [ship.forward_speed, ship.velocity.length()]
+	text += "\n"
+	text += "Biome: %s [%s]\n" % [debug_data.biome, debug_data.temp_category]
+	text += "Height: %.1f %s\n" % [debug_data.height, "(underwater)" if debug_data.underwater else ""]
+	text += "\n"
+	text += "Chunks: %d loaded, %d pending\n" % [chunk_stats.loaded_chunks, chunk_stats.pending_chunks]
+	text += "\n"
+	text += "[Shift+P] Performance report"
 
 # ============================================================================
-# FORMATTING HELPERS
+# HELPERS
 # ============================================================================
 
-func _format_fps_info(delta: float) -> String:
-	var current_fps: float = 1.0 / delta
-	fps_samples.append(current_fps)
-	
+func _update_fps(delta: float) -> void:
+	fps_samples.append(1.0 / delta)
 	if fps_samples.size() > MAX_FPS_SAMPLES:
 		fps_samples.pop_front()
-	
-	var average_fps: float = 0.0
+
+	avg_fps = 0.0
 	for fps in fps_samples:
-		average_fps += fps
-	average_fps /= fps_samples.size()
-	
-	var result: String = "FPS Info:\n"
-	result += "  Average: %.0f\n" % average_fps
-	result += "  Current: %d\n\n" % Engine.get_frames_per_second()
-	return result
+		avg_fps += fps
+	avg_fps /= fps_samples.size()
 
 
-func _format_player_info() -> String:
-	var pos: Vector3 = ship.global_position
-	
-	var result: String = "Ship Info:\n"
-	result += "  Position: (%.1f, %.1f, %.1f)\n" % [pos.x, pos.y, pos.z]
-	result += "  Speed: %.1f\n" % ship.forward_speed
-	result += "  Velocity: %.1f\n\n" % ship.velocity.length()
-	return result
+func _print_performance_report() -> void:
+	print("\n========== PERFORMANCE REPORT ==========")
 
+	# Chunk manager stats
+	var chunk_manager: ChunkManager = terrain_world
+	var stats := chunk_manager.get_stats()
+	print("[CHUNKS] loaded=%d pending=%d cached=%d unload_queue=%d" % [
+		stats.loaded_chunks, stats.pending_chunks, stats.cached_meshes, stats.queued_for_unload
+	])
 
-func _format_biome_info() -> String:
-	var pos: Vector3 = ship.global_position
-	var debug_data: Dictionary = terrain_generator.get_debug_info(pos.x, pos.z)
-	
-	var result: String = "Biome Info:\n"
-	result += "  Height Range: %.0f to %.0f\n" % [TerrainConstants.MIN_HEIGHT, TerrainConstants.MAX_HEIGHT]
-	result += "  Terrain Height: %.1f\n" % debug_data.height
-	result += "  Underwater: %s\n" % str(debug_data.underwater)
-	result += "  Biome: %s\n" % debug_data.biome
-	result += "  Temperature: %.2f\n" % debug_data.temperature
-	result += "  Moisture: %.2f\n" % debug_data.moisture
-	result += "  Continentalness: %.2f\n" % debug_data.continentalness
-	return result
+	# Biome cache stats
+	terrain_generator.biome_manager.print_cache_stats()
+
+	# Memory info
+	var mem_static := Performance.get_monitor(Performance.MEMORY_STATIC)
+	var mem_peak := Performance.get_monitor(Performance.MEMORY_STATIC_MAX)
+	var obj_count := Performance.get_monitor(Performance.OBJECT_COUNT)
+	print("[MEMORY] static=%.1f MB peak=%.1f MB objects=%d" % [
+		mem_static / 1048576.0, mem_peak / 1048576.0, obj_count
+	])
+
+	# Render info
+	var draw_calls := Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
+	var vertices := Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME)
+	print("[RENDER] draw_calls=%d primitives=%d" % [draw_calls, vertices])
+
+	print("=========================================\n")

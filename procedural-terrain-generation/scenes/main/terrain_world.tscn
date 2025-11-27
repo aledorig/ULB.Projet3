@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://0n10lr4rtcgt"]
+[gd_scene load_steps=13 format=3 uid="uid://0n10lr4rtcgt"]
 
 [ext_resource type="Script" uid="uid://bc843f6ej5jlt" path="res://scripts/terrain/management/chunk_manager.gd" id="1_2nvvr"]
 [ext_resource type="Script" uid="uid://cuo62yjc33lxq" path="res://scripts/camera/camera_controller.gd" id="3_4p0at"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://dws2kl6rxbpa3" path="res://scripts/ui/map.gd" id="5_qvro2"]
 [ext_resource type="Shader" uid="uid://lu66d4khntu0" path="res://shaders/ui/pixelation.gdshader" id="6_htxxt"]
 [ext_resource type="Shader" uid="uid://cawelrhpylh3m" path="res://shaders/main/sky_shader.gdshader" id="6_qvro2"]
+[ext_resource type="Script" path="res://scripts/environment/water_manager.gd" id="7_water"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_htxxt"]
 shader = ExtResource("6_qvro2")
@@ -56,12 +57,8 @@ environment = SubResource("Environment_4p0at")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
-[node name="Label" type="Label" parent="CanvasLayer"]
+[node name="DebugInfo" type="Label" parent="CanvasLayer"]
 z_index = 2
-offset_right = 83.0
-offset_bottom = 23.0
-text = "debug info:
-"
 script = ExtResource("4_qld23")
 
 [node name="Map" type="Control" parent="CanvasLayer"]
@@ -82,3 +79,8 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Executioner" parent="." instance=ExtResource("5_4p0at")]
+
+[node name="Water" type="MeshInstance3D" parent="."]
+script = ExtResource("7_water")
+water_size = 2000.0
+follow_camera = true
