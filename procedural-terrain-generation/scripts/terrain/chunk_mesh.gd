@@ -1,16 +1,19 @@
+class_name ChunkMesh
 extends MeshInstance3D
+
+## Single chunk mesh generator (standalone version)
+## Used for testing or single-chunk generation outside ChunkManager
 
 # ============================================================================
 # EXPORTS
 # ============================================================================
 
-@export var chunk_size:     int   = 40
+@export var chunk_size:     int = 40
 @export var vertex_spacing: float = 2.0
-@export var height_scale:   float = 10.0
-@export var terrain_seed:   int   = 9148748
+@export var terrain_seed:   int = 9148748
 
 # ============================================================================
-# MEMBER VARIABLES
+# REFERENCES
 # ============================================================================
 
 var terrain_generator: TerrainGenerator
@@ -20,18 +23,19 @@ var mesh_builder:      ChunkMeshBuilder
 # INITIALIZATION
 # ============================================================================
 
-func _ready():
+func _ready() -> void:
 	_initialize_generators()
 
-func _initialize_generators():
-	terrain_generator = TerrainGenerator.new(terrain_seed, height_scale, vertex_spacing)
+
+func _initialize_generators() -> void:
+	terrain_generator = TerrainGenerator.new(terrain_seed, vertex_spacing)
 	mesh_builder = ChunkMeshBuilder.new(chunk_size, vertex_spacing, terrain_generator)
 
 # ============================================================================
 # CHUNK GENERATION
 # ============================================================================
 
-func generate_chunk(chunk_position: Vector2):
+func generate_chunk(chunk_position: Vector2) -> void:
 	if not terrain_generator:
 		_initialize_generators()
 	
@@ -46,6 +50,7 @@ func get_height_at(world_x: float, world_z: float) -> float:
 	if not terrain_generator:
 		_initialize_generators()
 	return terrain_generator.get_height(world_x, world_z)
+
 
 ## Get biome data at world position
 func get_biome_data_at(world_x: float, world_z: float) -> Dictionary:

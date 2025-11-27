@@ -33,7 +33,7 @@ extends Node3D
 var p_seed = 1
 
 # Chunk storage (similar to Minecraft's id2ChunkMap)
-var loaded_chunks: Dictionary = {}   # Vector2i -> ChunkInstance
+var loaded_chunks:  Dictionary = {}  # Vector2i -> ChunkInstance
 var pending_chunks: Dictionary = {}  # Vector2i -> ChunkRequest
 
 # Unload queue (similar to Minecraft's droppedChunksSet)
@@ -48,16 +48,25 @@ var results_queue_mutex:   Mutex
 var results_queue:         Array[ChunkResult] = []
 var shutdown_threads:      bool = false
 
-# Mesh cache
-var mesh_cache:         Dictionary = {}  # Vector2i -> ArrayMesh
+# ============================================================================
+# CACHING
+# ============================================================================
+
+var mesh_cache:         Dictionary = {}       # Vector2i -> ArrayMesh
 var cache_access_order: Array[Vector2i] = []  # LRU tracking
 
-# References
-var camera:           Camera3D
-var material_manager: TerrainMaterialManager
-var terrain_material: StandardMaterial3D
+# ============================================================================
+# REFERENCES
+# ============================================================================
 
-# Performance tracking
+var camera: Camera3D
+var material_manager: TerrainMaterialManager
+var terrain_material: ShaderMaterial
+
+# ============================================================================
+# TRACKING
+# ============================================================================
+
 var chunks_generated_this_frame: int = 0
 var last_camera_chunk: Vector2i = Vector2i.ZERO
 
@@ -72,8 +81,9 @@ func _ready() -> void:
 	# Initial chunk generation
 	update_chunks(true)
 
+
 func _initialize_systems() -> void:
-	# Find or create camera
+	# Find camera
 	camera = get_node_or_null("/root/TerrainWorld/MainCamera")
 	if not camera:
 		camera = get_viewport().get_camera_3d()
@@ -91,15 +101,16 @@ func _initialize_systems() -> void:
 	results_queue_mutex = Mutex.new()
 	thread_pool_semaphore = Semaphore.new()
 	
-	#initialize seed
+	# Initialize seed
 	if not p_seed:
 		p_seed = randi()
 	
 	print("ChunkManager: Initialized with %d worker threads" % max_worker_threads)
 
+
 func _start_worker_threads() -> void:
 	for i in range(max_worker_threads):
-		var thread = Thread.new()
+		var thread := Thread.new()
 		thread.start(_worker_thread_func.bind(i))
 		worker_threads.append(thread)
 	
@@ -120,6 +131,7 @@ func _process(_delta: float) -> void:
 	
 	# Unload distant chunks
 	_process_unload_queue()
+
 
 func update_chunks(force_update: bool = false) -> void:
 	if not camera:
@@ -160,6 +172,7 @@ func update_chunks(force_update: bool = false) -> void:
 	# Mark distant chunks for unload
 	_mark_distant_chunks_for_unload(chunks_to_keep)
 
+
 func _sort_by_priority(a: ChunkRequest, b: ChunkRequest) -> bool:
 	return a.priority < b.priority
 
@@ -182,6 +195,7 @@ func _queue_chunk_generation(request: ChunkRequest) -> void:
 	
 	# Signal worker threads
 	thread_pool_semaphore.post()
+
 
 func _worker_thread_func(thread_id: int) -> void:
 	print("Worker thread %d started" % thread_id)
@@ -219,6 +233,7 @@ func _worker_thread_func(thread_id: int) -> void:
 	
 	print("Worker thread %d stopped" % thread_id)
 
+
 func _generate_chunk_mesh(chunk_pos: Vector2i) -> ChunkResult:
 	var result = ChunkResult.new(chunk_pos)
 	var start_time = Time.get_ticks_msec()
@@ -243,6 +258,7 @@ func _generate_chunk_mesh(chunk_pos: Vector2i) -> ChunkResult:
 	
 	return result
 
+
 func _cache_mesh(chunk_pos: Vector2i, mesh: ArrayMesh) -> void:
 	# Simple LRU cache
 	if mesh_cache.size() >= cache_max_size:
@@ -252,6 +268,7 @@ func _cache_mesh(chunk_pos: Vector2i, mesh: ArrayMesh) -> void:
 	
 	mesh_cache[chunk_pos] = mesh
 	cache_access_order.append(chunk_pos)
+
 
 func _process_completed_chunks() -> void:
 	results_queue_mutex.lock()
@@ -280,6 +297,7 @@ func _process_completed_chunks() -> void:
 		
 		# Remove from pending
 		pending_chunks.erase(result.chunk_pos)
+
 
 func _instantiate_chunk(chunk_pos: Vector2i, mesh: ArrayMesh) -> void:
 	# Don't instantiate if already loaded
@@ -315,6 +333,7 @@ func _instantiate_chunk(chunk_pos: Vector2i, mesh: ArrayMesh) -> void:
 	var chunk_instance = ChunkInstance.new(chunk_node, mesh_instance, chunk_pos)
 	loaded_chunks[chunk_pos] = chunk_instance
 
+
 func _find_or_create_mesh_instance(node: Node) -> MeshInstance3D:
 	# Search for existing MeshInstance3D
 	if node is MeshInstance3D:
@@ -344,6 +363,7 @@ func _mark_distant_chunks_for_unload(chunks_to_keep: Dictionary) -> void:
 			if distance > unload_distance:
 				queue_chunk_for_unload(chunk_pos)
 
+
 func queue_chunk_for_unload(chunk_pos: Vector2i) -> void:
 	if not loaded_chunks.has(chunk_pos):
 		return
@@ -354,6 +374,7 @@ func queue_chunk_for_unload(chunk_pos: Vector2i) -> void:
 	
 	chunk_instance.unload_queued = true
 	chunks_queued_for_unload[chunk_pos] = true
+
 
 func _process_unload_queue() -> void:
 	if chunks_queued_for_unload.is_empty():
@@ -384,30 +405,33 @@ func _process_unload_queue() -> void:
 # ============================================================================
 
 func world_to_chunk(world_pos: Vector3) -> Vector2i:
-	var chunk_world_size = (chunk_size - 1) * vertex_spacing
+	var chunk_world_size: float = (chunk_size - 1) * vertex_spacing
 	return Vector2i(
 		floori(world_pos.x / chunk_world_size),
 		floori(world_pos.z / chunk_world_size)
 	)
 
+
 func is_chunk_loaded(chunk_pos: Vector2i) -> bool:
 	return loaded_chunks.has(chunk_pos)
+
 
 func is_chunk_pending(chunk_pos: Vector2i) -> bool:
 	return pending_chunks.has(chunk_pos)
 
+
 func get_chunk_at(chunk_pos: Vector2i) -> ChunkInstance:
 	return loaded_chunks.get(chunk_pos)
 
+
 func get_height_at(world_pos: Vector3) -> float:
-	var chunk_pos = world_to_chunk(world_pos)
+	var chunk_pos: Vector2i = world_to_chunk(world_pos)
 	if not loaded_chunks.has(chunk_pos):
 		return 0.0
 	
-	var chunk_instance = loaded_chunks[chunk_pos]
-	var mesh_inst = chunk_instance.mesh_instance
+	var chunk_instance: ChunkInstance = loaded_chunks[chunk_pos]
+	var mesh_inst: MeshInstance3D = chunk_instance.mesh_instance
 	
-	# Try to call get_height_at if available
 	if mesh_inst.has_method("get_height_at"):
 		return mesh_inst.get_height_at(world_pos.x, world_pos.z)
 	
@@ -427,8 +451,9 @@ func get_stats() -> Dictionary:
 		"chunks_this_frame": chunks_generated_this_frame
 	}
 
+
 func print_stats() -> void:
-	var stats = get_stats()
+	var stats: Dictionary = get_stats()
 	print("=== Chunk Manager Stats ===")
 	print("  Loaded: %d" % stats.loaded_chunks)
 	print("  Pending: %d" % stats.pending_chunks)
@@ -445,6 +470,7 @@ func _exit_tree() -> void:
 	_shutdown_worker_threads()
 	_clear_all_chunks()
 
+
 func _shutdown_worker_threads() -> void:
 	shutdown_threads = true
 	
@@ -453,14 +479,15 @@ func _shutdown_worker_threads() -> void:
 		thread_pool_semaphore.post()
 	
 	# Wait for threads to finish
-	for thread in worker_threads:
+	for thread: Thread in worker_threads:
 		thread.wait_to_finish()
 	
 	worker_threads.clear()
 	print("ChunkManager: All worker threads stopped")
 
+
 func _clear_all_chunks() -> void:
-	for chunk_instance in loaded_chunks.values():
+	for chunk_instance: ChunkInstance in loaded_chunks.values():
 		chunk_instance.node.queue_free()
 	
 	loaded_chunks.clear()
@@ -470,8 +497,3 @@ func _clear_all_chunks() -> void:
 	cache_access_order.clear()
 	
 	print("ChunkManager: All chunks cleared")
-
-func clear_cache() -> void:
-	mesh_cache.clear()
-	cache_access_order.clear()
-	print("ChunkManager: Mesh cache cleared")

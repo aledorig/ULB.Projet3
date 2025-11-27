@@ -5,18 +5,17 @@ extends RefCounted
 ## Contains the generated mesh data and success status
 
 # ============================================================================
-# MEMBER VARIABLES
+# PROPERTIES
 # ============================================================================
 
-var chunk_pos: Vector2i
-var mesh_data: ArrayMesh
-var success: bool
-var error_message: String
+var chunk_pos:     Vector2i
+var mesh_data:     ArrayMesh
+var success:       bool = false
+var error_message: String = ""
 
 # ============================================================================
 # INITIALIZATION
 # ============================================================================
 
-func _init(pos: Vector2i):
-	chunk_pos = pos
-	success = false
+func _init(p_chunk_pos: Vector2i) -> void:
+	chunk_pos = p_chunk_pos

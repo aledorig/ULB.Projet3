@@ -5,18 +5,18 @@ extends RefCounted
 ## Similar to Minecraft's chunk generation request system
 
 # ============================================================================
-# MEMBER VARIABLES
+# PROPERTIES
 # ============================================================================
 
 var chunk_pos: Vector2i
-var priority: float  # Distance from camera (lower = higher priority)
-var timestamp: int
+var priority:  float  ## Distance from camera (lower = higher priority)
+var timestamp: int    ## Creation time for timeout detection
 
 # ============================================================================
 # INITIALIZATION
 # ============================================================================
 
-func _init(pos: Vector2i, prio: float):
-	chunk_pos = pos
-	priority = prio
+func _init(p_chunk_pos: Vector2i, p_priority: float) -> void:
+	chunk_pos = p_chunk_pos
+	priority = p_priority
 	timestamp = Time.get_ticks_msec()

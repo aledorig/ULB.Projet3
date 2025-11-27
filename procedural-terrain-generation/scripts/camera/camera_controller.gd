@@ -1,6 +1,8 @@
 class_name MainCamera
 extends Camera3D
 
+## Third-person camera that follows a target with smooth interpolation
+
 # ============================================================================
 # EXPORTS
 # ============================================================================
@@ -9,7 +11,11 @@ extends Camera3D
 @export var target_path: NodePath
 @export var offset:      Vector3 = Vector3.ZERO
 
-var target = null
+# ============================================================================
+# REFERENCES
+# ============================================================================
+
+var target: Node3D = null
 
 # ============================================================================
 # INITIALIZATION
@@ -19,13 +25,24 @@ func _ready() -> void:
 	if target_path:
 		target = get_node(target_path)
 
-func _physics_process(delta):
-	if !target:
+# ============================================================================
+# CAMERA FOLLOW
+# ============================================================================
+
+func _physics_process(delta: float) -> void:
+	if not target:
 		return
 	
-	var corrected_offset = Vector3(offset.x, offset.y, -offset.z)
-	var target_pos = target.global_transform.translated_local(corrected_offset).origin
+	_update_position(delta)
+	_update_rotation(delta)
+
+
+func _update_position(delta: float) -> void:
+	var corrected_offset := Vector3(offset.x, offset.y, -offset.z)
+	var target_pos := target.global_transform.translated_local(corrected_offset).origin
 	global_transform.origin = global_transform.origin.lerp(target_pos, lerp_speed * delta)
-	
-	var new_basis = global_transform.looking_at(target.global_transform.origin, target.transform.basis.y)
+
+
+func _update_rotation(delta: float) -> void:
+	var new_basis := global_transform.looking_at(target.global_transform.origin, target.transform.basis.y)
 	global_transform = global_transform.interpolate_with(new_basis, lerp_speed * delta)

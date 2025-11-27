@@ -1,51 +1,56 @@
 extends Node
 
-var MIN_HEIGHT = -127
-var MAX_HEIGHT = 128
-var DEEP_OCEAN_FLOOR = -127
-var OCEAN_FLOOR = -64
-var RIVER_FLOOR = -10
-var BEACH_FLOOR = 0
-var HILL_FLOOR = 21
-var MOUNTAINS_FLOOR = 42
-var MOUNTAINS_PEAK = 118
+## Global terrain configuration constants and enums
+## Autoloaded as TerrainConstants
 
-# Climate zones (continental scale)
+# ============================================================================
+# HEIGHT CONSTANTS
+# ============================================================================
+
+const MIN_HEIGHT: int = -128
+const MAX_HEIGHT: int = 128
+
+const DEEP_OCEAN_FLOOR: int = -128
+const OCEAN_FLOOR:      int = -48
+const BEACH_FLOOR:      int = 0
+const HILL_FLOOR:       int = 24
+const MOUNTAINS_FLOOR:  int = 48
+const MOUNTAINS_PEAK:   int = 128
+
+# ============================================================================
+# ENUMS
+# ============================================================================
+
 enum ClimateZone {
-	TROPICAL   = 0,
-	TEMPERATE  = 1,
-	COLD       = 2,
-	FROZEN     = 3
+	TROPICAL  = 0,
+	TEMPERATE = 1,
+	COLD      = 2,
+	FROZEN    = 3
 }
 
-# Expanded biome types (Minecraft-style)
 enum BiomeType {
 	# Ocean biomes
-	OCEAN           = 0,
-	DEEP_OCEAN      = 1,
-	FROZEN_OCEAN    = 2,
-	WARM_OCEAN      = 3,
-	
+	OCEAN         = 0,
+	DEEP_OCEAN    = 1,
+	FROZEN_OCEAN  = 2,
+	WARM_OCEAN    = 3,
 	# Land biomes
-	DESERT          = 4,
-	PLAINS          = 5,
-	HILLS           = 6,
-	MOUNTAINS       = 7,
-	JUNGLE          = 8,
-	FROZEN_PLAINS   = 9,
-	FROZEN_PEAKS    = 10,
-	
-	# Special
-	BEACH           = 11,
-	RIVER           = 12
+	DESERT        = 4,
+	PLAINS        = 5,
+	HILLS         = 6,
+	MOUNTAINS     = 7,
+	JUNGLE        = 8,
+	FROZEN_PLAINS = 9,
+	FROZEN_PEAKS  = 10,
+	# Special biomes
+	BEACH         = 11
 }
 
 # ============================================================================
-# CONSTANTS
+# BIOME PROPERTIES
 # ============================================================================
 
-# Biome colors (for vertex coloring)
-const BIOME_COLORS = {
+const BIOME_COLORS: Dictionary = {
 	BiomeType.OCEAN:          Color(0.1, 0.3, 0.7),
 	BiomeType.DEEP_OCEAN:     Color(0.05, 0.15, 0.5),
 	BiomeType.FROZEN_OCEAN:   Color(0.4, 0.6, 0.8),
@@ -57,12 +62,10 @@ const BIOME_COLORS = {
 	BiomeType.JUNGLE:         Color(0.1, 0.5, 0.1),
 	BiomeType.FROZEN_PLAINS:  Color(0.9, 0.95, 1.0),
 	BiomeType.FROZEN_PEAKS:   Color(0.95, 0.97, 1.0),
-	BiomeType.BEACH:          Color(0.85, 0.8, 0.6),
-	BiomeType.RIVER:          Color(0.2, 0.4, 0.6)
+	BiomeType.BEACH:          Color(0.85, 0.8, 0.6)
 }
 
-# Grass density (for future grass spawning)
-const GRASS_DENSITY = {
+const GRASS_DENSITY: Dictionary = {
 	BiomeType.OCEAN:          0.0,
 	BiomeType.DEEP_OCEAN:     0.0,
 	BiomeType.FROZEN_OCEAN:   0.0,
@@ -74,11 +77,14 @@ const GRASS_DENSITY = {
 	BiomeType.JUNGLE:         4.0,
 	BiomeType.FROZEN_PLAINS:  0.5,
 	BiomeType.FROZEN_PEAKS:   0.0,
-	BiomeType.BEACH:          0.2,
-	BiomeType.RIVER:          0.0
+	BiomeType.BEACH:          0.2
 }
 
-const BIOME_TYPE_STRING = {
+# ============================================================================
+# STRING REPRESENTATIONS
+# ============================================================================
+
+const BIOME_TYPE_STRING: Dictionary = {
 	BiomeType.OCEAN:          "Ocean",
 	BiomeType.DEEP_OCEAN:     "Deep Ocean",
 	BiomeType.FROZEN_OCEAN:   "Frozen Ocean",
@@ -90,14 +96,12 @@ const BIOME_TYPE_STRING = {
 	BiomeType.JUNGLE:         "Jungle",
 	BiomeType.FROZEN_PLAINS:  "FrozenPlains",
 	BiomeType.FROZEN_PEAKS:   "FrozenPeaks",
-	BiomeType.BEACH:          "Beach",
-	BiomeType.RIVER:          "River"
+	BiomeType.BEACH:          "Beach"
 }
 
-const CLIMATE_ZONE_STRING = {
-	ClimateZone.TROPICAL: "Tropical",
+const CLIMATE_ZONE_STRING: Dictionary = {
+	ClimateZone.TROPICAL:  "Tropical",
 	ClimateZone.TEMPERATE: "Temperate",
-	ClimateZone.COLD: "Cold",
-	ClimateZone.FROZEN: "Frozen",
-	
+	ClimateZone.COLD:      "Cold",
+	ClimateZone.FROZEN:    "Frozen"
 }
