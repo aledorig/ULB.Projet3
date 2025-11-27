@@ -57,7 +57,7 @@ func _physics_process(delta: float) -> void:
 func _apply_rotation(delta: float) -> void:
 	transform.basis = transform.basis.rotated(transform.basis.z, roll_input * roll_speed * delta)
 	transform.basis = transform.basis.rotated(transform.basis.x, pitch_input * pitch_speed * delta)
-	transform.basis = transform.basis.rotated(transform.basis.y, yaw_input * yaw_speed * delta)
+	transform.basis = transform.basis.rotated(-transform.basis.y, yaw_input * yaw_speed * delta)
 	transform.basis = transform.basis.orthonormalized()
 
 
