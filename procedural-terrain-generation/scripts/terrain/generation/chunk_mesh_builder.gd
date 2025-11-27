@@ -32,22 +32,34 @@ func _init(p_chunk_size: int, p_vertex_spacing: float, p_terrain_gen: TerrainGen
 # ============================================================================
 
 func build_chunk_mesh(chunk_position: Vector2) -> ArrayMesh:
-	var surface_tool := SurfaceTool.new()
-	surface_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	
-	# Step 1: Generate all vertices and colors (with overlap)
+	var t0 := Time.get_ticks_usec()
+
+	# Step 1: Generate all vertices and colors (with overlap for normals)
+	var t1 := Time.get_ticks_usec()
 	var vertex_data: Dictionary = _generate_vertex_data(chunk_position)
-	var vertices: Array = vertex_data.vertices
-	var colors: Array = vertex_data.colors
-	
-	# Step 2: Create triangles with extended geometry
-	_create_triangles(surface_tool, vertices, colors)
-	
-	# Step 3: Generate normals and extract them
-	var vertex_normals: Dictionary = _generate_and_extract_normals(surface_tool)
-	
-	# Step 4: Build final mesh with only inner vertices
-	return _build_final_mesh(vertices, colors, vertex_normals)
+	var vertices: PackedVector3Array = vertex_data.vertices
+	var colors: PackedColorArray = vertex_data.colors
+	var vertex_time := (Time.get_ticks_usec() - t1) / 1000.0
+
+	# Step 2: Calculate normals directly from heightmap (fast!)
+	var t2 := Time.get_ticks_usec()
+	var normals: PackedVector3Array = _calculate_normals_from_heights(vertices)
+	var normal_time := (Time.get_ticks_usec() - t2) / 1000.0
+
+	# Step 3: Build final mesh directly
+	var t3 := Time.get_ticks_usec()
+	var mesh := _build_mesh_direct(vertices, colors, normals)
+	var build_time := (Time.get_ticks_usec() - t3) / 1000.0
+
+	var total_time := (Time.get_ticks_usec() - t0) / 1000.0
+
+	# Log breakdown (lowered threshold to see improvement)
+	if total_time > 20:
+		print("[MESH] chunk %v: vertex=%.1f norm=%.1f build=%.1f TOTAL=%.1f ms" % [
+			chunk_position, vertex_time, normal_time, build_time, total_time
+		])
+
+	return mesh
 
 # ============================================================================
 # VERTEX GENERATION
@@ -55,145 +67,115 @@ func build_chunk_mesh(chunk_position: Vector2) -> ArrayMesh:
 
 func _generate_vertex_data(chunk_position: Vector2) -> Dictionary:
 	var extended_size: int = chunk_size + 2 * OVERLAP
-	var vertices: Array[Vector3] = []
-	var colors: Array[Color] = []
-	
-	for z in range(extended_size):
-		for x in range(extended_size):
-			var local_x: int = x - OVERLAP
-			var local_z: int = z - OVERLAP
-			
-			var world_x: float = (chunk_position.x * (chunk_size - 1) + local_x) * vertex_spacing
-			var world_z: float = (chunk_position.y * (chunk_size - 1) + local_z) * vertex_spacing
-			
-			var height: float = terrain_gen.get_height(world_x, world_z)
-			var vertex_color: Color = terrain_gen.get_surface_color(world_x, world_z, height)
-			
-			vertices.append(Vector3(local_x * vertex_spacing, height, local_z * vertex_spacing))
-			colors.append(vertex_color)
-	
+	var total_verts: int = extended_size * extended_size
+
+	# Use packed arrays for better performance (less GC pressure, contiguous memory)
+	var vertices: PackedVector3Array = PackedVector3Array()
+	var colors: PackedColorArray = PackedColorArray()
+	vertices.resize(total_verts)
+	colors.resize(total_verts)
+
+	# Calculate world origin for this chunk
+	var origin_x: float = (chunk_position.x * (chunk_size - 1) - OVERLAP) * vertex_spacing
+	var origin_z: float = (chunk_position.y * (chunk_size - 1) - OVERLAP) * vertex_spacing
+
+	# Batch generate all vertex data at once
+	terrain_gen.get_vertex_data_batch(
+		origin_x, origin_z,
+		extended_size, extended_size,
+		vertex_spacing,
+		vertices, colors
+	)
+
 	return {
 		"vertices": vertices,
 		"colors": colors
 	}
 
 # ============================================================================
-# TRIANGLE CREATION
+# NORMAL CALCULATION (direct from heightmap - much faster!)
 # ============================================================================
 
-func _create_triangles(surface_tool: SurfaceTool, vertices: Array, colors: Array) -> void:
+func _calculate_normals_from_heights(vertices: PackedVector3Array) -> PackedVector3Array:
 	var extended_size: int = chunk_size + 2 * OVERLAP
-	
-	for z in range(extended_size - 1):
-		for x in range(extended_size - 1):
-			var top_left: int = z * extended_size + x
-			var top_right: int = top_left + 1
-			var bottom_left: int = (z + 1) * extended_size + x
-			var bottom_right: int = bottom_left + 1
-			
-			# First triangle
-			surface_tool.set_color(colors[top_left])
-			surface_tool.add_vertex(vertices[top_left])
-			surface_tool.set_color(colors[top_right])
-			surface_tool.add_vertex(vertices[top_right])
-			surface_tool.set_color(colors[bottom_left])
-			surface_tool.add_vertex(vertices[bottom_left])
-			
-			# Second triangle
-			surface_tool.set_color(colors[top_right])
-			surface_tool.add_vertex(vertices[top_right])
-			surface_tool.set_color(colors[bottom_right])
-			surface_tool.add_vertex(vertices[bottom_right])
-			surface_tool.set_color(colors[bottom_left])
-			surface_tool.add_vertex(vertices[bottom_left])
+	var normals: PackedVector3Array = PackedVector3Array()
+	normals.resize(vertices.size())
+
+	for z in range(extended_size):
+		for x in range(extended_size):
+			var idx: int = z * extended_size + x
+
+			# Get heights of neighbors (with boundary clamping)
+			var h_center: float = vertices[idx].y
+			var h_left: float = h_center
+			var h_right: float = h_center
+			var h_up: float = h_center
+			var h_down: float = h_center
+
+			if x > 0:
+				h_left = vertices[idx - 1].y
+			if x < extended_size - 1:
+				h_right = vertices[idx + 1].y
+			if z > 0:
+				h_up = vertices[idx - extended_size].y
+			if z < extended_size - 1:
+				h_down = vertices[idx + extended_size].y
+
+			# Calculate normal from height differences
+			var dx: float = (h_left - h_right) / (2.0 * vertex_spacing)
+			var dz: float = (h_up - h_down) / (2.0 * vertex_spacing)
+
+			normals[idx] = Vector3(dx, 1.0, dz).normalized()
+
+	return normals
+
 
 # ============================================================================
-# NORMAL GENERATION
+# MESH BUILDING (single pass, no intermediate mesh)
 # ============================================================================
 
-func _generate_and_extract_normals(surface_tool: SurfaceTool) -> Dictionary:
-	surface_tool.generate_normals()
-	surface_tool.index()
-	var full_mesh: ArrayMesh = surface_tool.commit()
-	
-	var mdt := MeshDataTool.new()
-	mdt.create_from_surface(full_mesh, 0)
-	
-	var vertex_normals: Dictionary = {}
-	for i in range(mdt.get_vertex_count()):
-		var vertex_pos: Vector3 = mdt.get_vertex(i)
-		var vertex_normal: Vector3 = mdt.get_vertex_normal(i)
-		var key := Vector3(
-			round(vertex_pos.x / vertex_spacing),
-			0,
-			round(vertex_pos.z / vertex_spacing)
-		)
-		vertex_normals[key] = vertex_normal
-	
-	return vertex_normals
-
-# ============================================================================
-# FINAL MESH ASSEMBLY
-# ============================================================================
-
-func _build_final_mesh(vertices: Array, colors: Array, vertex_normals: Dictionary) -> ArrayMesh:
+func _build_mesh_direct(vertices: PackedVector3Array, colors: PackedColorArray, normals: PackedVector3Array) -> ArrayMesh:
 	var surface_tool := SurfaceTool.new()
 	surface_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	
+
 	var extended_size: int = chunk_size + 2 * OVERLAP
-	
+
+	# Only iterate over inner vertices (skip overlap border)
 	for z in range(OVERLAP, chunk_size + OVERLAP - 1):
 		for x in range(OVERLAP, chunk_size + OVERLAP - 1):
 			var idx: int = z * extended_size + x
-			
-			var top_left: Vector3 = vertices[idx]
-			var top_right: Vector3 = vertices[idx + 1]
-			var bottom_left: Vector3 = vertices[idx + extended_size]
-			var bottom_right: Vector3 = vertices[idx + extended_size + 1]
-			
-			var c_tl: Color = colors[idx]
-			var c_tr: Color = colors[idx + 1]
-			var c_bl: Color = colors[idx + extended_size]
-			var c_br: Color = colors[idx + extended_size + 1]
-			
-			var n_tl: Vector3 = _get_normal(top_left, vertex_normals)
-			var n_tr: Vector3 = _get_normal(top_right, vertex_normals)
-			var n_bl: Vector3 = _get_normal(bottom_left, vertex_normals)
-			var n_br: Vector3 = _get_normal(bottom_right, vertex_normals)
-			
-			# First triangle
-			surface_tool.set_normal(n_tl)
-			surface_tool.set_color(c_tl)
-			surface_tool.add_vertex(top_left)
-			surface_tool.set_normal(n_tr)
-			surface_tool.set_color(c_tr)
-			surface_tool.add_vertex(top_right)
-			surface_tool.set_normal(n_bl)
-			surface_tool.set_color(c_bl)
-			surface_tool.add_vertex(bottom_left)
-			
-			# Second triangle
-			surface_tool.set_normal(n_tr)
-			surface_tool.set_color(c_tr)
-			surface_tool.add_vertex(top_right)
-			surface_tool.set_normal(n_br)
-			surface_tool.set_color(c_br)
-			surface_tool.add_vertex(bottom_right)
-			surface_tool.set_normal(n_bl)
-			surface_tool.set_color(c_bl)
-			surface_tool.add_vertex(bottom_left)
-	
+
+			# Get the 4 corners of this quad
+			var tl_idx: int = idx
+			var tr_idx: int = idx + 1
+			var bl_idx: int = idx + extended_size
+			var br_idx: int = idx + extended_size + 1
+
+			# First triangle (top-left, top-right, bottom-left)
+			surface_tool.set_normal(normals[tl_idx])
+			surface_tool.set_color(colors[tl_idx])
+			surface_tool.add_vertex(vertices[tl_idx])
+
+			surface_tool.set_normal(normals[tr_idx])
+			surface_tool.set_color(colors[tr_idx])
+			surface_tool.add_vertex(vertices[tr_idx])
+
+			surface_tool.set_normal(normals[bl_idx])
+			surface_tool.set_color(colors[bl_idx])
+			surface_tool.add_vertex(vertices[bl_idx])
+
+			# Second triangle (top-right, bottom-right, bottom-left)
+			surface_tool.set_normal(normals[tr_idx])
+			surface_tool.set_color(colors[tr_idx])
+			surface_tool.add_vertex(vertices[tr_idx])
+
+			surface_tool.set_normal(normals[br_idx])
+			surface_tool.set_color(colors[br_idx])
+			surface_tool.add_vertex(vertices[br_idx])
+
+			surface_tool.set_normal(normals[bl_idx])
+			surface_tool.set_color(colors[bl_idx])
+			surface_tool.add_vertex(vertices[bl_idx])
+
 	surface_tool.index()
 	return surface_tool.commit()
-
-# ============================================================================
-# UTILITY
-# ============================================================================
-
-func _get_normal(vertex: Vector3, normals: Dictionary) -> Vector3:
-	var key := Vector3(
-		round(vertex.x / vertex_spacing),
-		0,
-		round(vertex.z / vertex_spacing)
-	)
-	return normals.get(key, Vector3.UP)

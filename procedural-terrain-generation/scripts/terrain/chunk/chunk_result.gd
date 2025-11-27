@@ -8,10 +8,11 @@ extends RefCounted
 # PROPERTIES
 # ============================================================================
 
-var chunk_pos:     Vector2i
-var mesh_data:     ArrayMesh
-var success:       bool = false
-var error_message: String = ""
+var chunk_pos:          Vector2i
+var mesh_data:          ArrayMesh
+var success:            bool = false
+var error_message:      String = ""
+var generation_time_ms: float = 0.0
 
 # ============================================================================
 # INITIALIZATION

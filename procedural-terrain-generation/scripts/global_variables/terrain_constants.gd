@@ -7,7 +7,7 @@ extends Node
 # SEED
 # ============================================================================
 
-const GAME_SEED: int = 1231465653634243432
+const GAME_SEED: int = 732647346203746
 
 # ============================================================================
 # HEIGHT CONSTANTS
@@ -31,6 +31,29 @@ enum Biome {
 	MOUNTAINS,
 	TUNDRA,
 	SNOW_PEAKS,
+}
+
+# ============================================================================
+# TEMPERATURE CATEGORIES (for biome compatibility)
+# ============================================================================
+
+enum TempCategory {
+	OCEAN,
+	COLD,
+	MEDIUM,
+	WARM,
+}
+
+const BIOME_TEMPERATURES: Dictionary = {
+	Biome.OCEAN:      TempCategory.OCEAN,
+	Biome.BEACH:      TempCategory.MEDIUM,
+	Biome.DESERT:     TempCategory.WARM,
+	Biome.PLAINS:     TempCategory.MEDIUM,
+	Biome.FOREST:     TempCategory.MEDIUM,
+	Biome.JUNGLE:     TempCategory.WARM,
+	Biome.MOUNTAINS:  TempCategory.MEDIUM,
+	Biome.TUNDRA:     TempCategory.COLD,
+	Biome.SNOW_PEAKS: TempCategory.COLD,
 }
 
 # ============================================================================

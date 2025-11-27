@@ -236,26 +236,31 @@ func _worker_thread_func(thread_id: int) -> void:
 
 func _generate_chunk_mesh(chunk_pos: Vector2i) -> ChunkResult:
 	var result = ChunkResult.new(chunk_pos)
-	var start_time = Time.get_ticks_msec()
-	
+	var start_time = Time.get_ticks_usec()
+
 	# Check mesh cache first (cache is thread-safe for reads)
 	if enable_mesh_caching and mesh_cache.has(chunk_pos):
 		result.mesh_data = mesh_cache[chunk_pos]
 		result.success = true
 		return result
-	
+
 	# Create temporary generators (thread-local)
 	var terrain_gen = TerrainGenerator.new(p_seed)
 	var mesh_builder = ChunkMeshBuilder.new(chunk_size, vertex_spacing, terrain_gen)
-	
+
 	# Generate mesh
 	result.mesh_data = mesh_builder.build_chunk_mesh(chunk_pos)
 	result.success = true
-	
-	var elapsed = Time.get_ticks_msec() - start_time
-	if elapsed > 1000:  # Only log if took more than 1 second
-		print("Chunk %v took %d ms to generate" % [chunk_pos, elapsed])
-	
+
+	var elapsed_ms: float = (Time.get_ticks_usec() - start_time) / 1000.0
+	result.generation_time_ms = elapsed_ms
+
+	# Log all chunk generations with timing
+	if elapsed_ms > 100:
+		print("[CHUNK] %v generated in %.1f ms (SLOW)" % [chunk_pos, elapsed_ms])
+	elif elapsed_ms > 50:
+		print("[CHUNK] %v generated in %.1f ms" % [chunk_pos, elapsed_ms])
+
 	return result
 
 
