@@ -1,8 +1,9 @@
-[gd_scene load_steps=8 format=3 uid="uid://0n10lr4rtcgt"]
+[gd_scene load_steps=9 format=3 uid="uid://0n10lr4rtcgt"]
 
 [ext_resource type="Script" uid="uid://bc843f6ej5jlt" path="res://scripts/terrain/management/chunk_manager.gd" id="1_2nvvr"]
 [ext_resource type="Script" uid="uid://cuo62yjc33lxq" path="res://scripts/camera/camera_controller.gd" id="3_4p0at"]
 [ext_resource type="Script" uid="uid://b4tbc0qvyfoe3" path="res://scripts/debug_info.gd" id="4_qld23"]
+[ext_resource type="PackedScene" uid="uid://c4cju08nu26pq" path="res://scenes/ship/executioner.tscn" id="5_4p0at"]
 [ext_resource type="Shader" uid="uid://cawelrhpylh3m" path="res://shaders/main/sky_shader.gdshader" id="6_qvro2"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_htxxt"]
@@ -32,8 +33,8 @@ script = ExtResource("1_2nvvr")
 transform = Transform3D(1, 0, 0, 0, 0.86602503, 0.4999998, 0, -0.4999998, 0.86602503, 0, 15, 0)
 fov = 90.0
 script = ExtResource("3_4p0at")
-move_speed = 20.0
-sprint_multiplier = 3.0
+target_path = NodePath("../Executioner")
+offset = Vector3(0, 5, 5)
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, -0.75, 0.433013, 0, 10, 0)
@@ -55,3 +56,5 @@ offset_bottom = 23.0
 text = "debug info:
 "
 script = ExtResource("4_qld23")
+
+[node name="Executioner" parent="." instance=ExtResource("5_4p0at")]
