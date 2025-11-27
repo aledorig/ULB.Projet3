@@ -7,7 +7,7 @@ extends RefCounted
 # CURVATURE SETTINGS
 # ============================================================================
 
-const DEFAULT_CURVATURE: float = 0.0008
+const DEFAULT_CURVATURE:       float = 0.0008
 const DEFAULT_CURVATURE_START: float = 50.0
 
 # ============================================================================
