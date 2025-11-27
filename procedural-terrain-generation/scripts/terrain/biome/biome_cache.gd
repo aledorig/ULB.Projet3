@@ -7,7 +7,7 @@ extends RefCounted
 # CONFIGURATION
 # ============================================================================
 
-const CACHE_SIZE: int = 512  # More chunks cached
+const CACHE_SIZE: int = 1024  # Larger cache to reduce regeneration
 const CHUNK_SIZE: int = 32  # Larger chunks = fewer cache misses
 
 # ============================================================================

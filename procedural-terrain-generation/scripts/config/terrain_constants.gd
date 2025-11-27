@@ -1,7 +1,7 @@
-extends Node
+class_name TerrainConstants
+extends RefCounted
 
-## Global terrain configuration
-## Autoloaded as TerrainConstants
+## Global terrain configuration constants
 
 # ============================================================================
 # SEED
@@ -16,6 +16,14 @@ const GAME_SEED: int = 732647346203746
 const SEA_LEVEL:  float = 0.0
 const MIN_HEIGHT: float = -64.0
 const MAX_HEIGHT: float = 128.0
+
+# Snow effect thresholds
+const SNOW_START_HEIGHT: float = 60.0
+const SNOW_FULL_HEIGHT:  float = 80.0
+
+# Underwater darkening
+const UNDERWATER_DEPTH_SCALE: float = 40.0
+const UNDERWATER_MAX_DARKNESS: float = 0.6
 
 # ============================================================================
 # BIOME ENUM

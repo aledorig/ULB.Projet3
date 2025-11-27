@@ -22,7 +22,7 @@ Open in Godot 4.5 and run. No build step required. Press F5 or run `terrain_worl
 
 ### Biome Generation (GenLayer Pipeline)
 
-Minecraft 1.9-style layered biome generation in `scripts/biome/`:
+Minecraft 1.9-style layered biome generation in `scripts/terrain/biome/`:
 
 1. **GenLayer** (`gen_layer.gd`) - Base class with LCG-based PRNG for deterministic generation
 2. **Layer Pipeline** (`biome_generator.gd`) - Chains transformation layers:
@@ -39,7 +39,7 @@ Minecraft 1.9-style layered biome generation in `scripts/biome/`:
 
 ### Terrain Generation Pipeline
 
-1. **BiomeManager** (`scripts/environment/biome_manager.gd`) - Queries GenLayer pipeline with caching. Provides biome blending for smooth terrain transitions.
+1. **BiomeManager** (`scripts/terrain/biome/biome_manager.gd`) - Queries GenLayer pipeline with caching. Provides biome blending for smooth terrain transitions.
 
 2. **TerrainGenerator** (`scripts/terrain/generation/terrain_generator.gd`) - Combines biome height params with FBM noise.
 
@@ -49,8 +49,10 @@ Minecraft 1.9-style layered biome generation in `scripts/biome/`:
 
 ### Key Constants
 
-`TerrainConstants` is an autoload (`scripts/global_variables/terrain_constants.gd`) containing:
+`TerrainConstants` (`scripts/config/terrain_constants.gd`) - global class containing:
 - `GAME_SEED`: World seed
+- `SEA_LEVEL`, `SNOW_START_HEIGHT`, `SNOW_FULL_HEIGHT`: Height thresholds
+- `UNDERWATER_DEPTH_SCALE`, `UNDERWATER_MAX_DARKNESS`: Underwater color settings
 - `Biome` enum: OCEAN, BEACH, DESERT, PLAINS, FOREST, JUNGLE, MOUNTAINS, TUNDRA, SNOW_PEAKS
 - `TempCategory` enum: OCEAN, COLD, MEDIUM, WARM (for biome compatibility rules)
 - `BIOME_TEMPERATURES`: Maps each biome to its temperature category
@@ -59,7 +61,8 @@ Minecraft 1.9-style layered biome generation in `scripts/biome/`:
 
 ### Shaders
 
-- `shaders/main/sky_shader.gdshader` - Sky gradient
+- `shaders/environment/sky.gdshader` - Sky gradient
+- `shaders/environment/water.gdshader` - Water surface with waves and fresnel
 - `shaders/ui/pixelation.gdshader` - Post-processing pixelation effect
 - Terrain shader is generated in `TerrainMaterialManager` with world curvature effect
 

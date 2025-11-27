@@ -15,10 +15,6 @@ run/main_scene="uid://0n10lr4rtcgt"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
 
-[autoload]
-
-TerrainConstants="*res://scripts/config/terrain_constants.gd"
-
 [filesystem]
 
 import/blender/enabled=false
