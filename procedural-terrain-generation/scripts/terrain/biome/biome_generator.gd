@@ -79,8 +79,8 @@ func _init_layers() -> GenLayer:
 	# Stage 4: Final refinement
 	# ========================================
 
-	# 3 zoom passes - balance between detail and performance
-	var biome_size: int = 3
+	# Zoom passes
+	var biome_size: int = 2
 
 	for i in range(biome_size):
 		layer = GenLayerZoom.new(1000 + i, layer)
