@@ -32,7 +32,7 @@ var last_report_time: int = 0
 # INITIALIZATION
 # ============================================================================
 
-func _init(p_seed: int = TerrainConstants.GAME_SEED) -> void:
+func _init(p_seed: int = GameSettingsAutoload.seed) -> void:
 	seed_value = p_seed
 	biome_generator = BiomeGenerator.new(p_seed)
 	cache = BiomeCache.new()

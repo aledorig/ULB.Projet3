@@ -11,9 +11,13 @@ config_version=5
 [application]
 
 config/name="Procedural Terrain Generation"
-run/main_scene="uid://0n10lr4rtcgt"
+run/main_scene="uid://duuwuggm2xpq3"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
+
+[autoload]
+
+GameSettingsAutoload="*res://scripts/config/game_settings.gd"
 
 [filesystem]
 

@@ -14,6 +14,7 @@ extends RefCounted
 var biome_manager: BiomeManager
 var height_noise:  FastNoiseLite
 var seed_value:    int
+var noise_octave: int
 
 # ============================================================================
 # CONFIGURATION
@@ -30,8 +31,9 @@ var blend_radius: float = 16.0
 # INITIALIZATION
 # ============================================================================
 
-func _init(p_seed: int = TerrainConstants.GAME_SEED) -> void:
+func _init(p_seed: int = GameSettingsAutoload.seed, p_octave : int = GameSettingsAutoload.octave) -> void:
 	seed_value = p_seed
+	noise_octave = p_octave
 	biome_manager = BiomeManager.new(p_seed)
 	_setup_height_noise()
 
@@ -43,7 +45,7 @@ func _setup_height_noise() -> void:
 	height_noise.noise_type         = FastNoiseLite.TYPE_SIMPLEX
 	height_noise.frequency          = 0.005  # ~200 units per cycle
 	height_noise.fractal_type       = FastNoiseLite.FRACTAL_FBM
-	height_noise.fractal_octaves    = 4
+	height_noise.fractal_octaves    = noise_octave
 	height_noise.fractal_lacunarity = 2.0
 	height_noise.fractal_gain       = 0.5
 

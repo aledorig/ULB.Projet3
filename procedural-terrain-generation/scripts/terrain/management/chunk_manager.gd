@@ -30,7 +30,7 @@ extends Node3D
 # ============================================================================
 
 #seed for random generation
-var p_seed: int = TerrainConstants.GAME_SEED
+var p_seed: int = GameSettingsAutoload.seed
 
 # Chunk storage (similar to Minecraft's id2ChunkMap)
 var loaded_chunks:  Dictionary = {}  # Vector2i -> ChunkInstance
@@ -75,12 +75,23 @@ var last_camera_chunk: Vector2i = Vector2i.ZERO
 # ============================================================================
 
 func _ready() -> void:
+	_clear_generation_state()
 	_initialize_systems()
 	_start_worker_threads()
 	
 	# Initial chunk generation
 	update_chunks(true)
+	
+func _clear_generation_state() -> void:
+	for chunk_instance in loaded_chunks.values():
+		chunk_instance.node.queue_free()
 
+	loaded_chunks.clear()
+	pending_chunks.clear()
+	chunks_queued_for_unload.clear()
+	mesh_cache.clear()
+	cache_access_order.clear()
+	last_camera_chunk = Vector2i.ZERO
 
 func _initialize_systems() -> void:
 	# Find camera
@@ -245,7 +256,7 @@ func _generate_chunk_mesh(chunk_pos: Vector2i) -> ChunkResult:
 		return result
 
 	# Create temporary generators (thread-local)
-	var terrain_gen = TerrainGenerator.new(p_seed)
+	var terrain_gen = TerrainGenerator.new(GameSettingsAutoload.seed, GameSettingsAutoload.octave)
 	var mesh_builder = ChunkMeshBuilder.new(chunk_size, vertex_spacing, terrain_gen)
 
 	# Generate mesh

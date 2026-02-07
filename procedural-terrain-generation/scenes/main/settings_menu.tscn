@@ -1,0 +1,111 @@
+[gd_scene load_steps=4 format=3 uid="uid://blv7t6ls0inp0"]
+
+[ext_resource type="Texture2D" uid="uid://31snryuna5j3" path="res://assets/ui/settings_background.jpg" id="1_05p07"]
+[ext_resource type="Script" uid="uid://bd6yvxrbhyhbo" path="res://scripts/ui/settings_menu.gd" id="1_cr101"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_cr101"]
+texture = ExtResource("1_05p07")
+
+[node name="SettingsMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_cr101")
+
+[node name="Background" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_cr101")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 29.0
+offset_top = 37.0
+offset_right = 476.0
+offset_bottom = 517.0
+theme_override_constants/separation = 30
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 43
+
+[node name="SeedInput" type="LineEdit" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Entrer numéro seed"
+alignment = 1
+max_length = 18
+expand_to_text_length = true
+
+[node name="InfoSeed" type="Button" parent="VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+tooltip_text = "(place holder)La seed est un nombre utilisé pour initialiser l’aléatoire afin que la génération soit déterministe.
+Avec la même seed, le programme produit exactement le même monde à chaque exécution."
+theme_override_constants/h_separation = 4
+text = "?"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 122
+
+[node name="Perlin" type="Label" parent="VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.09617865, 0.09617865, 0.09617865, 1)
+theme_override_font_sizes/font_size = 24
+text = "Parametre bruit de Perlin"
+
+[node name="InfoPerlin" type="Button" parent="VBoxContainer/HBoxContainer2"]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+tooltip_text = "(placeholder)Le bruit de Perlin est une fonction pseudo-aléatoire continue et lisse, conçue pour produire des variations naturelles sans ruptures brutales.
+Il est très utilisé en génération procédurale pour créer des textures, terrains ou nuages qui paraissent organiques plutôt que chaotiques."
+text = "?"
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 87
+
+[node name="Octave" type="Label" parent="VBoxContainer/HBoxContainer3"]
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.09617865, 0.09617865, 0.09617865, 1)
+theme_override_font_sizes/font_size = 24
+text = "Nombre de couche (octaves)"
+
+[node name="InfoOctave" type="Button" parent="VBoxContainer/HBoxContainer3"]
+clip_contents = true
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+tooltip_text = "(placeholder)Le nombre d’octaves indique combien de couches de bruit sont superposées pour ajouter des détails au terrain.
+Plus il y a d’octaves, plus le relief devient riche et fin, mais aussi plus la génération peut être coûteuse.
+"
+text = "?"
+expand_icon = true
+
+[node name="Octaveslider" type="HSlider" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 2
+min_value = 1.0
+max_value = 8.0
+value = 1.0
+tick_count = 8
+
+[node name="Start" type="Button" parent="."]
+layout_mode = 0
+offset_left = 346.0
+offset_top = 502.0
+offset_right = 791.0
+offset_bottom = 608.0
+text = "Lancer le terrain"
+
+[connection signal="button_down" from="Start" to="." method="_on_start_button_down"]
