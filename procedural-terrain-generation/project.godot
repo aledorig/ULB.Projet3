@@ -26,7 +26,7 @@ OBJExporter="*uid://cypdhf5ssdtga"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/gdscript-linter/plugin.cfg", "res://addons/obj_exporter/plugin.cfg", "res://addons/script-ide/plugin.cfg")
+enabled=PackedStringArray("res://addons/obj_exporter/plugin.cfg")
 
 [filesystem]
 
@@ -83,31 +83,4 @@ toggle_menu={
 "deadzone": 0.2,
 "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":4194305,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
 ]
-}
-
-[shader_globals]
-
-psx_affine_strength={
-"type": "float",
-"value": 1.0
-}
-psx_bit_depth={
-"type": "int",
-"value": 5
-}
-psx_fog_color={
-"type": "color",
-"value": Color(0.5, 0.5, 0.5, 0)
-}
-psx_fog_far={
-"type": "float",
-"value": 20.0
-}
-psx_fog_near={
-"type": "float",
-"value": 10.0
-}
-psx_snap_distance={
-"type": "float",
-"value": 0.025
 }
