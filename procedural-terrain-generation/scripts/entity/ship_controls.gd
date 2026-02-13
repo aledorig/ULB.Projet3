@@ -12,8 +12,10 @@ func _ready() -> void:
 	if chunk_manager:
 		if not chunk_manager.is_node_ready():
 			await chunk_manager.ready
+
 		var terrain_height: float = chunk_manager.debug_terrain_generator.get_height(global_position.x, global_position.z)
 		global_position.y = terrain_height + 10.0
+
 	GameSettingsAutoload.runtime_settings_changed.connect(_on_settings_changed)
 
 func _on_settings_changed() -> void:
@@ -22,6 +24,7 @@ func _on_settings_changed() -> void:
 func _get_input(delta: float) -> void:
 	var max_speed := GameSettingsAutoload.max_speed
 	var acceleration := GameSettingsAutoload.acceleration
+
 	if Input.is_action_pressed("throttle_up"):
 		forward_speed = lerp(forward_speed, max_speed, acceleration * delta)
 	if Input.is_action_pressed("throttle_down"):

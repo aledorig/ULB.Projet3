@@ -16,17 +16,11 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
-[node name="LoadingWorld" type="Control"]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="LoadingWorld" type="CanvasLayer"]
+layer = 100
 script = ExtResource("1_load")
 
 [node name="Background" type="ColorRect" parent="."]
-layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -35,7 +29,6 @@ grow_vertical = 2
 color = Color(0.08, 0.08, 0.08, 1)
 
 [node name="CenterContainer" type="CenterContainer" parent="."]
-layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -52,7 +45,7 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
 theme_override_font_sizes/font_size = 16
-text = "Building terrain..."
+text = "Loading resources..."
 horizontal_alignment = 1
 
 [node name="ProgressBar" type="ProgressBar" parent="CenterContainer/VBox"]
@@ -66,8 +59,9 @@ value = 0.0
 show_percentage = false
 
 [node name="Hint" type="Label" parent="CenterContainer/VBox"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.45, 0.45, 0.45, 1)
 theme_override_font_sizes/font_size = 12
-text = "Generating world from seed..."
+text = "Preparing scene data..."
 horizontal_alignment = 1

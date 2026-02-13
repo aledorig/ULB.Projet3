@@ -1,6 +1,8 @@
 class_name ChunkManager
 extends Node3D
 
+signal initial_chunks_ready
+
 @export var chunk_scene: PackedScene
 
 var chunk_size: int = 40
@@ -16,6 +18,7 @@ var generation_timeout_ms: int = 30000
 
 var p_seed: int = GameSettingsAutoload.seed
 var debug_terrain_generator: TerrainGenerator = null
+var _initial_load_done: bool = false
 
 var loaded_chunks:  Dictionary = {}
 var pending_chunks: Dictionary = {}
@@ -108,6 +111,10 @@ func _process(_delta: float) -> void:
 	_process_completed_chunks()
 	update_chunks(false)
 	_process_unload_queue()
+
+	if not _initial_load_done and pending_chunks.is_empty() and not loaded_chunks.is_empty():
+		_initial_load_done = true
+		initial_chunks_ready.emit()
 
 
 func update_chunks(force_update: bool = false) -> void:
