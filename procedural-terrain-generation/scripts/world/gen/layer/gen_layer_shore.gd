@@ -9,7 +9,7 @@ func _init(p_base_seed: int, p_parent: GenLayer) -> void:
 
 func get_values(area_x: int, area_z: int, width: int, height: int) -> PackedInt32Array:
 	var border: int = SHORE_RADIUS
-	var parent_width: int = width + border * 2
+	var parent_width:  int = width + border * 2
 	var parent_height: int = height + border * 2
 	var parent_values := parent.get_values(area_x - border, area_z - border, parent_width, parent_height)
 
@@ -21,7 +21,7 @@ func get_values(area_x: int, area_z: int, width: int, height: int) -> PackedInt3
 			init_chunk_seed(area_x + x, area_z + z)
 
 			var center: int = parent_values[(x + border) + (z + border) * parent_width]
-			var idx: int = x + z * width
+			var idx:    int = x + z * width
 
 			if _is_ocean(center):
 				result[idx] = center

@@ -10,7 +10,7 @@ const MAX_HEIGHT: float = 128.0
 const SNOW_START_HEIGHT: float = 60.0
 const SNOW_FULL_HEIGHT:  float = 80.0
 
-const UNDERWATER_DEPTH_SCALE: float = 40.0
+const UNDERWATER_DEPTH_SCALE:  float = 40.0
 const UNDERWATER_MAX_DARKNESS: float = 0.6
 
 enum Biome {

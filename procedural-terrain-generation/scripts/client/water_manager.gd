@@ -1,7 +1,7 @@
 class_name WaterManager
 extends MeshInstance3D
 
-@export var water_size: float = 2000.0
+@export var water_size:    float = 2000.0
 @export var follow_camera: bool = true
 
 var camera: Camera3D

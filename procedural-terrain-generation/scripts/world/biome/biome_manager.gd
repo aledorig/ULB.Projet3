@@ -1,15 +1,15 @@
 class_name BiomeManager
 extends RefCounted
 
-const BIOME_SCALE: float = 4.0
+const BIOME_SCALE:     float = 4.0
 const BLEND_GRID_SIZE: float = 8.0
 
 var biome_generator: BiomeGenerator
-var cache: BiomeCache
-var seed_value: int
+var cache:           BiomeCache
+var seed_value:      int
 
-var cache_hits: int = 0
-var cache_misses: int = 0
+var cache_hits:       int = 0
+var cache_misses:     int = 0
 var last_report_time: int = 0
 
 func _init(p_seed: int = GameSettingsAutoload.seed) -> void:
@@ -153,9 +153,11 @@ func get_params_batch_packed(
 func _get_biome_grid_inline(x: float, z: float, inv_scale: float) -> int:
 	var bx: int = int(floor(x * inv_scale))
 	var bz: int = int(floor(z * inv_scale))
+
 	var cached: int = cache.get_biome(bx, bz)
 	if cached == -1:
 		return _get_biome_at_grid(bx, bz) as int
+
 	return cached
 
 
@@ -252,24 +254,6 @@ func _get_blended_params_inline(
 		"color": blended_color / total_weight,
 	}
 
-
-func _catmull_rom_weight(t: float) -> PackedFloat32Array:
-	## Compute Catmull-Rom weights for parameter t in [0, 1]
-	## Returns weights for points p0, p1, p2, p3 where interpolation is between p1 and p2
-	## NOTE: Kept for reference only. The hot path in get_params_batch_catmull_rom()
-	## inlines these computations as local floats to avoid PackedFloat32Array allocations.
-	var t2: float = t * t
-	var t3: float = t2 * t
-
-	var w: PackedFloat32Array = PackedFloat32Array()
-	w.resize(4)
-	w[0] = -0.5 * t3 + t2 - 0.5 * t          # p0 weight
-	w[1] = 1.5 * t3 - 2.5 * t2 + 1.0         # p1 weight
-	w[2] = -1.5 * t3 + 2.0 * t2 + 0.5 * t    # p2 weight
-	w[3] = 0.5 * t3 - 0.5 * t2               # p3 weight
-	return w
-
-
 func _sample_biome_params_at_grid(grid_x: int, grid_z: int,
 	biome_base: PackedFloat32Array, biome_var: PackedFloat32Array,
 	biome_colors: PackedColorArray, inv_biome_scale: float
@@ -310,6 +294,7 @@ func get_params_batch_catmull_rom(
 	var biome_base: PackedFloat32Array = PackedFloat32Array()
 	var biome_var: PackedFloat32Array = PackedFloat32Array()
 	var biome_colors_lookup: PackedColorArray = PackedColorArray()
+
 	biome_base.resize(num_biomes)
 	biome_var.resize(num_biomes)
 	biome_colors_lookup.resize(num_biomes)
@@ -324,6 +309,7 @@ func get_params_batch_catmull_rom(
 	var grid_var: PackedFloat32Array = PackedFloat32Array()
 	var grid_biome: PackedInt32Array = PackedInt32Array()
 	var grid_size: int = grid_width * grid_height
+
 	grid_base.resize(grid_size)
 	grid_var.resize(grid_size)
 	grid_biome.resize(grid_size)

@@ -5,20 +5,20 @@ signal initial_chunks_ready
 
 @export var chunk_scene: PackedScene
 
-var chunk_size: int = 40
-var vertex_spacing: float = 2.0
-var render_distance: int = 4
-var unload_distance: int = 8
-var max_worker_threads: int = 4
-var chunks_per_frame: int = 2
-var enable_mesh_caching: bool = true
-var cache_max_size: int = 256
+var chunk_size:             int = 40
+var vertex_spacing:         float = 2.0
+var render_distance:        int = 4
+var unload_distance:        int = 8
+var max_worker_threads:     int = 4
+var chunks_per_frame:       int = 2
+var enable_mesh_caching:    bool = true
+var cache_max_size:         int = 256
 var unload_chunks_per_tick: int = 5
-var generation_timeout_ms: int = 30000
+var generation_timeout_ms:  int = 30000
 
-var p_seed: int = GameSettingsAutoload.seed
+var p_seed:                  int = GameSettingsAutoload.seed
 var debug_terrain_generator: TerrainGenerator = null
-var _initial_load_done: bool = false
+var _initial_load_done:      bool = false
 
 var loaded_chunks:  Dictionary = {}
 var pending_chunks: Dictionary = {}
@@ -36,25 +36,27 @@ var shutdown_threads:      bool = false
 var mesh_cache:         Dictionary = {}
 var cache_access_order: Array[Vector2i] = []
 
-var camera: Camera3D
+var camera:           Camera3D
 var material_manager: TerrainMaterialManager
 var terrain_material: ShaderMaterial
 
 var chunks_generated_this_frame: int = 0
-var last_camera_chunk: Vector2i = Vector2i.ZERO
+var last_camera_chunk:           Vector2i = Vector2i.ZERO
 
 func _ready() -> void:
-	chunk_size = GameSettingsAutoload.chunk_size
-	vertex_spacing = GameSettingsAutoload.vertex_spacing
-	max_worker_threads = GameSettingsAutoload.max_worker_threads
-	render_distance = GameSettingsAutoload.render_distance
-	unload_distance = render_distance * 2
-	chunks_per_frame = GameSettingsAutoload.chunks_per_frame
+	chunk_size          = GameSettingsAutoload.chunk_size
+	vertex_spacing      = GameSettingsAutoload.vertex_spacing
+	max_worker_threads  = GameSettingsAutoload.max_worker_threads
+	render_distance     = GameSettingsAutoload.render_distance
+	unload_distance     = render_distance * 2
+	chunks_per_frame    = GameSettingsAutoload.chunks_per_frame
 	enable_mesh_caching = GameSettingsAutoload.enable_mesh_caching
-	cache_max_size = GameSettingsAutoload.cache_max_size
+	cache_max_size      = GameSettingsAutoload.cache_max_size
+
 	_clear_generation_state()
 	_initialize_systems()
 	_start_worker_threads()
+
 	GameSettingsAutoload.runtime_settings_changed.connect(_on_settings_changed)
 	update_chunks(true)
 

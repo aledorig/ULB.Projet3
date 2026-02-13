@@ -2,7 +2,7 @@ class_name BiomeGenerator
 extends RefCounted
 
 var final_layer: GenLayer
-var game_seed: int
+var game_seed:   int
 
 func _init(p_seed: int) -> void:
 	game_seed = p_seed
@@ -39,12 +39,10 @@ func _init_layers() -> GenLayer:
 
 	for i in range(biome_size):
 		layer = GenLayerZoom.new(1000 + i, layer)
-
 		if i == 1:
 			layer = GenLayerShore.new(1000, layer)
 
 	layer = GenLayerSmooth.new(1000, layer)
-
 	layer.init_world_seed(game_seed)
 
 	return layer

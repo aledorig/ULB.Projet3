@@ -4,12 +4,12 @@ extends RefCounted
 const CACHE_SIZE: int = 1024
 const CHUNK_SIZE: int = 32
 
-var cache: Dictionary = {}
+var cache:        Dictionary = {}
 var access_order: Array[int] = []
 
 func get_biome(bx: int, bz: int) -> int:
-	var chunk_x: int = bx >> 5
-	var chunk_z: int = bz >> 5
+	var chunk_x:   int = bx >> 5
+	var chunk_z:   int = bz >> 5
 	var chunk_key: int = _make_key(chunk_x, chunk_z)
 
 	if not cache.has(chunk_key):
@@ -17,8 +17,8 @@ func get_biome(bx: int, bz: int) -> int:
 
 	_touch(chunk_key)
 
-	var local_x: int = bx & 31
-	var local_z: int = bz & 31
+	var local_x:    int = bx & 31
+	var local_z:    int = bz & 31
 	var chunk_data: PackedInt32Array = cache[chunk_key]
 	return chunk_data[local_x + local_z * CHUNK_SIZE]
 

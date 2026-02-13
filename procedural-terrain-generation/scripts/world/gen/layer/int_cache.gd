@@ -1,14 +1,14 @@
 class_name IntCache
 extends RefCounted
 
-const SMALL_ARRAY_SIZE: int = 256
+const SMALL_ARRAY_SIZE:  int = 256
 const INITIAL_POOL_SIZE: int = 16
 
-var _free_small: Array[PackedInt32Array] = []
-var _free_large: Array[PackedInt32Array] = []
+var _free_small:   Array[PackedInt32Array] = []
+var _free_large:   Array[PackedInt32Array] = []
 var _in_use_small: Array[PackedInt32Array] = []
 var _in_use_large: Array[PackedInt32Array] = []
-var _large_size: int = 256
+var _large_size:   int = 256
 
 static var _instance: IntCache = null
 

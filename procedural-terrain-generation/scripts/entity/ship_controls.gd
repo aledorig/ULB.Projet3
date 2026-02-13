@@ -2,10 +2,10 @@ class_name ShipController
 extends CharacterBody3D
 
 var input_response: float = 8.0
-var forward_speed: float = 0.0
-var pitch_input: float = 0.0
-var roll_input: float = 0.0
-var yaw_input: float = 0.0
+var forward_speed:  float = 0.0
+var pitch_input:    float = 0.0
+var roll_input:     float = 0.0
+var yaw_input:      float = 0.0
 
 func _ready() -> void:
 	var chunk_manager: ChunkManager = get_node("/root/TerrainWorld")

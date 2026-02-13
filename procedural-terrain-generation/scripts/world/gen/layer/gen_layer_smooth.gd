@@ -6,7 +6,7 @@ func _init(p_base_seed: int, p_parent: GenLayer) -> void:
 
 
 func get_values(area_x: int, area_z: int, width: int, height: int) -> PackedInt32Array:
-	var parent_width: int = width + 2
+	var parent_width:  int = width + 2
 	var parent_height: int = height + 2
 	var parent_values := parent.get_values(area_x - 1, area_z - 1, parent_width, parent_height)
 
@@ -15,10 +15,10 @@ func get_values(area_x: int, area_z: int, width: int, height: int) -> PackedInt3
 
 	for z in range(height):
 		for x in range(width):
-			var west: int = parent_values[x + (z + 1) * parent_width]
-			var east: int = parent_values[(x + 2) + (z + 1) * parent_width]
-			var north: int = parent_values[(x + 1) + z * parent_width]
-			var south: int = parent_values[(x + 1) + (z + 2) * parent_width]
+			var west:   int = parent_values[x + (z + 1) * parent_width]
+			var east:   int = parent_values[(x + 2) + (z + 1) * parent_width]
+			var north:  int = parent_values[(x + 1) + z * parent_width]
+			var south:  int = parent_values[(x + 1) + (z + 2) * parent_width]
 			var center: int = parent_values[(x + 1) + (z + 1) * parent_width]
 
 			var idx: int = x + z * width

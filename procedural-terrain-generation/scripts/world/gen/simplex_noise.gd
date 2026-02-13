@@ -6,7 +6,7 @@ const GRAD_Z: PackedFloat64Array = [1.0, 1.0, -1.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.
 
 const SQRT_3: float = 1.7320508075688772
 const F2: float = 0.5 * (SQRT_3 - 1.0)    # skew factor
-const G2: float = (3.0 - SQRT_3) / 6.0     # unskew factor
+const G2: float = (3.0 - SQRT_3) / 6.0    # unskew factor
 
 var perm: PackedInt32Array
 var x_offset: float
@@ -47,6 +47,7 @@ func get_value(x: float, z: float) -> float:
 
 	var i1: int
 	var j1: int
+
 	if x0 > z0:
 		i1 = 1; j1 = 0
 	else:
@@ -65,6 +66,7 @@ func get_value(x: float, z: float) -> float:
 
 	var t0: float = 0.5 - x0 * x0 - z0 * z0
 	var n0: float
+
 	if t0 < 0.0:
 		n0 = 0.0
 	else:
@@ -73,6 +75,7 @@ func get_value(x: float, z: float) -> float:
 
 	var t1: float = 0.5 - x1 * x1 - z1 * z1
 	var n1: float
+
 	if t1 < 0.0:
 		n1 = 0.0
 	else:
@@ -81,6 +84,7 @@ func get_value(x: float, z: float) -> float:
 
 	var t2: float = 0.5 - x2 * x2 - z2 * z2
 	var n2: float
+
 	if t2 < 0.0:
 		n2 = 0.0
 	else:
@@ -111,6 +115,7 @@ func add(out: PackedFloat32Array, x_off: float, z_off: float,
 
 			var i1: int
 			var j1: int
+
 			if x0 > z0:
 				i1 = 1; j1 = 0
 			else:
@@ -129,6 +134,7 @@ func add(out: PackedFloat32Array, x_off: float, z_off: float,
 
 			var t0: float = 0.5 - x0 * x0 - z0 * z0
 			var n0: float
+
 			if t0 < 0.0:
 				n0 = 0.0
 			else:
@@ -137,6 +143,7 @@ func add(out: PackedFloat32Array, x_off: float, z_off: float,
 
 			var t1: float = 0.5 - x1 * x1 - z1 * z1
 			var n1: float
+
 			if t1 < 0.0:
 				n1 = 0.0
 			else:
@@ -145,6 +152,7 @@ func add(out: PackedFloat32Array, x_off: float, z_off: float,
 
 			var t2: float = 0.5 - x2 * x2 - z2 * z2
 			var n2: float
+
 			if t2 < 0.0:
 				n2 = 0.0
 			else:

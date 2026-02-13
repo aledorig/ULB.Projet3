@@ -17,10 +17,12 @@ func get_value(x: float, z: float, x_scale: float, z_scale: float) -> float:
 	var frequency: float = 1.0
 	var amplitude: float = 1.0
 	var result: float = 0.0
+
 	for j in range(octave_count):
 		result += generators[j].get_value(x * x_scale * frequency, z * z_scale * frequency) * amplitude
 		frequency *= 2.0
 		amplitude *= 0.5
+
 	return result
 
 

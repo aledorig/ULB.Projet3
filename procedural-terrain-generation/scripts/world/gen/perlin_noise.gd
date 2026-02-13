@@ -39,8 +39,10 @@ func populate_noise_array(
 	for gz in range(z_size):
 		var real_z: float = z_offset_param + gz * z_scale + self_zo
 		var zi: int = int(real_z)
+
 		if real_z < float(zi):
 			zi -= 1
+
 		var z0: int = zi & 255
 		real_z -= float(zi)
 
@@ -49,8 +51,10 @@ func populate_noise_array(
 		for gx in range(x_size):
 			var real_x: float = x_offset_param + gx * x_scale + self_xo
 			var xi: int = int(real_x)
+
 			if real_x < float(xi):
 				xi -= 1
+
 			var x0: int = xi & 255
 			real_x -= float(xi)
 

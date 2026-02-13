@@ -26,6 +26,7 @@ func _sample_noise(x: float, z: float) -> float:
 
 func get_height(x: float, z: float) -> float:
 	var params: Dictionary
+
 	if use_biome_blending:
 		params = biome_manager.get_blended_params(x, z, blend_radius)
 	else:
@@ -70,6 +71,7 @@ func get_surface_color(x: float, z: float, height: float) -> Color:
 
 func get_vertex_data(x: float, z: float) -> Dictionary:
 	var params: Dictionary
+
 	if use_biome_blending:
 		params = biome_manager.get_blended_params(x, z, blend_radius)
 	else:
@@ -110,6 +112,7 @@ func get_vertex_data_batch(
 	var base_heights: PackedFloat32Array = PackedFloat32Array()
 	var variations: PackedFloat32Array = PackedFloat32Array()
 	var biome_colors: PackedColorArray = PackedColorArray()
+
 	base_heights.resize(total_verts)
 	variations.resize(total_verts)
 	biome_colors.resize(total_verts)
@@ -125,10 +128,10 @@ func get_vertex_data_batch(
 			base_heights, variations, biome_colors
 		)
 
-	# Grid offset for batch noise: gx goes 0..width-1, world pos = origin + gx*spacing.
-	# generate_octaves computes: d3 * x_scale * (x_off + gx).
-	# We want:                   d3 * 0.005 * (origin + gx * spacing).
-	# So: x_scale = spacing * freq, x_off = origin / spacing.
+	# Grid offset for batch noise: gx goes 0..width-1, world pos = origin + gx*spacing
+	# generate_octaves computes: d3 * x_scale * (x_off + gx)
+	# We want:                   d3 * 0.005 * (origin + gx * spacing)
+	# So: x_scale = spacing * freq, x_off = origin / spacing
 	var inv_spacing: float = 1.0 / spacing
 
 	var noise_grid: PackedFloat32Array = PackedFloat32Array()

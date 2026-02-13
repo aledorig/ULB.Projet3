@@ -1,13 +1,13 @@
 class_name PerformanceMonitor
 extends RefCounted
 
-static var logging_enabled: bool = true
+static var logging_enabled:  bool = true
 static var log_threshold_ms: float = 1.0
-static var history_size: int = 100
+static var history_size:     int = 100
 
-static var _active_timers: Dictionary = {}
-static var _timing_history: Dictionary = {}
-static var _call_counts: Dictionary = {}
+static var _active_timers:      Dictionary = {}
+static var _timing_history:     Dictionary = {}
+static var _call_counts:        Dictionary = {}
 static var _frame_accumulators: Dictionary = {}
 
 static func start(name: String) -> void:

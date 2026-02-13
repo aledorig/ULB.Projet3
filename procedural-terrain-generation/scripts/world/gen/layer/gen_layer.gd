@@ -2,10 +2,10 @@ class_name GenLayer
 extends RefCounted
 
 const LCG_MULTIPLIER: int = 6364136223846793005
-const LCG_INCREMENT: int = 1442695040888963407
+const LCG_INCREMENT:  int = 1442695040888963407
 
 var parent: GenLayer
-var base_seed: int
+var base_seed:  int
 var world_seed: int
 var chunk_seed: int
 

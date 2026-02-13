@@ -9,26 +9,26 @@ func _init(p_base_seed: int, p_parent: GenLayer, p_fuzzy: bool = false) -> void:
 
 
 func get_values(area_x: int, area_z: int, width: int, height: int) -> PackedInt32Array:
-	var parent_x: int = area_x >> 1
-	var parent_z: int = area_z >> 1
-	var parent_width: int = (width >> 1) + 2
+	var parent_x:      int = area_x >> 1
+	var parent_z:      int = area_z >> 1
+	var parent_width:  int = (width >> 1) + 2
 	var parent_height: int = (height >> 1) + 2
 
 	var parent_values := parent.get_values(parent_x, parent_z, parent_width, parent_height)
-	var temp_width: int = (parent_width - 1) * 2
+	var temp_width:  int = (parent_width - 1) * 2
 	var temp_height: int = (parent_height - 1) * 2
 	var temp := PackedInt32Array()
 	temp.resize(temp_width * temp_height)
 
 	for pz in range(parent_height - 1):
-		var temp_idx: int = (pz * 2) * temp_width
-		var top_left: int = parent_values[pz * parent_width]
+		var temp_idx:    int = (pz * 2) * temp_width
+		var top_left:    int = parent_values[pz * parent_width]
 		var bottom_left: int = parent_values[(pz + 1) * parent_width]
 
 		for px in range(parent_width - 1):
 			init_chunk_seed((parent_x + px) * 2, (parent_z + pz) * 2)
 
-			var top_right: int = parent_values[px + 1 + pz * parent_width]
+			var top_right:    int = parent_values[px + 1 + pz * parent_width]
 			var bottom_right: int = parent_values[px + 1 + (pz + 1) * parent_width]
 
 			# Top-left corner: unchanged
