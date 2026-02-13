@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://0n10lr4rtcgt"]
+[gd_scene format=3 uid="uid://0n10lr4rtcgt"]
 
 [ext_resource type="Script" uid="uid://bc843f6ej5jlt" path="res://scripts/world/gen/chunk_manager.gd" id="1_2nvvr"]
 [ext_resource type="Script" uid="uid://cuo62yjc33lxq" path="res://scripts/client/camera_controller.gd" id="3_4p0at"]
@@ -34,17 +34,17 @@ fog_sky_affect = 0.505
 shader = ExtResource("6_htxxt")
 shader_parameter/pixel_size = 3
 
-[node name="TerrainWorld" type="Node3D"]
+[node name="TerrainWorld" type="Node3D" unique_id=1309497319]
 script = ExtResource("1_2nvvr")
 
-[node name="MainCamera" type="Camera3D" parent="."]
+[node name="MainCamera" type="Camera3D" parent="." unique_id=497816521]
 transform = Transform3D(1, 0, 0, 0, 0.86602503, 0.4999998, 0, -0.4999998, 0.86602503, 0, 15, 0)
 fov = 90.0
 script = ExtResource("3_4p0at")
 target_path = NodePath("../Executioner")
 offset = Vector3(0, 5, 5)
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=570340315]
 transform = Transform3D(0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, -0.75, 0.433013, 0, 10, 0)
 light_color = Color(1, 0.95, 0.85, 1)
 light_energy = 1.2
@@ -53,16 +53,16 @@ shadow_bias = 0.05
 directional_shadow_mode = 1
 directional_shadow_max_distance = 200.0
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=875975760]
 environment = SubResource("Environment_4p0at")
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1959937083]
 
-[node name="DebugInfo" type="Label" parent="CanvasLayer"]
+[node name="DebugInfo" type="Label" parent="CanvasLayer" unique_id=373791141]
 z_index = 2
 script = ExtResource("4_qld23")
 
-[node name="Map" type="Control" parent="CanvasLayer"]
+[node name="Map" type="Control" parent="CanvasLayer" unique_id=1895625531]
 z_index = 2
 layout_mode = 3
 anchors_preset = 0
@@ -70,7 +70,7 @@ offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("5_qvro2")
 
-[node name="ColorRect" type="ColorRect" parent="CanvasLayer"]
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer" unique_id=125111344]
 z_index = 1
 material = SubResource("ShaderMaterial_nikly")
 anchors_preset = 15
@@ -79,9 +79,9 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="IngameMenu" type="Control" parent="CanvasLayer"]
-z_index = 10
+[node name="IngameMenu" type="Control" parent="CanvasLayer" unique_id=757274231]
 visible = false
+z_index = 10
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -90,7 +90,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("8_menu")
 
-[node name="Overlay" type="ColorRect" parent="CanvasLayer/IngameMenu"]
+[node name="Overlay" type="ColorRect" parent="CanvasLayer/IngameMenu" unique_id=425377282]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -99,7 +99,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.5)
 
-[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer/IngameMenu"]
+[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer/IngameMenu" unique_id=1834950568]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -107,57 +107,56 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBox" type="VBoxContainer" parent="CanvasLayer/IngameMenu/CenterContainer"]
+[node name="VBox" type="VBoxContainer" parent="CanvasLayer/IngameMenu/CenterContainer" unique_id=966150547]
 custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Title" type="Label" parent="CanvasLayer/IngameMenu/CenterContainer/VBox"]
+[node name="Title" type="Label" parent="CanvasLayer/IngameMenu/CenterContainer/VBox" unique_id=1128004982]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 24
 text = "Game Paused"
 horizontal_alignment = 1
 
-[node name="Spacer" type="Control" parent="CanvasLayer/IngameMenu/CenterContainer/VBox"]
+[node name="Spacer" type="Control" parent="CanvasLayer/IngameMenu/CenterContainer/VBox" unique_id=173615839]
 custom_minimum_size = Vector2(0, 8)
 layout_mode = 2
 
-[node name="BackToGame" type="Button" parent="CanvasLayer/IngameMenu/CenterContainer/VBox"]
+[node name="BackToGame" type="Button" parent="CanvasLayer/IngameMenu/CenterContainer/VBox" unique_id=238035208]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 text = "Back to Game"
 
-[node name="SettingsBtn" type="Button" parent="CanvasLayer/IngameMenu/CenterContainer/VBox"]
+[node name="SettingsBtn" type="Button" parent="CanvasLayer/IngameMenu/CenterContainer/VBox" unique_id=988249284]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 text = "Settings"
 
-[node name="SettingsPanel" type="VBoxContainer" parent="CanvasLayer/IngameMenu/CenterContainer/VBox"]
+[node name="SettingsPanel" type="VBoxContainer" parent="CanvasLayer/IngameMenu/CenterContainer/VBox" unique_id=854301173]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="RenderDistanceRow" type="HBoxContainer" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel"]
+[node name="RenderDistanceRow" type="HBoxContainer" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel" unique_id=1034580340]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel/RenderDistanceRow"]
+[node name="Label" type="Label" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel/RenderDistanceRow" unique_id=234793567]
 custom_minimum_size = Vector2(130, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
 text = "Render Distance"
 
-[node name="RenderDistanceSlider" type="HSlider" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel/RenderDistanceRow"]
+[node name="RenderDistanceSlider" type="HSlider" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel/RenderDistanceRow" unique_id=2026385010]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = 2.0
 max_value = 12.0
-step = 1.0
 value = 4.0
 
-[node name="RenderDistanceValue" type="Label" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel/RenderDistanceRow"]
+[node name="RenderDistanceValue" type="Label" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel/RenderDistanceRow" unique_id=1691041492]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(30, 0)
 layout_mode = 2
@@ -165,16 +164,16 @@ theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
 text = "4"
 horizontal_alignment = 2
 
-[node name="MaxSpeedRow" type="HBoxContainer" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel"]
+[node name="MaxSpeedRow" type="HBoxContainer" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel" unique_id=1913486600]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel/MaxSpeedRow"]
+[node name="Label" type="Label" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel/MaxSpeedRow" unique_id=1067471494]
 custom_minimum_size = Vector2(130, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
 text = "Ship Speed"
 
-[node name="MaxSpeedSlider" type="HSlider" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel/MaxSpeedRow"]
+[node name="MaxSpeedSlider" type="HSlider" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel/MaxSpeedRow" unique_id=967474327]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -183,7 +182,7 @@ max_value = 200.0
 step = 5.0
 value = 50.0
 
-[node name="MaxSpeedValue" type="Label" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel/MaxSpeedRow"]
+[node name="MaxSpeedValue" type="Label" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel/MaxSpeedRow" unique_id=1376192334]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(30, 0)
 layout_mode = 2
@@ -191,17 +190,16 @@ theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
 text = "50"
 horizontal_alignment = 2
 
-[node name="QuitToTitle" type="Button" parent="CanvasLayer/IngameMenu/CenterContainer/VBox"]
+[node name="QuitToTitle" type="Button" parent="CanvasLayer/IngameMenu/CenterContainer/VBox" unique_id=1905885739]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 text = "Quit to Title"
 
+[node name="Executioner" parent="." unique_id=1342995080 instance=ExtResource("5_4p0at")]
+
+[node name="Water" type="MeshInstance3D" parent="." unique_id=1474375278]
+script = ExtResource("7_water")
+
 [connection signal="pressed" from="CanvasLayer/IngameMenu/CenterContainer/VBox/BackToGame" to="CanvasLayer/IngameMenu" method="_on_back_to_game_pressed"]
 [connection signal="pressed" from="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsBtn" to="CanvasLayer/IngameMenu" method="_on_settings_pressed"]
-
 [connection signal="pressed" from="CanvasLayer/IngameMenu/CenterContainer/VBox/QuitToTitle" to="CanvasLayer/IngameMenu" method="_on_quit_to_title_pressed"]
-
-[node name="Executioner" parent="." instance=ExtResource("5_4p0at")]
-
-[node name="Water" type="MeshInstance3D" parent="."]
-script = ExtResource("7_water")
