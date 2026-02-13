@@ -76,7 +76,7 @@ func _init_layers() -> GenLayer:
 	# ========================================
 
 	# Zoom passes
-	var biome_size: int = 2
+	var biome_size: int = 4
 
 	for i in range(biome_size):
 		layer = GenLayerZoom.new(1000 + i, layer)

@@ -4,13 +4,16 @@ extends RefCounted
 ## Terrain generation using GenLayer-based biome system
 ## 1. Sample biome at (x, z) via BiomeManager (uses GenLayer pipeline)
 ## 2. Get terrain params (base_height, variation) from biome
-## 3. Sample height noise at (x, z)
-## 4. Final height = base_height + (noise * variation)
+## 3. Sample height noise at (x, z) via OctaveNoise (Minecraft FBM)
+## 4. Modulate with depth noise and surface simplex detail
+## 5. Final height = base_height + (noise * variation * depth_mod) + surface_detail
 
 # COMPONENTS
 
 var biome_manager: BiomeManager
-var height_noise:  PerlinNoise
+var height_noise:  OctaveNoise     # main terrain height
+var depth_noise:   OctaveNoise     # per-biome variation modulation
+var surface_noise: SimplexNoise    # surface micro-detail
 var seed_value:    int
 
 # CONFIGURATION
@@ -24,19 +27,20 @@ var blend_radius: float = 16.0
 
 # INITIALIZATION
 
-func _init(p_seed: int = TerrainConstants.GAME_SEED) -> void:
+func _init(p_seed: int = GameSettingsAutoload.seed, p_octaves: int = GameSettingsAutoload.octave) -> void:
 	seed_value = p_seed
 	biome_manager = BiomeManager.new(p_seed)
-	_setup_height_noise()
 
-
-func _setup_height_noise() -> void:
-	height_noise = PerlinNoise.new(4, 0.5, 2.0, seed_value + 5000)
-	height_noise.base_frequency = 0.005
+	# All noise generators from one RNG sequence (Minecraft pattern)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = p_seed
+	height_noise  = OctaveNoise.new(rng, p_octaves)   # terrain height
+	depth_noise   = OctaveNoise.new(rng, p_octaves)   # variation modulation
+	surface_noise = SimplexNoise.new(rng)             # surface micro-detail
 
 
 func _sample_noise(x: float, z: float) -> float:
-	return height_noise.get_noise_2d(x, z)
+	return height_noise.get_value(x, z, 0.005, 0.005)
 
 # HEIGHT GENERATION
 
@@ -47,16 +51,18 @@ func get_height(x: float, z: float) -> float:
 		params = biome_manager.get_blended_params(x, z, blend_radius)
 	else:
 		params = biome_manager.get_terrain_params(x, z)
-	
+
 	var base_height: float = params.base
 	var variation: float = params.variation
-	
+
 	# Step 2: Sample height noise (-1 to 1)
 	var noise_val: float = _sample_noise(x, z)
+	var depth_mod: float = depth_noise.get_value(x, z, 0.003, 0.003)
+	var surface_detail: float = surface_noise.get_value(x * 0.02, z * 0.02) * 2.0
 
 	# Step 3: Compute final height
-	var height: float = base_height + (noise_val * variation)
-	
+	var height: float = base_height + (noise_val * variation * (1.0 + depth_mod * 0.3)) + surface_detail
+
 	return height
 
 # SURFACE PROPERTIES
@@ -105,7 +111,9 @@ func get_vertex_data(x: float, z: float) -> Dictionary:
 		}
 
 	var noise_val: float = _sample_noise(x, z)
-	var height: float = params.base + (noise_val * params.variation)
+	var depth_mod: float = depth_noise.get_value(x, z, 0.003, 0.003)
+	var surface_detail: float = surface_noise.get_value(x * 0.02, z * 0.02) * 2.0
+	var height: float = params.base + (noise_val * params.variation * (1.0 + depth_mod * 0.3)) + surface_detail
 	var color: Color = params.color
 
 	# Darken underwater
@@ -156,10 +164,42 @@ func get_vertex_data_batch(
 			base_heights, variations, biome_colors
 		)
 
-	# Pre-compute noise grid (batch call — avoids ~9K function calls per chunk)
+	# Grid offset for batch noise: gx goes 0..width-1, world pos = origin + gx*spacing.
+	# generate_octaves computes: d3 * x_scale * (x_off + gx).
+	# We want:                   d3 * 0.005 * (origin + gx * spacing).
+	# So: x_scale = spacing * freq, x_off = origin / spacing.
+	var inv_spacing: float = 1.0 / spacing
+
+	# Pre-compute height noise grid (batch FBM)
 	var noise_grid: PackedFloat32Array = PackedFloat32Array()
 	noise_grid.resize(total_verts)
-	height_noise.fill_noise_grid(origin_x, origin_z, width, height, spacing, noise_grid)
+	height_noise.generate_octaves(
+		noise_grid,
+		origin_x * inv_spacing, origin_z * inv_spacing,
+		width, height,
+		spacing * 0.005, spacing * 0.005
+	)
+
+	# Pre-compute depth noise grid
+	var depth_grid: PackedFloat32Array = PackedFloat32Array()
+	depth_grid.resize(total_verts)
+	depth_noise.generate_octaves(
+		depth_grid,
+		origin_x * inv_spacing, origin_z * inv_spacing,
+		width, height,
+		spacing * 0.003, spacing * 0.003
+	)
+
+	# Pre-compute surface detail grid (simplex)
+	var surface_grid: PackedFloat32Array = PackedFloat32Array()
+	surface_grid.resize(total_verts)
+	surface_noise.add(
+		surface_grid,
+		origin_x * inv_spacing, origin_z * inv_spacing,
+		width, height,
+		spacing * 0.02, spacing * 0.02,
+		2.0
+	)
 
 	var sea_level: float = TerrainConstants.SEA_LEVEL
 	var snow_color := Color(0.95, 0.97, 1.0)
@@ -167,7 +207,7 @@ func get_vertex_data_batch(
 	var idx: int = 0
 	for z in range(height):
 		for x in range(width):
-			var h: float = base_heights[idx] + (noise_grid[idx] * variations[idx])
+			var h: float = base_heights[idx] + (noise_grid[idx] * variations[idx] * (1.0 + depth_grid[idx] * 0.3)) + surface_grid[idx]
 			var color: Color = biome_colors[idx]
 
 			# Darken underwater
