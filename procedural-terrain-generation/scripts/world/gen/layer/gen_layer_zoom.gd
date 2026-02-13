@@ -1,23 +1,14 @@
 class_name GenLayerZoom
 extends GenLayer
 
-## Doubles the resolution of the parent layer with interpolation
-## Can be fuzzy (random interpolation) or normal (mode-based)
-
-# CONFIGURATION
-
 var fuzzy: bool = false
-
-# INITIALIZATION
 
 func _init(p_base_seed: int, p_parent: GenLayer, p_fuzzy: bool = false) -> void:
 	super._init(p_base_seed, p_parent)
 	fuzzy = p_fuzzy
 
-# GENERATION
 
 func get_values(area_x: int, area_z: int, width: int, height: int) -> PackedInt32Array:
-	# Calculate parent area (half size, offset for alignment)
 	var parent_x: int = area_x >> 1
 	var parent_z: int = area_z >> 1
 	var parent_width: int = (width >> 1) + 2
@@ -29,7 +20,6 @@ func get_values(area_x: int, area_z: int, width: int, height: int) -> PackedInt3
 	var temp := PackedInt32Array()
 	temp.resize(temp_width * temp_height)
 
-	# Zoom by 2x with interpolation
 	for pz in range(parent_height - 1):
 		var temp_idx: int = (pz * 2) * temp_width
 		var top_left: int = parent_values[pz * parent_width]
@@ -60,7 +50,6 @@ func get_values(area_x: int, area_z: int, width: int, height: int) -> PackedInt3
 			bottom_left = bottom_right
 			temp_idx += 2
 
-	# Extract the requested region from temp
 	var result := PackedInt32Array()
 	result.resize(width * height)
 
@@ -73,7 +62,6 @@ func get_values(area_x: int, area_z: int, width: int, height: int) -> PackedInt3
 
 	return result
 
-# HELPERS
 
 func _select_random_2(a: int, b: int) -> int:
 	return a if next_int(2) == 0 else b
@@ -88,7 +76,6 @@ func _select_random_4(a: int, b: int, c: int, d: int) -> int:
 		_: return d
 
 
-## Static factory for creating multiple zoom layers
 static func magnify(base_seed: int, layer: GenLayer, count: int) -> GenLayer:
 	var result := layer
 	for i in range(count):

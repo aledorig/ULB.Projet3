@@ -1,21 +1,14 @@
 class_name GenLayerBiome
 extends GenLayer
 
-## Converts climate zones into actual biome IDs
-## Uses weighted selection arrays for each climate
-
-# BIOME SELECTION ARRAYS
-
-# Warm climate biomes (desert-heavy)
-const WARM_BIOMES: Array[int] = [
+const WARM_BIOMES: Array[int] = [  # desert-heavy
 	TerrainConstants.Biome.DESERT,
 	TerrainConstants.Biome.DESERT,
 	TerrainConstants.Biome.PLAINS,
 	TerrainConstants.Biome.JUNGLE,
 ]
 
-# Medium climate biomes (most variety)
-const MEDIUM_BIOMES: Array[int] = [
+const MEDIUM_BIOMES: Array[int] = [  # most variety
 	TerrainConstants.Biome.FOREST,
 	TerrainConstants.Biome.FOREST,
 	TerrainConstants.Biome.PLAINS,
@@ -24,7 +17,6 @@ const MEDIUM_BIOMES: Array[int] = [
 	TerrainConstants.Biome.MOUNTAINS,
 ]
 
-# Cold climate biomes
 const COLD_BIOMES: Array[int] = [
 	TerrainConstants.Biome.FOREST,
 	TerrainConstants.Biome.MOUNTAINS,
@@ -32,20 +24,16 @@ const COLD_BIOMES: Array[int] = [
 	TerrainConstants.Biome.HILLS,
 ]
 
-# Frozen climate biomes (tundra/snow heavy)
-const FROZEN_BIOMES: Array[int] = [
+const FROZEN_BIOMES: Array[int] = [  # tundra/snow heavy
 	TerrainConstants.Biome.TUNDRA,
 	TerrainConstants.Biome.TUNDRA,
 	TerrainConstants.Biome.SNOW_PEAKS,
 	TerrainConstants.Biome.SNOW_PEAKS,
 ]
 
-# INITIALIZATION
-
 func _init(p_base_seed: int, p_parent: GenLayer) -> void:
 	super._init(p_base_seed, p_parent)
 
-# GENERATION
 
 func get_values(area_x: int, area_z: int, width: int, height: int) -> PackedInt32Array:
 	var parent_values := parent.get_values(area_x, area_z, width, height)
@@ -62,22 +50,16 @@ func get_values(area_x: int, area_z: int, width: int, height: int) -> PackedInt3
 
 			match climate:
 				0:
-					# Ocean
 					result[idx] = TerrainConstants.Biome.OCEAN
 				1:
-					# Warm
 					result[idx] = _select_from_array(WARM_BIOMES)
 				2:
-					# Medium
 					result[idx] = _select_from_array(MEDIUM_BIOMES)
 				3:
-					# Cold
 					result[idx] = _select_from_array(COLD_BIOMES)
 				4:
-					# Frozen
 					result[idx] = _select_from_array(FROZEN_BIOMES)
 				_:
-					# Fallback
 					result[idx] = TerrainConstants.Biome.PLAINS
 
 	return result

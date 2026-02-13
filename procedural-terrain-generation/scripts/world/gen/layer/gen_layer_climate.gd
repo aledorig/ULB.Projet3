@@ -1,20 +1,11 @@
 class_name GenLayerClimate
 extends GenLayer
 
-## Assigns climate zones to land cells
-## Climate values:
-##   0 = Ocean
-##   1 = Warm
-##   2 = Medium
-##   3 = Cold
-##   4 = Frozen
-
-# INITIALIZATION
+# 0=Ocean, 1=Warm, 2=Medium, 3=Cold, 4=Frozen
 
 func _init(p_base_seed: int, p_parent: GenLayer) -> void:
 	super._init(p_base_seed, p_parent)
 
-# GENERATION
 
 func get_values(area_x: int, area_z: int, width: int, height: int) -> PackedInt32Array:
 	var parent_values := parent.get_values(area_x, area_z, width, height)
@@ -30,20 +21,17 @@ func get_values(area_x: int, area_z: int, width: int, height: int) -> PackedInt3
 			var idx: int = x + z * width
 
 			if val == 0:
-				# Ocean stays ocean
 				result[idx] = 0
 			else:
-				# Assign climate based on random selection
-				# Weight towards medium climates for more balanced worlds
 				var r: int = next_int(6)
 				match r:
 					0:
-						result[idx] = 4  # Frozen (rare)
+						result[idx] = 4
 					1:
-						result[idx] = 3  # Cold
+						result[idx] = 3
 					2, 3:
-						result[idx] = 2  # Medium (most common)
+						result[idx] = 2
 					4, 5:
-						result[idx] = 1  # Warm
+						result[idx] = 1
 
 	return result

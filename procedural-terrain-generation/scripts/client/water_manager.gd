@@ -1,27 +1,15 @@
 class_name WaterManager
 extends MeshInstance3D
 
-## Infinite water plane that follows the camera at sea level
-
-# EXPORTS
-
 @export var water_size: float = 2000.0
 @export var follow_camera: bool = true
 
-# REFERENCES
-
 var camera: Camera3D
-
-# INITIALIZATION
 
 func _ready() -> void:
 	_setup_water_mesh()
 	_setup_water_material()
-
-	# Find camera
 	camera = get_viewport().get_camera_3d()
-
-	# Position at sea level
 	position.y = TerrainConstants.SEA_LEVEL
 
 
@@ -37,8 +25,6 @@ func _setup_water_material() -> void:
 	var shader := load("res://shaders/environment/water.gdshader") as Shader
 	var mat := ShaderMaterial.new()
 	mat.shader = shader
-
-	# Default water parameters
 	mat.set_shader_parameter("water_color", Color(0.1, 0.35, 0.55))
 	mat.set_shader_parameter("water_deep_color", Color(0.02, 0.12, 0.25))
 	mat.set_shader_parameter("water_clarity", 0.3)
@@ -47,13 +33,9 @@ func _setup_water_material() -> void:
 	mat.set_shader_parameter("wave_scale", 0.015)
 	mat.set_shader_parameter("wave_height", 0.2)
 	mat.set_shader_parameter("fresnel_power", 4.0)
-
 	material_override = mat
-
-# UPDATE
 
 func _process(_delta: float) -> void:
 	if follow_camera and camera:
-		# Follow camera on X/Z but stay at sea level Y
 		position.x = camera.global_position.x
 		position.z = camera.global_position.z

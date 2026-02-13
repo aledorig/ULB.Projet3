@@ -1,49 +1,29 @@
 class_name BiomeManager
 extends RefCounted
 
-## Biome manager using Minecraft-style GenLayer pipeline
-## Handles biome lookups with caching and terrain parameter blending
-
-# CONFIGURATION
-
-## World units per biome grid cell (balance between detail and performance)
 const BIOME_SCALE: float = 4.0
-
-## World units per blend grid cell (coarser grid for smooth interpolation)
-## Smaller = tighter transitions, larger = smoother but blurrier biome borders
 const BLEND_GRID_SIZE: float = 8.0
-
-# COMPONENTS
 
 var biome_generator: BiomeGenerator
 var cache: BiomeCache
 var seed_value: int
 
-# Performance tracking
 var cache_hits: int = 0
 var cache_misses: int = 0
 var last_report_time: int = 0
-
-# INITIALIZATION
 
 func _init(p_seed: int = GameSettingsAutoload.seed) -> void:
 	seed_value = p_seed
 	biome_generator = BiomeGenerator.new(p_seed)
 	cache = BiomeCache.new()
 
-# BIOME LOOKUP
-
 func get_biome(x: float, z: float) -> TerrainConstants.Biome:
-	## Get biome at world coordinates
 	var bx: int = int(floor(x / BIOME_SCALE))
 	var bz: int = int(floor(z / BIOME_SCALE))
 	return _get_biome_at_grid(bx, bz)
 
 
 func _get_biome_at_grid(bx: int, bz: int) -> TerrainConstants.Biome:
-	## Get biome at biome-grid coordinates with caching
-
-	# Check cache first
 	var cached: int = cache.get_biome(bx, bz)
 	if cached != -1:
 		cache_hits += 1
@@ -51,14 +31,12 @@ func _get_biome_at_grid(bx: int, bz: int) -> TerrainConstants.Biome:
 
 	cache_misses += 1
 
-	# Cache miss - generate chunk
-	var chunk_x: int = bx >> 5  # Divide by 32
+	var chunk_x: int = bx >> 5
 	var chunk_z: int = bz >> 5
 
 	if not cache.has_chunk(chunk_x, chunk_z):
 		var t0 := Time.get_ticks_usec()
 
-		# Generate 32x32 chunk of biomes
 		var chunk_data := biome_generator.get_biome_values(
 			chunk_x * 32, chunk_z * 32, 32, 32
 		)
@@ -70,34 +48,22 @@ func _get_biome_at_grid(bx: int, bz: int) -> TerrainConstants.Biome:
 
 	return cache.get_biome(bx, bz) as TerrainConstants.Biome
 
-# TERRAIN PARAMETERS
-
 func get_terrain_params(x: float, z: float) -> Dictionary:
-	## Get terrain parameters for biome at world coordinates
 	var biome: TerrainConstants.Biome = get_biome(x, z)
 	return TerrainConstants.BIOME_PARAMS[biome]
 
 
 func get_biome_color(x: float, z: float) -> Color:
-	## Get color for biome at world coordinates
 	var biome: TerrainConstants.Biome = get_biome(x, z)
 	return TerrainConstants.BIOME_COLORS[biome]
 
-# BLENDED TERRAIN PARAMETERS
-
 func get_blended_params(x: float, z: float, blend_radius: float = 16.0) -> Dictionary:
-	## Sample biomes and blend terrain parameters
-	## Optimized: only sample center + check if at biome boundary
-
-	# Get center biome first
 	var center_biome: TerrainConstants.Biome = get_biome(x, z)
 	var center_params: Dictionary = TerrainConstants.BIOME_PARAMS[center_biome]
 	var center_color: Color = TerrainConstants.BIOME_COLORS[center_biome]
 
-	# Quick check: sample one nearby point to see if we're at a boundary
 	var test_biome: TerrainConstants.Biome = get_biome(x + blend_radius, z)
 
-	# If same biome, no blending needed (common case - fast path)
 	if test_biome == center_biome:
 		return {
 			"base": center_params.base,
@@ -105,13 +71,11 @@ func get_blended_params(x: float, z: float, blend_radius: float = 16.0) -> Dicti
 			"color": center_color,
 		}
 
-	# At boundary - do minimal blending with 3 samples
-	var total_weight: float = 2.0  # center weight
+	var total_weight: float = 2.0
 	var blended_base: float = center_params.base * 2.0
 	var blended_variation: float = center_params.variation * 2.0
 	var blended_color: Color = center_color * 2.0
 
-	# Sample 2 more points
 	var offsets: Array[Vector2] = [
 		Vector2(blend_radius, 0),
 		Vector2(0, blend_radius),
@@ -131,8 +95,6 @@ func get_blended_params(x: float, z: float, blend_radius: float = 16.0) -> Dicti
 		"color": blended_color / total_weight,
 	}
 
-# BATCHED GENERATION
-
 func get_params_batch_packed(
 	origin_x: float, origin_z: float,
 	width: int, height: int,
@@ -142,22 +104,16 @@ func get_params_batch_packed(
 	out_variation: PackedFloat32Array,
 	out_colors: PackedColorArray
 ) -> void:
-	## Batch generate terrain params for an entire grid using packed arrays
-	## Much faster than dictionary approach - no allocations in hot loop
-
 	var use_blending: bool = blend_radius > 0.0
 
-	# Pre-warm the biome cache for this region (include blend radius margin)
 	var margin: float = blend_radius + BIOME_SCALE
 	var min_bx: int = int(floor((origin_x - margin) / BIOME_SCALE))
 	var min_bz: int = int(floor((origin_z - margin) / BIOME_SCALE))
 	var max_bx: int = int(floor((origin_x + width * spacing + margin) / BIOME_SCALE))
 	var max_bz: int = int(floor((origin_z + height * spacing + margin) / BIOME_SCALE))
 
-	# Ensure all biome chunks for this region are cached
 	_ensure_biome_region_cached(min_bx, min_bz, max_bx, max_bz)
 
-	# Pre-cache biome params as packed arrays for ultra-fast access
 	var num_biomes: int = TerrainConstants.Biome.size()
 	var biome_base: PackedFloat32Array = PackedFloat32Array()
 	var biome_var: PackedFloat32Array = PackedFloat32Array()
@@ -172,7 +128,6 @@ func get_params_batch_packed(
 		biome_var[i] = params.variation
 		biome_colors[i] = TerrainConstants.BIOME_COLORS[i]
 
-	# Now generate params for each vertex - no allocations!
 	var idx: int = 0
 	var inv_scale: float = 1.0 / BIOME_SCALE
 
@@ -196,7 +151,6 @@ func get_params_batch_packed(
 
 
 func _get_biome_grid_inline(x: float, z: float, inv_scale: float) -> int:
-	## Inline biome lookup - no function call overhead
 	var bx: int = int(floor(x * inv_scale))
 	var bz: int = int(floor(z * inv_scale))
 	var cached: int = cache.get_biome(bx, bz)
@@ -210,10 +164,8 @@ func _get_blended_params_packed(
 	biome_base: PackedFloat32Array, biome_var: PackedFloat32Array, biome_colors: PackedColorArray,
 	idx: int, out_base: PackedFloat32Array, out_variation: PackedFloat32Array, out_colors: PackedColorArray
 ) -> void:
-	## Ultra-optimized blended params using packed arrays
 	var center_biome: int = _get_biome_grid_inline(x, z, inv_scale)
 
-	# Quick boundary check
 	var test_biome: int = _get_biome_grid_inline(x + blend_radius, z, inv_scale)
 	if test_biome == center_biome:
 		out_base[idx] = biome_base[center_biome]
@@ -221,29 +173,25 @@ func _get_blended_params_packed(
 		out_colors[idx] = biome_colors[center_biome]
 		return
 
-	# At boundary - blend with 3 samples
 	var blended_base: float = biome_base[center_biome] * 2.0
 	var blended_var: float = biome_var[center_biome] * 2.0
 	var blended_color: Color = biome_colors[center_biome] * 2.0
 
-	# Sample +X offset (already have test_biome)
 	blended_base += biome_base[test_biome]
 	blended_var += biome_var[test_biome]
 	blended_color += biome_colors[test_biome]
 
-	# Sample +Z offset
 	var biome_z: int = _get_biome_grid_inline(x, z + blend_radius, inv_scale)
 	blended_base += biome_base[biome_z]
 	blended_var += biome_var[biome_z]
 	blended_color += biome_colors[biome_z]
 
-	out_base[idx] = blended_base * 0.25  # /4.0
+	out_base[idx] = blended_base * 0.25
 	out_variation[idx] = blended_var * 0.25
 	out_colors[idx] = blended_color * 0.25
 
 
 func _ensure_biome_region_cached(min_bx: int, min_bz: int, max_bx: int, max_bz: int) -> void:
-	## Pre-generate all biome chunks needed for a region
 	var chunk_min_x: int = min_bx >> 5
 	var chunk_min_z: int = min_bz >> 5
 	var chunk_max_x: int = max_bx >> 5
@@ -257,12 +205,10 @@ func _ensure_biome_region_cached(min_bx: int, min_bz: int, max_bx: int, max_bz: 
 
 
 func _get_biome_grid_fast(x: float, z: float) -> int:
-	## Ultra-fast biome lookup - direct cache access, returns int
 	var bx: int = int(floor(x / BIOME_SCALE))
 	var bz: int = int(floor(z / BIOME_SCALE))
 	var cached: int = cache.get_biome(bx, bz)
 	if cached == -1:
-		# This shouldn't happen if cache was pre-warmed, but fallback just in case
 		return _get_biome_at_grid(bx, bz) as int
 	return cached
 
@@ -271,12 +217,10 @@ func _get_blended_params_inline(
 	x: float, z: float, blend_radius: float,
 	biome_params: Array[Dictionary], biome_colors: Array[Color]
 ) -> Dictionary:
-	## Inlined blended params with pre-cached lookups
 	var center_biome: int = _get_biome_grid_fast(x, z)
 	var center_params: Dictionary = biome_params[center_biome]
 	var center_color: Color = biome_colors[center_biome]
 
-	# Quick boundary check
 	var test_biome: int = _get_biome_grid_fast(x + blend_radius, z)
 	if test_biome == center_biome:
 		return {
@@ -285,20 +229,17 @@ func _get_blended_params_inline(
 			"color": center_color,
 		}
 
-	# At boundary - blend with 3 samples
 	var total_weight: float = 2.0
 	var blended_base: float = center_params.base * 2.0
 	var blended_variation: float = center_params.variation * 2.0
 	var blended_color: Color = center_color * 2.0
 
-	# Sample +X offset
 	var biome_x: int = _get_biome_grid_fast(x + blend_radius, z)
 	blended_base += biome_params[biome_x].base
 	blended_variation += biome_params[biome_x].variation
 	blended_color += biome_colors[biome_x]
 	total_weight += 1.0
 
-	# Sample +Z offset
 	var biome_z: int = _get_biome_grid_fast(x, z + blend_radius)
 	blended_base += biome_params[biome_z].base
 	blended_variation += biome_params[biome_z].variation
@@ -311,8 +252,6 @@ func _get_blended_params_inline(
 		"color": blended_color / total_weight,
 	}
 
-
-# CATMULL-ROM INTERPOLATION (smooth biome blending)
 
 func _catmull_rom_weight(t: float) -> PackedFloat32Array:
 	## Compute Catmull-Rom weights for parameter t in [0, 1]
@@ -335,7 +274,6 @@ func _sample_biome_params_at_grid(grid_x: int, grid_z: int,
 	biome_base: PackedFloat32Array, biome_var: PackedFloat32Array,
 	biome_colors: PackedColorArray, inv_biome_scale: float
 ) -> Vector3:
-	## Sample biome params at a blend grid point, return as Vector3(base, var, color_idx)
 	var world_x: float = grid_x * BLEND_GRID_SIZE
 	var world_z: float = grid_z * BLEND_GRID_SIZE
 	var biome: int = _get_biome_grid_inline(world_x, world_z, inv_biome_scale)
@@ -350,13 +288,9 @@ func get_params_batch_catmull_rom(
 	out_variation: PackedFloat32Array,
 	out_colors: PackedColorArray
 ) -> void:
-	## Batch generate terrain params using Catmull-Rom interpolation for smooth blending
-	## Samples biome at coarse grid points and interpolates smoothly between them
-
 	var inv_blend_grid: float = 1.0 / BLEND_GRID_SIZE
 	var inv_biome_scale: float = 1.0 / BIOME_SCALE
 
-	# Calculate blend grid bounds (need 4x4 neighborhood for Catmull-Rom)
 	var min_gx: int = int(floor(origin_x * inv_blend_grid)) - 1
 	var min_gz: int = int(floor(origin_z * inv_blend_grid)) - 1
 	var max_gx: int = int(floor((origin_x + width * spacing) * inv_blend_grid)) + 2
@@ -365,7 +299,6 @@ func get_params_batch_catmull_rom(
 	var grid_width: int = max_gx - min_gx + 1
 	var grid_height: int = max_gz - min_gz + 1
 
-	# Pre-warm biome cache for the entire region
 	var margin: float = BLEND_GRID_SIZE * 2
 	var cache_min_bx: int = int(floor((origin_x - margin) * inv_biome_scale))
 	var cache_min_bz: int = int(floor((origin_z - margin) * inv_biome_scale))
@@ -373,7 +306,6 @@ func get_params_batch_catmull_rom(
 	var cache_max_bz: int = int(floor((origin_z + height * spacing + margin) * inv_biome_scale))
 	_ensure_biome_region_cached(cache_min_bx, cache_min_bz, cache_max_bx, cache_max_bz)
 
-	# Pre-cache biome params lookup tables
 	var num_biomes: int = TerrainConstants.Biome.size()
 	var biome_base: PackedFloat32Array = PackedFloat32Array()
 	var biome_var: PackedFloat32Array = PackedFloat32Array()
@@ -388,7 +320,6 @@ func get_params_batch_catmull_rom(
 		biome_var[i] = params.variation
 		biome_colors_lookup[i] = TerrainConstants.BIOME_COLORS[i]
 
-	# Build grid of biome samples (base, variation, biome_id for color)
 	var grid_base: PackedFloat32Array = PackedFloat32Array()
 	var grid_var: PackedFloat32Array = PackedFloat32Array()
 	var grid_biome: PackedInt32Array = PackedInt32Array()
@@ -407,7 +338,6 @@ func get_params_batch_catmull_rom(
 			grid_var[grid_idx] = biome_var[biome]
 			grid_biome[grid_idx] = biome
 
-	# Now interpolate for each vertex
 	var idx: int = 0
 	for vz in range(height):
 		var world_z: float = origin_z + vz * spacing
@@ -421,7 +351,6 @@ func get_params_batch_catmull_rom(
 		var wz2: float = -1.5 * fz3 + 2.0 * fz2 + 0.5 * fz
 		var wz3: float = 0.5 * fz3 - 0.5 * fz2
 
-		# Grid row indices (relative to our cached grid)
 		var row0: int = (gz_i - 1 - min_gz) * grid_width
 		var row1: int = (gz_i - min_gz) * grid_width
 		var row2: int = (gz_i + 1 - min_gz) * grid_width
@@ -439,33 +368,27 @@ func get_params_batch_catmull_rom(
 			var wx2: float = -1.5 * fx3 + 2.0 * fx2 + 0.5 * fx
 			var wx3: float = 0.5 * fx3 - 0.5 * fx2
 
-			# Grid column indices (relative to our cached grid)
 			var col0: int = gx_i - 1 - min_gx
 			var col1: int = gx_i - min_gx
 			var col2: int = gx_i + 1 - min_gx
 			var col3: int = gx_i + 2 - min_gx
 
-			# Interpolate base height (4x4 Catmull-Rom)
 			var base_val: float = 0.0
 			var var_val: float = 0.0
 
-			# Row 0
 			base_val += wz0 * (wx0 * grid_base[row0 + col0] + wx1 * grid_base[row0 + col1] + wx2 * grid_base[row0 + col2] + wx3 * grid_base[row0 + col3])
 			var_val += wz0 * (wx0 * grid_var[row0 + col0] + wx1 * grid_var[row0 + col1] + wx2 * grid_var[row0 + col2] + wx3 * grid_var[row0 + col3])
-			# Row 1
 			base_val += wz1 * (wx0 * grid_base[row1 + col0] + wx1 * grid_base[row1 + col1] + wx2 * grid_base[row1 + col2] + wx3 * grid_base[row1 + col3])
 			var_val += wz1 * (wx0 * grid_var[row1 + col0] + wx1 * grid_var[row1 + col1] + wx2 * grid_var[row1 + col2] + wx3 * grid_var[row1 + col3])
-			# Row 2
 			base_val += wz2 * (wx0 * grid_base[row2 + col0] + wx1 * grid_base[row2 + col1] + wx2 * grid_base[row2 + col2] + wx3 * grid_base[row2 + col3])
 			var_val += wz2 * (wx0 * grid_var[row2 + col0] + wx1 * grid_var[row2 + col1] + wx2 * grid_var[row2 + col2] + wx3 * grid_var[row2 + col3])
-			# Row 3
 			base_val += wz3 * (wx0 * grid_base[row3 + col0] + wx1 * grid_base[row3 + col1] + wx2 * grid_base[row3 + col2] + wx3 * grid_base[row3 + col3])
 			var_val += wz3 * (wx0 * grid_var[row3 + col0] + wx1 * grid_var[row3 + col1] + wx2 * grid_var[row3 + col2] + wx3 * grid_var[row3 + col3])
 
 			out_base[idx] = base_val
 			out_variation[idx] = var_val
 
-			# For color, use bilinear on the 4 nearest grid points (Catmull-Rom on colors can cause artifacts)
+			# Bilinear on colors to avoid Catmull-Rom artifacts
 			var c00: Color = biome_colors_lookup[grid_biome[row1 + col1]]
 			var c10: Color = biome_colors_lookup[grid_biome[row1 + col2]]
 			var c01: Color = biome_colors_lookup[grid_biome[row2 + col1]]
@@ -477,8 +400,6 @@ func get_params_batch_catmull_rom(
 
 			idx += 1
 
-
-# DEBUG / UTILITY
 
 func get_biome_name(x: float, z: float) -> String:
 	var biome: TerrainConstants.Biome = get_biome(x, z)

@@ -1,16 +1,13 @@
 class_name PerlinNoise
 extends RefCounted
 
-## Single-octave 2D improved Perlin noise
-
-# 16 gradient directions (Minecraft's GRAD_2X / GRAD_2Z)
+# 16 gradient directions
 const GRAD_X: PackedFloat64Array = [1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, -1.0, 0.0]
 const GRAD_Z: PackedFloat64Array = [0.0, 0.0, 0.0, 0.0, 1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 0.0, 1.0, 0.0, -1.0]
 
-# Random coordinate offsets (Minecraft's xCoord / zCoord)
 var x_offset: float
 var z_offset: float
-var _perm_table: PackedInt32Array  # 512 entries (256 shuffled + mirrored)
+var _perm_table: PackedInt32Array
 
 func _init(rng: RandomNumberGenerator) -> void:
 	x_offset = rng.randf() * 256.0
@@ -29,8 +26,6 @@ func populate_noise_array(
 	x_scale: float, z_scale: float,
 	noise_scale: float
 ) -> void:
-	# Batch Perlin (ySize==1 path)
-	# Accumulates into out[]
 	var inv_scale: float = 1.0 / noise_scale
 	var perm := _perm_table
 	var gx_arr := GRAD_X
@@ -61,13 +56,11 @@ func populate_noise_array(
 
 			var fx: float = real_x * real_x * real_x * (real_x * (real_x * 6.0 - 15.0) + 10.0)
 
-			# Hash corners (y=0)
 			var a_hash: int = perm[x0]
 			var aa: int = perm[a_hash] + z0
 			var b_hash: int = perm[x0 + 1]
 			var ba: int = perm[b_hash] + z0
 
-			# Gradient dots at 4 corners
 			var g: int = perm[aa] & 15
 			var d00: float = gx_arr[g] * real_x + gz_arr[g] * real_z
 
