@@ -21,7 +21,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-GameSettingsAutoload="*res://scripts/config/game_settings.gd"
+GameSettingsAutoload="*res://scripts/init/game_settings.gd"
 
 [filesystem]
 
