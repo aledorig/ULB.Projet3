@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://cabdtpoobf70t"]
 
 [ext_resource type="Texture2D" uid="uid://31snryuna5j3" path="res://assets/ui/settings_background.jpg" id="1_dksal"]
-[ext_resource type="Script" uid="uid://cuqgyxgb51avg" path="res://scripts/client/gui/information.gd" id="1_qaqfs"]
+[ext_resource type="Script" uid="uid://cuqgyxgb51avg" path="res://scripts/client/gui/gui_information.gd" id="1_qaqfs"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_qaqfs"]
 texture = ExtResource("1_dksal")
@@ -30,7 +30,7 @@ offset_left = 851.0
 offset_top = 485.0
 offset_right = 1142.5
 offset_bottom = 584.0
-text = "<-  Retour en arrière"
+text = "<- Back"
 
 [node name="Texte" type="RichTextLabel" parent="."]
 layout_mode = 1
@@ -46,6 +46,6 @@ offset_bottom = 162.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/default_color = Color(0, 0, 0, 1)
-text = "Information sur courbe de bezier, bruit de perlin, créateur de l'appli.On utilise des méthodes de génération procédurale pour créer des surfaces en 3D en combinant un bruit de Perlin , qui produit des variations continues et naturelles du relief. Une courbe de Bézier permet ensuite de faire des fuckass rivière"
+text = "Boundless Horizons uses procedural generation techniques to create 3D terrain by combining Perlin noise, which produces smooth and natural elevation variations. A biome pipeline (GenLayer system) assigns climate zones, biome types, and terrain parameters across the world. Multiple octaves of noise are layered for detail at different scales."
 
 [connection signal="button_down" from="Button" to="." method="_on_button_button_down"]

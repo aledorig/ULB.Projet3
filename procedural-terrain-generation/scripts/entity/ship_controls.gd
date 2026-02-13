@@ -1,29 +1,25 @@
 class_name ShipController
 extends CharacterBody3D
 
-@export_group("Speed")
-@export var max_speed:    float = 50.0
-@export var acceleration: float = 0.6
-
-@export_group("Rotation")
-@export var pitch_speed: float = 1.5
-@export var roll_speed:  float = 1.9
-@export var yaw_speed:   float = 1.25
-
-@export_group("Input")
-@export var input_response: float = 8.0
-
+var input_response: float = 8.0
 var forward_speed: float = 0.0
 var pitch_input: float = 0.0
 var roll_input: float = 0.0
 var yaw_input: float = 0.0
 
 func _ready() -> void:
-	var gen := TerrainGenerator.new()
-	var terrain_height: float = gen.get_height(global_position.x, global_position.z)
-	global_position.y = terrain_height + 10.0
+	var chunk_manager: ChunkManager = get_node("/root/TerrainWorld")
+	if chunk_manager and chunk_manager.debug_terrain_generator:
+		var terrain_height: float = chunk_manager.debug_terrain_generator.get_height(global_position.x, global_position.z)
+		global_position.y = terrain_height + 10.0
+	GameSettingsAutoload.runtime_settings_changed.connect(_on_settings_changed)
+
+func _on_settings_changed() -> void:
+	pass
 
 func _get_input(delta: float) -> void:
+	var max_speed := GameSettingsAutoload.max_speed
+	var acceleration := GameSettingsAutoload.acceleration
 	if Input.is_action_pressed("throttle_up"):
 		forward_speed = lerp(forward_speed, max_speed, acceleration * delta)
 	if Input.is_action_pressed("throttle_down"):
@@ -40,9 +36,9 @@ func _physics_process(delta: float) -> void:
 
 
 func _apply_rotation(delta: float) -> void:
-	transform.basis = transform.basis.rotated(transform.basis.z, roll_input * roll_speed * delta)
-	transform.basis = transform.basis.rotated(transform.basis.x, pitch_input * pitch_speed * delta)
-	transform.basis = transform.basis.rotated(-transform.basis.y, yaw_input * yaw_speed * delta)
+	transform.basis = transform.basis.rotated(transform.basis.z, roll_input * GameSettingsAutoload.roll_speed * delta)
+	transform.basis = transform.basis.rotated(transform.basis.x, pitch_input * GameSettingsAutoload.pitch_speed * delta)
+	transform.basis = transform.basis.rotated(-transform.basis.y, yaw_input * GameSettingsAutoload.yaw_speed * delta)
 	transform.basis = transform.basis.orthonormalized()
 
 

@@ -1,25 +1,23 @@
-class_name DebugInfo
+class_name GuiOverlayDebug
 extends Label
 
 const MAX_FPS_SAMPLES: int = 60
 
 @onready var ship: CharacterBody3D = get_node("/root/TerrainWorld/Executioner")
-@onready var terrain_world: Node3D = get_node("/root/TerrainWorld")
+@onready var chunk_manager: ChunkManager = get_node("/root/TerrainWorld")
 
-var terrain_generator: TerrainGenerator = null
 var fps_samples: Array[float] = []
 var avg_fps: float = 0.0
 
 func _ready() -> void:
 	if ship == null:
-		push_error("DebugInfo: Ship not found!")
+		push_error("GuiOverlayDebug: Ship not found!")
 		return
 
-	if terrain_world == null:
-		push_error("DebugInfo: Couldn't get TerrainWorld node")
+	if chunk_manager == null:
+		push_error("GuiOverlayDebug: Couldn't get ChunkManager node")
 		return
 
-	terrain_generator = TerrainGenerator.new(terrain_world.p_seed)
 	_setup_label_style()
 
 func _setup_label_style() -> void:
@@ -48,14 +46,13 @@ func _process(delta: float) -> void:
 	_update_fps(delta)
 
 	var pos := ship.global_position
-	var debug_data := terrain_generator.get_debug_info(pos.x, pos.z)
+	var debug_data := chunk_manager.debug_terrain_generator.get_debug_info(pos.x, pos.z)
 
-	var chunk_manager: ChunkManager = terrain_world
 	var chunk_pos := chunk_manager.world_to_chunk(pos)
 	var chunk_stats := chunk_manager.get_stats()
 
 	text = ""
-	text += "Procedural Terrain v0.1\n"
+	text += "Boundless Horizons v0.1\n"
 	text += "%d fps (avg %.0f)\n" % [Engine.get_frames_per_second(), avg_fps]
 	text += "\n"
 	text += "XYZ: %.1f / %.1f / %.1f\n" % [pos.x, pos.y, pos.z]
@@ -79,13 +76,12 @@ func _update_fps(delta: float) -> void:
 func _print_performance_report() -> void:
 	print("\n========== PERFORMANCE REPORT ==========")
 
-	var chunk_manager: ChunkManager = terrain_world
 	var stats := chunk_manager.get_stats()
 	print("[CHUNKS] loaded=%d pending=%d cached=%d unload_queue=%d" % [
 		stats.loaded_chunks, stats.pending_chunks, stats.cached_meshes, stats.queued_for_unload
 	])
 
-	terrain_generator.biome_manager.print_cache_stats()
+	chunk_manager.debug_terrain_generator.biome_manager.print_cache_stats()
 
 	var mem_static := Performance.get_monitor(Performance.MEMORY_STATIC)
 	var mem_peak := Performance.get_monitor(Performance.MEMORY_STATIC_MAX)

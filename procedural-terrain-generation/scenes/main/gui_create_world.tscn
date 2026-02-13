@@ -1,0 +1,396 @@
+[gd_scene format=3 uid="uid://blv7t6ls0inp0"]
+
+[ext_resource type="Texture2D" uid="uid://31snryuna5j3" path="res://assets/ui/settings_background.jpg" id="1_05p07"]
+[ext_resource type="Script" uid="uid://bd6yvxrbhyhbo" path="res://scripts/client/gui/gui_create_world.gd" id="1_cr101"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_cr101"]
+texture = ExtResource("1_05p07")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0, 0, 0, 0.6)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 20.0
+content_margin_top = 20.0
+content_margin_right = 20.0
+content_margin_bottom = 20.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn"]
+bg_color = Color(0.15, 0.40, 0.23, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_hover"]
+bg_color = Color(0.25, 0.55, 0.35, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_pressed"]
+bg_color = Color(0.1, 0.3, 0.15, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_advanced"]
+bg_color = Color(0, 0, 0, 0.3)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+
+[node name="SettingsMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_cr101")
+
+[node name="Background" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_cr101")
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MainPanel" type="Panel" parent="CenterContainer"]
+custom_minimum_size = Vector2(500, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="Content" type="VBoxContainer" parent="CenterContainer/MainPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="CenterContainer/MainPanel/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 28
+text = "Create New World"
+horizontal_alignment = 1
+
+[node name="Spacer1" type="Control" parent="CenterContainer/MainPanel/Content"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+
+[node name="SeedRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SeedLabel" type="Label" parent="CenterContainer/MainPanel/Content/SeedRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+theme_override_font_sizes/font_size = 16
+text = "Seed"
+
+[node name="SeedInput" type="LineEdit" parent="CenterContainer/MainPanel/Content/SeedRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "The seed initializes the random number generator so the same seed always produces the same world."
+placeholder_text = "Enter seed"
+alignment = 1
+max_length = 18
+
+[node name="RandomSeedCheck" type="CheckBox" parent="CenterContainer/MainPanel/Content/SeedRow"]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "Generate a random seed each time"
+text = "Random"
+
+[node name="Spacer2" type="Control" parent="CenterContainer/MainPanel/Content"]
+custom_minimum_size = Vector2(0, 4)
+layout_mode = 2
+
+[node name="AdvancedToggle" type="Button" parent="CenterContainer/MainPanel/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+text = "Advanced Options"
+
+[node name="AdvancedOptions" type="VBoxContainer" parent="CenterContainer/MainPanel/Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="AdvancedPanel" type="Panel" parent="CenterContainer/MainPanel/Content/AdvancedOptions"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_advanced")
+
+[node name="AdvancedContent" type="VBoxContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 12.0
+offset_right = -12.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="OctaveRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/OctaveRow"]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+text = "Octaves"
+
+[node name="OctaveSlider" type="HSlider" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/OctaveRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 1.0
+max_value = 8.0
+step = 1.0
+value = 4.0
+tick_count = 8
+ticks_on_borders = true
+
+[node name="OctaveValue" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/OctaveRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+text = "4"
+horizontal_alignment = 2
+
+[node name="BiomeSizeRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/BiomeSizeRow"]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+text = "Biome Size"
+
+[node name="BiomeSizeSlider" type="HSlider" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/BiomeSizeRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 1.0
+max_value = 8.0
+step = 1.0
+value = 4.0
+tick_count = 8
+ticks_on_borders = true
+
+[node name="BiomeSizeValue" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/BiomeSizeRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+text = "4"
+horizontal_alignment = 2
+
+[node name="RenderDistanceRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/RenderDistanceRow"]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+text = "Render Distance"
+
+[node name="RenderDistanceSlider" type="HSlider" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/RenderDistanceRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 2.0
+max_value = 12.0
+step = 1.0
+value = 4.0
+tick_count = 11
+ticks_on_borders = true
+
+[node name="RenderDistanceValue" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/RenderDistanceRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+text = "4"
+horizontal_alignment = 2
+
+[node name="BlendingRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent"]
+layout_mode = 2
+
+[node name="BiomeBlendingCheck" type="CheckBox" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/BlendingRow"]
+unique_name_in_owner = true
+layout_mode = 2
+button_pressed = true
+text = "Biome Blending"
+
+[node name="BlendRadiusRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/BlendRadiusRow"]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+text = "Blend Radius"
+
+[node name="BlendRadiusSlider" type="HSlider" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/BlendRadiusRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 4.0
+max_value = 32.0
+step = 1.0
+value = 16.0
+
+[node name="BlendRadiusValue" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/BlendRadiusRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+text = "16"
+horizontal_alignment = 2
+
+[node name="ChunkSizeRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/ChunkSizeRow"]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+text = "Chunk Size"
+
+[node name="ChunkSizeSlider" type="HSlider" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/ChunkSizeRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 16.0
+max_value = 80.0
+step = 4.0
+value = 40.0
+
+[node name="ChunkSizeValue" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/ChunkSizeRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+text = "40"
+horizontal_alignment = 2
+
+[node name="VertexSpacingRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/VertexSpacingRow"]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+text = "Vertex Spacing"
+
+[node name="VertexSpacingSlider" type="HSlider" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/VertexSpacingRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.5
+max_value = 4.0
+step = 0.5
+value = 2.0
+
+[node name="VertexSpacingValue" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/VertexSpacingRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+text = "2.0"
+horizontal_alignment = 2
+
+[node name="WorkerThreadsRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/WorkerThreadsRow"]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+text = "Worker Threads"
+
+[node name="WorkerThreadsSlider" type="HSlider" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/WorkerThreadsRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 1.0
+max_value = 8.0
+step = 1.0
+value = 4.0
+tick_count = 8
+ticks_on_borders = true
+
+[node name="WorkerThreadsValue" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/WorkerThreadsRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+text = "4"
+horizontal_alignment = 2
+
+[node name="Spacer3" type="Control" parent="CenterContainer/MainPanel/Content"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ButtonRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="Play" type="Button" parent="CenterContainer/MainPanel/Content/ButtonRow"]
+custom_minimum_size = Vector2(150, 45)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+text = "Play"
+
+[node name="Cancel" type="Button" parent="CenterContainer/MainPanel/Content/ButtonRow"]
+custom_minimum_size = Vector2(150, 45)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
+text = "Cancel"
+
+[connection signal="pressed" from="CenterContainer/MainPanel/Content/AdvancedToggle" to="." method="_on_advanced_toggle_pressed"]
+[connection signal="pressed" from="CenterContainer/MainPanel/Content/ButtonRow/Play" to="." method="_on_play_pressed"]
+[connection signal="pressed" from="CenterContainer/MainPanel/Content/ButtonRow/Cancel" to="." method="_on_cancel_pressed"]

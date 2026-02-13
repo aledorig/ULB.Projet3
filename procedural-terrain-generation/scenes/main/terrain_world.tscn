@@ -1,13 +1,14 @@
-[gd_scene load_steps=13 format=3 uid="uid://0n10lr4rtcgt"]
+[gd_scene load_steps=14 format=3 uid="uid://0n10lr4rtcgt"]
 
 [ext_resource type="Script" uid="uid://bc843f6ej5jlt" path="res://scripts/world/gen/chunk_manager.gd" id="1_2nvvr"]
 [ext_resource type="Script" uid="uid://cuo62yjc33lxq" path="res://scripts/client/camera_controller.gd" id="3_4p0at"]
-[ext_resource type="Script" uid="uid://b4tbc0qvyfoe3" path="res://scripts/client/gui/debug_info.gd" id="4_qld23"]
+[ext_resource type="Script" uid="uid://b4tbc0qvyfoe3" path="res://scripts/client/gui/gui_overlay_debug.gd" id="4_qld23"]
 [ext_resource type="PackedScene" uid="uid://c4cju08nu26pq" path="res://scenes/ship/executioner.tscn" id="5_4p0at"]
-[ext_resource type="Script" uid="uid://dws2kl6rxbpa3" path="res://scripts/client/gui/map.gd" id="5_qvro2"]
+[ext_resource type="Script" uid="uid://dws2kl6rxbpa3" path="res://scripts/client/gui/gui_minimap.gd" id="5_qvro2"]
 [ext_resource type="Shader" uid="uid://lu66d4khntu0" path="res://shaders/ui/pixelation.gdshader" id="6_htxxt"]
 [ext_resource type="Shader" uid="uid://cawelrhpylh3m" path="res://shaders/environment/sky.gdshader" id="6_qvro2"]
 [ext_resource type="Script" uid="uid://8y80lskyu25x" path="res://scripts/client/water_manager.gd" id="7_water"]
+[ext_resource type="Script" uid="uid://hidl70vd7ntt" path="res://scripts/client/gui/gui_ingame_menu.gd" id="8_menu"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_htxxt"]
 shader = ExtResource("6_qvro2")
@@ -77,6 +78,128 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="IngameMenu" type="Control" parent="CanvasLayer"]
+z_index = 10
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("8_menu")
+
+[node name="Overlay" type="ColorRect" parent="CanvasLayer/IngameMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.5)
+
+[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer/IngameMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="CanvasLayer/IngameMenu/CenterContainer"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="CanvasLayer/IngameMenu/CenterContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 24
+text = "Game Paused"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="CanvasLayer/IngameMenu/CenterContainer/VBox"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+
+[node name="BackToGame" type="Button" parent="CanvasLayer/IngameMenu/CenterContainer/VBox"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "Back to Game"
+
+[node name="SettingsBtn" type="Button" parent="CanvasLayer/IngameMenu/CenterContainer/VBox"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "Settings"
+
+[node name="SettingsPanel" type="VBoxContainer" parent="CanvasLayer/IngameMenu/CenterContainer/VBox"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="RenderDistanceRow" type="HBoxContainer" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel/RenderDistanceRow"]
+custom_minimum_size = Vector2(130, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+text = "Render Distance"
+
+[node name="RenderDistanceSlider" type="HSlider" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel/RenderDistanceRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 2.0
+max_value = 12.0
+step = 1.0
+value = 4.0
+
+[node name="RenderDistanceValue" type="Label" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel/RenderDistanceRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+text = "4"
+horizontal_alignment = 2
+
+[node name="MaxSpeedRow" type="HBoxContainer" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel/MaxSpeedRow"]
+custom_minimum_size = Vector2(130, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+text = "Ship Speed"
+
+[node name="MaxSpeedSlider" type="HSlider" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel/MaxSpeedRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 10.0
+max_value = 200.0
+step = 5.0
+value = 50.0
+
+[node name="MaxSpeedValue" type="Label" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel/MaxSpeedRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+text = "50"
+horizontal_alignment = 2
+
+[node name="QuitToTitle" type="Button" parent="CanvasLayer/IngameMenu/CenterContainer/VBox"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "Quit to Title"
+
+[connection signal="pressed" from="CanvasLayer/IngameMenu/CenterContainer/VBox/BackToGame" to="CanvasLayer/IngameMenu" method="_on_back_to_game_pressed"]
+[connection signal="pressed" from="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsBtn" to="CanvasLayer/IngameMenu" method="_on_settings_pressed"]
+
+[connection signal="pressed" from="CanvasLayer/IngameMenu/CenterContainer/VBox/QuitToTitle" to="CanvasLayer/IngameMenu" method="_on_quit_to_title_pressed"]
 
 [node name="Executioner" parent="." instance=ExtResource("5_4p0at")]
 

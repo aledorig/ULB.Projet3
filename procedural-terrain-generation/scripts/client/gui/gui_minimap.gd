@@ -1,4 +1,4 @@
-class_name BiomeMinimap
+class_name GuiMinimap
 extends Control
 
 @export var display_size:    int   = 200
@@ -7,7 +7,7 @@ extends Control
 @export var update_interval: float = 0.2
 
 @onready var ship: CharacterBody3D = get_node("/root/TerrainWorld/Executioner")
-@onready var terrain_world: Node3D = get_node("/root/TerrainWorld")
+@onready var chunk_manager: ChunkManager = get_node("/root/TerrainWorld")
 
 var biome_manager: BiomeManager = null
 var texture_rect:  TextureRect  = null
@@ -16,11 +16,16 @@ var player_marker: ColorRect = null
 var update_timer:  float = 0.0
 
 func _ready() -> void:
-	if terrain_world == null:
-		push_error("BiomeMinimap: Couldn't get TerrainWorld node")
+	if chunk_manager == null:
+		push_error("GuiMinimap: Couldn't get ChunkManager node")
 		return
 
-	biome_manager = BiomeManager.new(terrain_world.p_seed)
+	# Children _ready() fires before parent
+	# wait for ChunkManager to initialize
+	if not chunk_manager.is_node_ready():
+		await chunk_manager.ready
+
+	biome_manager = chunk_manager.debug_terrain_generator.biome_manager
 	_setup_ui()
 	_update_map()
 

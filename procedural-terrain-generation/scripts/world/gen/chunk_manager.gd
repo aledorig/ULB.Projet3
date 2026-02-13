@@ -1,24 +1,21 @@
 class_name ChunkManager
 extends Node3D
 
-@export_group("Chunk Settings")
-@export var chunk_scene:     PackedScene
-@export var chunk_size:      int = 40
-@export var vertex_spacing:  float = 2.0
-@export var render_distance: int = 4
-@export var unload_distance: int = 8
+@export var chunk_scene: PackedScene
 
-@export_group("Threading")
-@export var max_worker_threads:    int = 4
-@export var chunks_per_frame:      int = 2
-@export var generation_timeout_ms: int = 30000
-
-@export_group("Performance")
-@export var enable_mesh_caching:    bool = true
-@export var cache_max_size:         int = 256
-@export var unload_chunks_per_tick: int = 5
+var chunk_size: int = 40
+var vertex_spacing: float = 2.0
+var render_distance: int = 4
+var unload_distance: int = 8
+var max_worker_threads: int = 4
+var chunks_per_frame: int = 2
+var enable_mesh_caching: bool = true
+var cache_max_size: int = 256
+var unload_chunks_per_tick: int = 5
+var generation_timeout_ms: int = 30000
 
 var p_seed: int = GameSettingsAutoload.seed
+var debug_terrain_generator: TerrainGenerator = null
 
 var loaded_chunks:  Dictionary = {}
 var pending_chunks: Dictionary = {}
@@ -44,9 +41,18 @@ var chunks_generated_this_frame: int = 0
 var last_camera_chunk: Vector2i = Vector2i.ZERO
 
 func _ready() -> void:
+	chunk_size = GameSettingsAutoload.chunk_size
+	vertex_spacing = GameSettingsAutoload.vertex_spacing
+	max_worker_threads = GameSettingsAutoload.max_worker_threads
+	render_distance = GameSettingsAutoload.render_distance
+	unload_distance = render_distance * 2
+	chunks_per_frame = GameSettingsAutoload.chunks_per_frame
+	enable_mesh_caching = GameSettingsAutoload.enable_mesh_caching
+	cache_max_size = GameSettingsAutoload.cache_max_size
 	_clear_generation_state()
 	_initialize_systems()
 	_start_worker_threads()
+	GameSettingsAutoload.runtime_settings_changed.connect(_on_settings_changed)
 	update_chunks(true)
 
 func _clear_generation_state() -> void:
@@ -78,6 +84,10 @@ func _initialize_systems() -> void:
 
 	if not p_seed:
 		p_seed = randi()
+
+	debug_terrain_generator = TerrainGenerator.new(p_seed, GameSettingsAutoload.octave)
+	debug_terrain_generator.use_biome_blending = GameSettingsAutoload.biome_blending
+	debug_terrain_generator.blend_radius = GameSettingsAutoload.blend_radius
 
 	print("ChunkManager: Initialized with %d worker threads" % max_worker_threads)
 
@@ -381,6 +391,15 @@ func print_stats() -> void:
 	print("  Cached meshes: %d" % stats.cached_meshes)
 	print("  Worker threads: %d" % stats.worker_threads)
 	print("  Chunks this frame: %d" % stats.chunks_this_frame)
+
+func _on_settings_changed() -> void:
+	var old_distance := render_distance
+	render_distance = GameSettingsAutoload.render_distance
+	unload_distance = render_distance * 2
+
+	if render_distance != old_distance:
+		update_chunks(true)
+
 
 func _exit_tree() -> void:
 	_shutdown_worker_threads()

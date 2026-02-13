@@ -35,7 +35,7 @@ func _init_layers() -> GenLayer:
 	layer = GenLayerBiomeEdge.new(1000, layer)
 
 	# Stage 4: Final refinement
-	var biome_size: int = 4
+	var biome_size: int = GameSettingsAutoload.biome_size
 
 	for i in range(biome_size):
 		layer = GenLayerZoom.new(1000 + i, layer)

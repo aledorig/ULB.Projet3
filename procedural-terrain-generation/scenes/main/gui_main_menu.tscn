@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://duuwuggm2xpq3"]
 
-[ext_resource type="Script" uid="uid://y4hdrrphklbr" path="res://scripts/client/gui/main_menu.gd" id="1_5vafy"]
+[ext_resource type="Script" uid="uid://y4hdrrphklbr" path="res://scripts/client/gui/gui_main_menu.gd" id="1_5vafy"]
 [ext_resource type="Texture2D" uid="uid://b6okiwbkufpou" path="res://assets/ui/background.jpg" id="1_l6cm7"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ekxnf"]
@@ -53,9 +53,9 @@ theme_override_constants/separation = 50
 [node name="Title" type="Label" parent="VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 37
-text = "Générateur de terrain 3D"
+text = "Boundless Horizons"
 
-[node name="Start" type="Button" parent="VBoxContainer"]
+[node name="Play" type="Button" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_colors/font_color = Color(0.875, 0.875, 0.875, 1)
@@ -63,7 +63,7 @@ theme_override_font_sizes/font_size = 45
 theme_override_styles/normal = SubResource("StyleBoxFlat_vue75")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_l6cm7")
 theme_override_styles/hover = SubResource("StyleBoxFlat_ekxnf")
-text = "Commencer"
+text = "Play"
 
 [node name="Information" type="Button" parent="VBoxContainer"]
 layout_mode = 2
@@ -83,8 +83,8 @@ theme_override_font_sizes/font_size = 45
 theme_override_styles/normal = SubResource("StyleBoxFlat_vue75")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_l6cm7")
 theme_override_styles/hover = SubResource("StyleBoxFlat_ekxnf")
-text = "Quitter"
+text = "Quit"
 
-[connection signal="button_down" from="VBoxContainer/Start" to="." method="_on_start_button_down"]
+[connection signal="button_down" from="VBoxContainer/Play" to="." method="_on_play_button_down"]
 [connection signal="button_down" from="VBoxContainer/Information" to="." method="_on_information_button_down"]
 [connection signal="button_down" from="VBoxContainer/Quit" to="." method="_on_quit_button_down"]
