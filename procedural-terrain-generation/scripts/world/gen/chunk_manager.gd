@@ -279,6 +279,12 @@ func _instantiate_chunk(chunk_pos: Vector2i, mesh: ArrayMesh) -> void:
 	if mesh.get_surface_count() > 0:
 		mesh.surface_set_material(0, terrain_material)
 
+	var static_body = StaticBody3D.new()
+	var collision_shape = CollisionShape3D.new()
+	collision_shape.shape = mesh.create_trimesh_shape()
+	static_body.add_child(collision_shape)
+	chunk_node.add_child(static_body)
+
 	var chunk_world_size = (chunk_size - 1) * vertex_spacing
 	chunk_node.position = Vector3(
 		chunk_pos.x * chunk_world_size,
