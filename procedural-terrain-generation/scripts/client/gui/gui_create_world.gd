@@ -107,9 +107,9 @@ func _on_play_pressed() -> void:
 	GameSettingsAutoload.vertex_spacing = vertex_spacing_slider.value
 	GameSettingsAutoload.max_worker_threads = int(worker_threads_slider.value)
 
-	var error := get_tree().change_scene_to_file("res://scenes/main/terrain_world.tscn")
+	var error := get_tree().change_scene_to_file("res://scenes/main/gui_loading_world.tscn")
 	if error != OK:
-		push_error("Failed to load terrain_world (error=%s)" % error)
+		push_error("Failed to load loading screen (error=%s)" % error)
 
 
 func _on_cancel_pressed() -> void:

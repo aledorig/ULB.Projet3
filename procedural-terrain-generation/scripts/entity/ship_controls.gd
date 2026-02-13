@@ -9,7 +9,9 @@ var yaw_input: float = 0.0
 
 func _ready() -> void:
 	var chunk_manager: ChunkManager = get_node("/root/TerrainWorld")
-	if chunk_manager and chunk_manager.debug_terrain_generator:
+	if chunk_manager:
+		if not chunk_manager.is_node_ready():
+			await chunk_manager.ready
 		var terrain_height: float = chunk_manager.debug_terrain_generator.get_height(global_position.x, global_position.z)
 		global_position.y = terrain_height + 10.0
 	GameSettingsAutoload.runtime_settings_changed.connect(_on_settings_changed)

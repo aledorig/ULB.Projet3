@@ -75,22 +75,13 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="MainPanel" type="Panel" parent="CenterContainer"]
+[node name="MainPanel" type="PanelContainer" parent="CenterContainer"]
 custom_minimum_size = Vector2(500, 0)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
 [node name="Content" type="VBoxContainer" parent="CenterContainer/MainPanel"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 20.0
-offset_top = 20.0
-offset_right = -20.0
-offset_bottom = -20.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 2
 theme_override_constants/separation = 16
 
 [node name="Title" type="Label" parent="CenterContainer/MainPanel/Content"]
@@ -147,21 +138,12 @@ visible = false
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="AdvancedPanel" type="Panel" parent="CenterContainer/MainPanel/Content/AdvancedOptions"]
+[node name="AdvancedPanel" type="PanelContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions"]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_advanced")
 
 [node name="AdvancedContent" type="VBoxContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 12.0
-offset_top = 12.0
-offset_right = -12.0
-offset_bottom = -12.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 2
 theme_override_constants/separation = 10
 
 [node name="OctaveRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent"]
@@ -366,7 +348,6 @@ horizontal_alignment = 2
 [node name="Spacer3" type="Control" parent="CenterContainer/MainPanel/Content"]
 custom_minimum_size = Vector2(0, 8)
 layout_mode = 2
-size_flags_vertical = 3
 
 [node name="ButtonRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content"]
 layout_mode = 2

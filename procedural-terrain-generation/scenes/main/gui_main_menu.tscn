@@ -7,18 +7,26 @@
 texture = ExtResource("1_l6cm7")
 modulate_color = Color(0.54504406, 0.61625, 0.53928685, 1)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vue75"]
-bg_color = Color(0, 0, 0, 0)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_right = 16
-corner_radius_bottom_left = 16
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn"]
+bg_color = Color(0.15, 0.40, 0.23, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_l6cm7"]
-bg_color = Color(0.15305835, 0.40276954, 0.23181823, 1)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_hover"]
+bg_color = Color(0.25, 0.55, 0.35, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ekxnf"]
-bg_color = Color(0.45002162, 0.9614925, 0.5801214, 1)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_pressed"]
+bg_color = Color(0.1, 0.3, 0.15, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -38,53 +46,57 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxTexture_ekxnf")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="CenterContainer" type="CenterContainer" parent="."]
 layout_mode = 1
-anchors_preset = 4
-anchor_top = 0.5
-anchor_bottom = 0.5
-offset_left = 7.0
-offset_top = -240.0
-offset_right = 458.0
-offset_bottom = 208.5
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 50
 
-[node name="Title" type="Label" parent="VBoxContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer"]
+custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
-theme_override_font_sizes/font_size = 37
+theme_override_constants/separation = 24
+
+[node name="Title" type="Label" parent="CenterContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 52
 text = "Boundless Horizons"
+horizontal_alignment = 1
 
-[node name="Play" type="Button" parent="VBoxContainer"]
+[node name="Spacer" type="Control" parent="CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 16)
 layout_mode = 2
-size_flags_vertical = 3
-theme_override_colors/font_color = Color(0.875, 0.875, 0.875, 1)
-theme_override_font_sizes/font_size = 45
-theme_override_styles/normal = SubResource("StyleBoxFlat_vue75")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_l6cm7")
-theme_override_styles/hover = SubResource("StyleBoxFlat_ekxnf")
+
+[node name="Play" type="Button" parent="CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
 text = "Play"
 
-[node name="Information" type="Button" parent="VBoxContainer"]
+[node name="Information" type="Button" parent="CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
-size_flags_vertical = 3
-theme_override_colors/font_color = Color(0.875, 0.875, 0.875, 1)
-theme_override_font_sizes/font_size = 45
-theme_override_styles/normal = SubResource("StyleBoxFlat_vue75")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_l6cm7")
-theme_override_styles/hover = SubResource("StyleBoxFlat_ekxnf")
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
 text = "Information"
 
-[node name="Quit" type="Button" parent="VBoxContainer"]
+[node name="Quit" type="Button" parent="CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
-size_flags_vertical = 3
-theme_override_colors/font_color = Color(0.875, 0.875, 0.875, 1)
-theme_override_font_sizes/font_size = 45
-theme_override_styles/normal = SubResource("StyleBoxFlat_vue75")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_l6cm7")
-theme_override_styles/hover = SubResource("StyleBoxFlat_ekxnf")
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
 text = "Quit"
 
-[connection signal="button_down" from="VBoxContainer/Play" to="." method="_on_play_button_down"]
-[connection signal="button_down" from="VBoxContainer/Information" to="." method="_on_information_button_down"]
-[connection signal="button_down" from="VBoxContainer/Quit" to="." method="_on_quit_button_down"]
+[connection signal="button_down" from="CenterContainer/VBoxContainer/Play" to="." method="_on_play_button_down"]
+[connection signal="button_down" from="CenterContainer/VBoxContainer/Information" to="." method="_on_information_button_down"]
+[connection signal="button_down" from="CenterContainer/VBoxContainer/Quit" to="." method="_on_quit_button_down"]
