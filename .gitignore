@@ -3,6 +3,7 @@
 
 # Godot
 .godot/
+addons/
 
 # Other
 insp/
