@@ -1,0 +1,51 @@
+[gd_scene load_steps=4 format=3 uid="uid://cabdtpoobf70t"]
+
+[ext_resource type="Texture2D" uid="uid://31snryuna5j3" path="res://assets/ui/settings_background.jpg" id="1_dksal"]
+[ext_resource type="Script" uid="uid://cuqgyxgb51avg" path="res://scripts/ui/information.gd" id="1_qaqfs"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_qaqfs"]
+texture = ExtResource("1_dksal")
+
+[node name="Information" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_qaqfs")
+
+[node name="Background" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_qaqfs")
+
+[node name="Button" type="Button" parent="."]
+layout_mode = 0
+offset_left = 851.0
+offset_top = 485.0
+offset_right = 1142.5
+offset_bottom = 584.0
+text = "<-  Retour en arrière"
+
+[node name="Texte" type="RichTextLabel" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -338.5
+offset_top = -162.0
+offset_right = 338.5
+offset_bottom = 162.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/default_color = Color(0, 0, 0, 1)
+text = "Information sur courbe de bezier, bruit de perlin, créateur de l'appli.On utilise des méthodes de génération procédurale pour créer des surfaces en 3D en combinant un bruit de Perlin , qui produit des variations continues et naturelles du relief. Une courbe de Bézier permet ensuite de faire des fuckass rivière"
+
+[connection signal="button_down" from="Button" to="." method="_on_button_button_down"]
