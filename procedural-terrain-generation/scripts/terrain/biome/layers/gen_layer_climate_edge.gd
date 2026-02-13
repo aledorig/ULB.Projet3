@@ -4,32 +4,24 @@ extends GenLayer
 ## Prevents incompatible climate zones from being adjacent
 ## Converts hot/cold boundaries to medium climate
 
-# ============================================================================
 # MODES
-# ============================================================================
 
 enum Mode {
 	COOL_WARM,  # Prevents warm(1) from touching cold(3) - inserts medium(2)
 	HEAT_ICE,   # Prevents warm(1) from touching frozen(4) - inserts cold(3)
 }
 
-# ============================================================================
 # STATE
-# ============================================================================
 
 var mode: Mode
 
-# ============================================================================
 # INITIALIZATION
-# ============================================================================
 
 func _init(p_base_seed: int, p_parent: GenLayer, p_mode: Mode) -> void:
 	super._init(p_base_seed, p_parent)
 	mode = p_mode
 
-# ============================================================================
 # GENERATION
-# ============================================================================
 
 func get_values(area_x: int, area_z: int, width: int, height: int) -> PackedInt32Array:
 	# Fetch with 1-cell border

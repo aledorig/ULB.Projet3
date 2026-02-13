@@ -3,25 +3,19 @@ extends Control
 
 ## Renders biome data as a minimap texture
 
-# ============================================================================
 # CONFIGURATION
-# ============================================================================
 
 @export var display_size:    int   = 200   ## Display size in pixels
 @export var sample_size:     int   = 50    ## Actual noise samples
 @export var world_scale:     float = 16.0  ## World units per sample
 @export var update_interval: float = 0.2
 
-# ============================================================================
 # REFERENCES
-# ============================================================================
 
 @onready var ship: CharacterBody3D = get_node("/root/TerrainWorld/Executioner")
 @onready var terrain_world: Node3D = get_node("/root/TerrainWorld")
 
-# ============================================================================
 # COMPONENTS
-# ============================================================================
 
 var biome_manager: BiomeManager = null
 var texture_rect:  TextureRect  = null
@@ -29,9 +23,7 @@ var image:         Image     = null
 var player_marker: ColorRect = null
 var update_timer:  float = 0.0
 
-# ============================================================================
 # INITIALIZATION
-# ============================================================================
 
 func _ready() -> void:
 	if terrain_world == null:
@@ -74,9 +66,7 @@ func _setup_ui() -> void:
 	# Small image that gets scaled up by TextureRect
 	image = Image.create(sample_size, sample_size, false, Image.FORMAT_RGB8)
 
-# ============================================================================
 # UPDATE
-# ============================================================================
 
 func _process(delta: float) -> void:
 	update_timer += delta

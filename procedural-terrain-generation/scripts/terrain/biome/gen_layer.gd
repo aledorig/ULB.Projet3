@@ -4,25 +4,19 @@ extends RefCounted
 ## Base class for all biome generation layers
 ## Implements Minecraft's LCG-based PRNG system for deterministic generation
 
-# ============================================================================
 # CONSTANTS
-# ============================================================================
 
 const LCG_MULTIPLIER: int = 6364136223846793005
 const LCG_INCREMENT: int = 1442695040888963407
 
-# ============================================================================
 # STATE
-# ============================================================================
 
 var parent: GenLayer
 var base_seed: int
 var world_seed: int
 var chunk_seed: int
 
-# ============================================================================
 # SHARED CACHE
-# ============================================================================
 
 static var _int_cache: IntCache = null
 
@@ -36,9 +30,7 @@ static func reset_cache() -> void:
 	if _int_cache != null:
 		_int_cache.reset()
 
-# ============================================================================
 # INITIALIZATION
-# ============================================================================
 
 func _init(p_base_seed: int, p_parent: GenLayer = null) -> void:
 	parent = p_parent
@@ -62,9 +54,7 @@ func init_world_seed(seed: int) -> void:
 	world_seed = _lcg(world_seed)
 	world_seed += base_seed
 
-# ============================================================================
 # PRNG
-# ============================================================================
 
 func _lcg(value: int) -> int:
 	return value * LCG_MULTIPLIER + LCG_INCREMENT
@@ -87,9 +77,7 @@ func next_int(bound: int) -> int:
 	chunk_seed = _lcg(chunk_seed) + world_seed
 	return result
 
-# ============================================================================
 # ABSTRACT METHOD
-# ============================================================================
 
 func get_values(area_x: int, area_z: int, width: int, height: int) -> PackedInt32Array:
 	# Override in subclasses
@@ -101,9 +89,7 @@ func _get_result_array(size: int) -> PackedInt32Array:
 	## Get a cached array for results - avoids allocations
 	return GenLayer.get_int_cache().get_int_cache(size)
 
-# ============================================================================
 # HELPER METHODS
-# ============================================================================
 
 func select_random(values: Array) -> int:
 	return values[next_int(values.size())]

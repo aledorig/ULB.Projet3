@@ -3,16 +3,12 @@ extends RefCounted
 
 ## Creates and manages terrain materials and shaders
 
-# ============================================================================
 # CURVATURE SETTINGS
-# ============================================================================
 
 const DEFAULT_CURVATURE:       float = 0.0008
 const DEFAULT_CURVATURE_START: float = 50.0
 
-# ============================================================================
 # MATERIAL CREATION
-# ============================================================================
 
 func create_terrain_material() -> ShaderMaterial:
 	var mat := ShaderMaterial.new()
@@ -83,9 +79,7 @@ void fragment() {
 	shader.code = shader_code
 	return shader
 
-# ============================================================================
 # SHADER CREATION
-# ============================================================================
 
 func create_biome_shader() -> Shader:
 	var shader_code := """

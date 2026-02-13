@@ -7,17 +7,13 @@ extends RefCounted
 ## 3. Sample height noise at (x, z)
 ## 4. Final height = base_height + (noise * variation)
 
-# ============================================================================
 # COMPONENTS
-# ============================================================================
 
 var biome_manager: BiomeManager
-var height_noise:  FastNoiseLite
+var height_noise:  PerlinNoise
 var seed_value:    int
 
-# ============================================================================
 # CONFIGURATION
-# ============================================================================
 
 ## Whether to blend biome params at borders (smoother terrain)
 ## Uses Catmull-Rom interpolation for smooth, non-blocky terrain
@@ -26,9 +22,7 @@ var use_biome_blending: bool = true
 ## Blend radius for legacy single-point functions (get_height, get_surface_color)
 var blend_radius: float = 16.0
 
-# ============================================================================
 # INITIALIZATION
-# ============================================================================
 
 func _init(p_seed: int = TerrainConstants.GAME_SEED) -> void:
 	seed_value = p_seed
@@ -37,19 +31,14 @@ func _init(p_seed: int = TerrainConstants.GAME_SEED) -> void:
 
 
 func _setup_height_noise() -> void:
-	# Height noise - smaller scale than biome noise, multi-octave for detail
-	height_noise                    = FastNoiseLite.new()
-	height_noise.seed               = seed_value + 5000
-	height_noise.noise_type         = FastNoiseLite.TYPE_SIMPLEX
-	height_noise.frequency          = 0.005  # ~200 units per cycle
-	height_noise.fractal_type       = FastNoiseLite.FRACTAL_FBM
-	height_noise.fractal_octaves    = 4
-	height_noise.fractal_lacunarity = 2.0
-	height_noise.fractal_gain       = 0.5
+	height_noise = PerlinNoise.new(4, 0.5, 2.0, seed_value + 5000)
+	height_noise.base_frequency = 0.005
 
-# ============================================================================
+
+func _sample_noise(x: float, z: float) -> float:
+	return height_noise.get_noise_2d(x, z)
+
 # HEIGHT GENERATION
-# ============================================================================
 
 func get_height(x: float, z: float) -> float:
 	# Step 1: Get biome terrain parameters
@@ -63,16 +52,14 @@ func get_height(x: float, z: float) -> float:
 	var variation: float = params.variation
 	
 	# Step 2: Sample height noise (-1 to 1)
-	var noise_val: float = height_noise.get_noise_2d(x, z)
-	
+	var noise_val: float = _sample_noise(x, z)
+
 	# Step 3: Compute final height
 	var height: float = base_height + (noise_val * variation)
 	
 	return height
 
-# ============================================================================
 # SURFACE PROPERTIES
-# ============================================================================
 
 func get_biome(x: float, z: float) -> TerrainConstants.Biome:
 	return biome_manager.get_biome(x, z)
@@ -102,9 +89,7 @@ func get_surface_color(x: float, z: float, height: float) -> Color:
 	return color
 
 
-# ============================================================================
 # BATCHED GENERATION (optimized for chunks)
-# ============================================================================
 
 func get_vertex_data(x: float, z: float) -> Dictionary:
 	## Get height AND color in one call (avoids double biome lookup)
@@ -119,7 +104,7 @@ func get_vertex_data(x: float, z: float) -> Dictionary:
 			"color": TerrainConstants.BIOME_COLORS[biome],
 		}
 
-	var noise_val: float = height_noise.get_noise_2d(x, z)
+	var noise_val: float = _sample_noise(x, z)
 	var height: float = params.base + (noise_val * params.variation)
 	var color: Color = params.color
 
@@ -171,17 +156,18 @@ func get_vertex_data_batch(
 			base_heights, variations, biome_colors
 		)
 
+	# Pre-compute noise grid (batch call — avoids ~9K function calls per chunk)
+	var noise_grid: PackedFloat32Array = PackedFloat32Array()
+	noise_grid.resize(total_verts)
+	height_noise.fill_noise_grid(origin_x, origin_z, width, height, spacing, noise_grid)
+
 	var sea_level: float = TerrainConstants.SEA_LEVEL
 	var snow_color := Color(0.95, 0.97, 1.0)
 
 	var idx: int = 0
 	for z in range(height):
-		var world_z: float = origin_z + z * spacing
 		for x in range(width):
-			var world_x: float = origin_x + x * spacing
-
-			var noise_val: float = height_noise.get_noise_2d(world_x, world_z)
-			var h: float = base_heights[idx] + (noise_val * variations[idx])
+			var h: float = base_heights[idx] + (noise_grid[idx] * variations[idx])
 			var color: Color = biome_colors[idx]
 
 			# Darken underwater
@@ -206,9 +192,7 @@ func get_vertex_data_batch(
 func is_underwater(height: float) -> bool:
 	return height < TerrainConstants.SEA_LEVEL
 
-# ============================================================================
 # DEBUG / UTILITY
-# ============================================================================
 
 func get_biome_name(x: float, z: float) -> String:
 	var biome: TerrainConstants.Biome = get_biome(x, z)

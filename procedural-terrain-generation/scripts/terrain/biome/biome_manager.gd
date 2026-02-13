@@ -4,9 +4,7 @@ extends RefCounted
 ## Biome manager using Minecraft-style GenLayer pipeline
 ## Handles biome lookups with caching and terrain parameter blending
 
-# ============================================================================
 # CONFIGURATION
-# ============================================================================
 
 ## World units per biome grid cell (balance between detail and performance)
 const BIOME_SCALE: float = 4.0
@@ -15,9 +13,7 @@ const BIOME_SCALE: float = 4.0
 ## Smaller = tighter transitions, larger = smoother but blurrier biome borders
 const BLEND_GRID_SIZE: float = 8.0
 
-# ============================================================================
 # COMPONENTS
-# ============================================================================
 
 var biome_generator: BiomeGenerator
 var cache: BiomeCache
@@ -28,18 +24,14 @@ var cache_hits: int = 0
 var cache_misses: int = 0
 var last_report_time: int = 0
 
-# ============================================================================
 # INITIALIZATION
-# ============================================================================
 
 func _init(p_seed: int = TerrainConstants.GAME_SEED) -> void:
 	seed_value = p_seed
 	biome_generator = BiomeGenerator.new(p_seed)
 	cache = BiomeCache.new()
 
-# ============================================================================
 # BIOME LOOKUP
-# ============================================================================
 
 func get_biome(x: float, z: float) -> TerrainConstants.Biome:
 	## Get biome at world coordinates
@@ -78,9 +70,7 @@ func _get_biome_at_grid(bx: int, bz: int) -> TerrainConstants.Biome:
 
 	return cache.get_biome(bx, bz) as TerrainConstants.Biome
 
-# ============================================================================
 # TERRAIN PARAMETERS
-# ============================================================================
 
 func get_terrain_params(x: float, z: float) -> Dictionary:
 	## Get terrain parameters for biome at world coordinates
@@ -93,9 +83,7 @@ func get_biome_color(x: float, z: float) -> Color:
 	var biome: TerrainConstants.Biome = get_biome(x, z)
 	return TerrainConstants.BIOME_COLORS[biome]
 
-# ============================================================================
 # BLENDED TERRAIN PARAMETERS
-# ============================================================================
 
 func get_blended_params(x: float, z: float, blend_radius: float = 16.0) -> Dictionary:
 	## Sample biomes and blend terrain parameters
@@ -143,9 +131,7 @@ func get_blended_params(x: float, z: float, blend_radius: float = 16.0) -> Dicti
 		"color": blended_color / total_weight,
 	}
 
-# ============================================================================
 # BATCHED GENERATION
-# ============================================================================
 
 func get_params_batch_packed(
 	origin_x: float, origin_z: float,
@@ -326,13 +312,13 @@ func _get_blended_params_inline(
 	}
 
 
-# ============================================================================
 # CATMULL-ROM INTERPOLATION (smooth biome blending)
-# ============================================================================
 
 func _catmull_rom_weight(t: float) -> PackedFloat32Array:
 	## Compute Catmull-Rom weights for parameter t in [0, 1]
 	## Returns weights for points p0, p1, p2, p3 where interpolation is between p1 and p2
+	## NOTE: Kept for reference only. The hot path in get_params_batch_catmull_rom()
+	## inlines these computations as local floats to avoid PackedFloat32Array allocations.
 	var t2: float = t * t
 	var t3: float = t2 * t
 
@@ -428,7 +414,12 @@ func get_params_batch_catmull_rom(
 		var gz_f: float = world_z * inv_blend_grid
 		var gz_i: int = int(floor(gz_f))
 		var fz: float = gz_f - gz_i
-		var wz: PackedFloat32Array = _catmull_rom_weight(fz)
+		var fz2: float = fz * fz
+		var fz3: float = fz2 * fz
+		var wz0: float = -0.5 * fz3 + fz2 - 0.5 * fz
+		var wz1: float = 1.5 * fz3 - 2.5 * fz2 + 1.0
+		var wz2: float = -1.5 * fz3 + 2.0 * fz2 + 0.5 * fz
+		var wz3: float = 0.5 * fz3 - 0.5 * fz2
 
 		# Grid row indices (relative to our cached grid)
 		var row0: int = (gz_i - 1 - min_gz) * grid_width
@@ -441,7 +432,12 @@ func get_params_batch_catmull_rom(
 			var gx_f: float = world_x * inv_blend_grid
 			var gx_i: int = int(floor(gx_f))
 			var fx: float = gx_f - gx_i
-			var wx: PackedFloat32Array = _catmull_rom_weight(fx)
+			var fx2: float = fx * fx
+			var fx3: float = fx2 * fx
+			var wx0: float = -0.5 * fx3 + fx2 - 0.5 * fx
+			var wx1: float = 1.5 * fx3 - 2.5 * fx2 + 1.0
+			var wx2: float = -1.5 * fx3 + 2.0 * fx2 + 0.5 * fx
+			var wx3: float = 0.5 * fx3 - 0.5 * fx2
 
 			# Grid column indices (relative to our cached grid)
 			var col0: int = gx_i - 1 - min_gx
@@ -454,17 +450,17 @@ func get_params_batch_catmull_rom(
 			var var_val: float = 0.0
 
 			# Row 0
-			base_val += wz[0] * (wx[0] * grid_base[row0 + col0] + wx[1] * grid_base[row0 + col1] + wx[2] * grid_base[row0 + col2] + wx[3] * grid_base[row0 + col3])
-			var_val += wz[0] * (wx[0] * grid_var[row0 + col0] + wx[1] * grid_var[row0 + col1] + wx[2] * grid_var[row0 + col2] + wx[3] * grid_var[row0 + col3])
+			base_val += wz0 * (wx0 * grid_base[row0 + col0] + wx1 * grid_base[row0 + col1] + wx2 * grid_base[row0 + col2] + wx3 * grid_base[row0 + col3])
+			var_val += wz0 * (wx0 * grid_var[row0 + col0] + wx1 * grid_var[row0 + col1] + wx2 * grid_var[row0 + col2] + wx3 * grid_var[row0 + col3])
 			# Row 1
-			base_val += wz[1] * (wx[0] * grid_base[row1 + col0] + wx[1] * grid_base[row1 + col1] + wx[2] * grid_base[row1 + col2] + wx[3] * grid_base[row1 + col3])
-			var_val += wz[1] * (wx[0] * grid_var[row1 + col0] + wx[1] * grid_var[row1 + col1] + wx[2] * grid_var[row1 + col2] + wx[3] * grid_var[row1 + col3])
+			base_val += wz1 * (wx0 * grid_base[row1 + col0] + wx1 * grid_base[row1 + col1] + wx2 * grid_base[row1 + col2] + wx3 * grid_base[row1 + col3])
+			var_val += wz1 * (wx0 * grid_var[row1 + col0] + wx1 * grid_var[row1 + col1] + wx2 * grid_var[row1 + col2] + wx3 * grid_var[row1 + col3])
 			# Row 2
-			base_val += wz[2] * (wx[0] * grid_base[row2 + col0] + wx[1] * grid_base[row2 + col1] + wx[2] * grid_base[row2 + col2] + wx[3] * grid_base[row2 + col3])
-			var_val += wz[2] * (wx[0] * grid_var[row2 + col0] + wx[1] * grid_var[row2 + col1] + wx[2] * grid_var[row2 + col2] + wx[3] * grid_var[row2 + col3])
+			base_val += wz2 * (wx0 * grid_base[row2 + col0] + wx1 * grid_base[row2 + col1] + wx2 * grid_base[row2 + col2] + wx3 * grid_base[row2 + col3])
+			var_val += wz2 * (wx0 * grid_var[row2 + col0] + wx1 * grid_var[row2 + col1] + wx2 * grid_var[row2 + col2] + wx3 * grid_var[row2 + col3])
 			# Row 3
-			base_val += wz[3] * (wx[0] * grid_base[row3 + col0] + wx[1] * grid_base[row3 + col1] + wx[2] * grid_base[row3 + col2] + wx[3] * grid_base[row3 + col3])
-			var_val += wz[3] * (wx[0] * grid_var[row3 + col0] + wx[1] * grid_var[row3 + col1] + wx[2] * grid_var[row3 + col2] + wx[3] * grid_var[row3 + col3])
+			base_val += wz3 * (wx0 * grid_base[row3 + col0] + wx1 * grid_base[row3 + col1] + wx2 * grid_base[row3 + col2] + wx3 * grid_base[row3 + col3])
+			var_val += wz3 * (wx0 * grid_var[row3 + col0] + wx1 * grid_var[row3 + col1] + wx2 * grid_var[row3 + col2] + wx3 * grid_var[row3 + col3])
 
 			out_base[idx] = base_val
 			out_variation[idx] = var_val
@@ -482,9 +478,7 @@ func get_params_batch_catmull_rom(
 			idx += 1
 
 
-# ============================================================================
 # DEBUG / UTILITY
-# ============================================================================
 
 func get_biome_name(x: float, z: float) -> String:
 	var biome: TerrainConstants.Biome = get_biome(x, z)

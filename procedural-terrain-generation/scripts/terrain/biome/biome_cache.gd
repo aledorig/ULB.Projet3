@@ -3,16 +3,12 @@ extends RefCounted
 
 ## LRU cache for biome lookups to avoid regenerating the same regions
 
-# ============================================================================
 # CONFIGURATION
-# ============================================================================
 
 const CACHE_SIZE: int = 1024
 const CHUNK_SIZE: int = 32
 
-# ============================================================================
 # STATE
-# ============================================================================
 
 ## Cache storage: chunk_key -> PackedInt32Array of biome IDs
 var cache: Dictionary = {}
@@ -20,9 +16,7 @@ var cache: Dictionary = {}
 ## LRU tracking: ordered list of chunk keys (oldest first)
 var access_order: Array[int] = []
 
-# ============================================================================
 # PUBLIC API
-# ============================================================================
 
 func get_biome(bx: int, bz: int) -> int:
 	var chunk_x: int = bx >> 5  # Divide by 32
@@ -79,9 +73,7 @@ func get_stats() -> Dictionary:
 		"max_size": CACHE_SIZE,
 	}
 
-# ============================================================================
 # INTERNAL
-# ============================================================================
 
 func _make_key(chunk_x: int, chunk_z: int) -> int:
 	# Combine chunk coords into single int key

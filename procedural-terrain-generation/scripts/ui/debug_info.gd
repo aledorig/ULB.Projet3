@@ -3,30 +3,22 @@ extends Label
 
 ## Minecraft-style debug overlay (F3 screen)
 
-# ============================================================================
 # CONSTANTS
-# ============================================================================
 
 const MAX_FPS_SAMPLES: int = 60
 
-# ============================================================================
 # REFERENCES
-# ============================================================================
 
 @onready var ship: CharacterBody3D = get_node("/root/TerrainWorld/Executioner")
 @onready var terrain_world: Node3D = get_node("/root/TerrainWorld")
 
-# ============================================================================
 # STATE
-# ============================================================================
 
 var terrain_generator: TerrainGenerator = null
 var fps_samples: Array[float] = []
 var avg_fps: float = 0.0
 
-# ============================================================================
 # INITIALIZATION
-# ============================================================================
 
 func _ready() -> void:
 	if ship == null:
@@ -61,9 +53,7 @@ func _setup_label_style() -> void:
 	# Position in top-left with padding
 	position = Vector2(8, 8)
 
-# ============================================================================
 # INPUT
-# ============================================================================
 
 func _unhandled_input(_event: InputEvent) -> void:
 	if Input.is_action_just_pressed("toggle_debug"):
@@ -73,9 +63,7 @@ func _unhandled_input(_event: InputEvent) -> void:
 	if Input.is_physical_key_pressed(KEY_P) and Input.is_key_pressed(KEY_SHIFT):
 		_print_performance_report()
 
-# ============================================================================
 # UPDATE
-# ============================================================================
 
 func _process(delta: float) -> void:
 	if ship == null or not visible:
@@ -103,9 +91,7 @@ func _process(delta: float) -> void:
 	text += "Biome: %s [%s]\n" % [debug_data.biome, debug_data.temp_category]
 	text += "Height: %.1f %s\n" % [debug_data.height, "(underwater)" if debug_data.underwater else ""]
 
-# ============================================================================
 # HELPERS
-# ============================================================================
 
 func _update_fps(delta: float) -> void:
 	fps_samples.append(1.0 / delta)

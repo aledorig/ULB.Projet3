@@ -4,23 +4,17 @@ extends GenLayer
 ## Doubles the resolution of the parent layer with interpolation
 ## Can be fuzzy (random interpolation) or normal (mode-based)
 
-# ============================================================================
 # CONFIGURATION
-# ============================================================================
 
 var fuzzy: bool = false
 
-# ============================================================================
 # INITIALIZATION
-# ============================================================================
 
 func _init(p_base_seed: int, p_parent: GenLayer, p_fuzzy: bool = false) -> void:
 	super._init(p_base_seed, p_parent)
 	fuzzy = p_fuzzy
 
-# ============================================================================
 # GENERATION
-# ============================================================================
 
 func get_values(area_x: int, area_z: int, width: int, height: int) -> PackedInt32Array:
 	# Calculate parent area (half size, offset for alignment)
@@ -79,9 +73,7 @@ func get_values(area_x: int, area_z: int, width: int, height: int) -> PackedInt3
 
 	return result
 
-# ============================================================================
 # HELPERS
-# ============================================================================
 
 func _select_random_2(a: int, b: int) -> int:
 	return a if next_int(2) == 0 else b

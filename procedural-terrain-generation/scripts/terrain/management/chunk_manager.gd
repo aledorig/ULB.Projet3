@@ -4,9 +4,7 @@ extends Node3D
 ## Minecraft-inspired chunk manager with threading
 ## Based on ChunkProviderServer architecture
 
-# ============================================================================
 # CONFIGURATION
-# ============================================================================
 
 @export_group("Chunk Settings")
 @export var chunk_scene:     PackedScene
@@ -25,9 +23,7 @@ extends Node3D
 @export var cache_max_size:         int = 256
 @export var unload_chunks_per_tick: int = 5
 
-# ============================================================================
 # INTERNAL STATE
-# ============================================================================
 
 #seed for random generation
 var p_seed: int = TerrainConstants.GAME_SEED
@@ -48,31 +44,23 @@ var results_queue_mutex:   Mutex
 var results_queue:         Array[ChunkResult] = []
 var shutdown_threads:      bool = false
 
-# ============================================================================
 # CACHING
-# ============================================================================
 
 var mesh_cache:         Dictionary = {}       # Vector2i -> ArrayMesh
 var cache_access_order: Array[Vector2i] = []  # LRU tracking
 
-# ============================================================================
 # REFERENCES
-# ============================================================================
 
 var camera: Camera3D
 var material_manager: TerrainMaterialManager
 var terrain_material: ShaderMaterial
 
-# ============================================================================
 # TRACKING
-# ============================================================================
 
 var chunks_generated_this_frame: int = 0
 var last_camera_chunk: Vector2i = Vector2i.ZERO
 
-# ============================================================================
 # INITIALIZATION
-# ============================================================================
 
 func _ready() -> void:
 	_initialize_systems()
@@ -107,6 +95,9 @@ func _initialize_systems() -> void:
 	
 	print("ChunkManager: Initialized with %d worker threads" % max_worker_threads)
 
+	# Pre-build the index buffer for all chunks (thread-safe: built before workers start)
+	ChunkMeshBuilder._get_or_build_index_buffer(chunk_size, ChunkMeshBuilder.OVERLAP)
+
 
 func _start_worker_threads() -> void:
 	for i in range(max_worker_threads):
@@ -116,9 +107,7 @@ func _start_worker_threads() -> void:
 	
 	print("ChunkManager: Started %d worker threads" % worker_threads.size())
 
-# ============================================================================
 # MAIN UPDATE LOOP
-# ============================================================================
 
 func _process(_delta: float) -> void:
 	chunks_generated_this_frame = 0
@@ -176,9 +165,7 @@ func update_chunks(force_update: bool = false) -> void:
 func _sort_by_priority(a: ChunkRequest, b: ChunkRequest) -> bool:
 	return a.priority < b.priority
 
-# ============================================================================
 # CHUNK LOADING & GENERATION
-# ============================================================================
 
 func _queue_chunk_generation(request: ChunkRequest) -> void:
 	# Check if already pending
@@ -353,9 +340,7 @@ func _find_or_create_mesh_instance(node: Node) -> MeshInstance3D:
 	node.add_child(mesh_instance)
 	return mesh_instance
 
-# ============================================================================
 # CHUNK UNLOADING
-# ============================================================================
 
 func _mark_distant_chunks_for_unload(chunks_to_keep: Dictionary) -> void:
 	for chunk_pos in loaded_chunks.keys():
@@ -405,9 +390,7 @@ func _process_unload_queue() -> void:
 	for chunk_pos in chunks_to_remove:
 		chunks_queued_for_unload.erase(chunk_pos)
 
-# ============================================================================
 # UTILITY FUNCTIONS
-# ============================================================================
 
 func world_to_chunk(world_pos: Vector3) -> Vector2i:
 	var chunk_world_size: float = (chunk_size - 1) * vertex_spacing
@@ -442,9 +425,7 @@ func get_height_at(world_pos: Vector3) -> float:
 	
 	return 0.0
 
-# ============================================================================
 # STATISTICS & DEBUG
-# ============================================================================
 
 func get_stats() -> Dictionary:
 	return {
@@ -467,9 +448,7 @@ func print_stats() -> void:
 	print("  Worker threads: %d" % stats.worker_threads)
 	print("  Chunks this frame: %d" % stats.chunks_this_frame)
 
-# ============================================================================
 # CLEANUP
-# ============================================================================
 
 func _exit_tree() -> void:
 	_shutdown_worker_threads()

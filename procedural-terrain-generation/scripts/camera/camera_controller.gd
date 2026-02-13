@@ -3,31 +3,23 @@ extends Camera3D
 
 ## Third-person camera that follows a target with smooth interpolation
 
-# ============================================================================
 # EXPORTS
-# ============================================================================
 
 @export var lerp_speed:  float = 3.0
 @export var target_path: NodePath
 @export var offset:      Vector3 = Vector3.ZERO
 
-# ============================================================================
 # REFERENCES
-# ============================================================================
 
 var target: Node3D = null
 
-# ============================================================================
 # INITIALIZATION
-# ============================================================================
 
 func _ready() -> void:
 	if target_path:
 		target = get_node(target_path)
 
-# ============================================================================
 # CAMERA FOLLOW
-# ============================================================================
 
 func _physics_process(delta: float) -> void:
 	if not target:

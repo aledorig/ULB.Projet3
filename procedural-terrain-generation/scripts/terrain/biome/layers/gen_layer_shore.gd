@@ -4,23 +4,17 @@ extends GenLayer
 ## Adds beach biomes between land and ocean
 ## Uses extended radius for wider shores
 
-# ============================================================================
 # CONFIGURATION
-# ============================================================================
 
 ## How many cells to check for ocean (larger = wider beaches)
 const SHORE_RADIUS: int = 2
 
-# ============================================================================
 # INITIALIZATION
-# ============================================================================
 
 func _init(p_base_seed: int, p_parent: GenLayer) -> void:
 	super._init(p_base_seed, p_parent)
 
-# ============================================================================
 # GENERATION
-# ============================================================================
 
 func get_values(area_x: int, area_z: int, width: int, height: int) -> PackedInt32Array:
 	# Fetch with extended border for wider shore detection

@@ -3,33 +3,65 @@ extends RefCounted
 
 ## Builds terrain mesh for a single chunk with proper normal calculation
 
-# ============================================================================
 # CONSTANTS
-# ============================================================================
 
 ## Overlap vertices for seamless normals at chunk boundaries
 const OVERLAP: int = 1
 
-# ============================================================================
 # CONFIGURATION
-# ============================================================================
 
 var chunk_size:     int
 var vertex_spacing: float
 var terrain_gen:    TerrainGenerator
 
 # ============================================================================
-# INITIALIZATION
+# STATIC INDEX BUFFER (computed once, shared by all chunks)
 # ============================================================================
+
+## The triangle index pattern is identical for all chunks of the same size.
+## We compute it once and reuse it forever, avoiding redundant work.
+static var _cached_indices: PackedInt32Array = PackedInt32Array()
+static var _cached_chunk_size: int = -1
+
+static func _get_or_build_index_buffer(p_chunk_size: int, p_overlap: int) -> PackedInt32Array:
+	if p_chunk_size == _cached_chunk_size and not _cached_indices.is_empty():
+		return _cached_indices
+
+	var extended_size: int = p_chunk_size + 2 * p_overlap
+	var num_quads: int = (p_chunk_size - 1) * (p_chunk_size - 1)
+	var indices := PackedInt32Array()
+	indices.resize(num_quads * 6)
+
+	var write_idx: int = 0
+	for z in range(p_overlap, p_chunk_size + p_overlap - 1):
+		for x in range(p_overlap, p_chunk_size + p_overlap - 1):
+			var tl: int = z * extended_size + x
+			var tr: int = tl + 1
+			var bl: int = tl + extended_size
+			var br: int = bl + 1
+
+			# Triangle 1: TL -> TR -> BL
+			indices[write_idx] = tl
+			indices[write_idx + 1] = tr
+			indices[write_idx + 2] = bl
+			# Triangle 2: TR -> BR -> BL
+			indices[write_idx + 3] = tr
+			indices[write_idx + 4] = br
+			indices[write_idx + 5] = bl
+			write_idx += 6
+
+	_cached_indices = indices
+	_cached_chunk_size = p_chunk_size
+	return indices
+
+# INITIALIZATION
 
 func _init(p_chunk_size: int, p_vertex_spacing: float, p_terrain_gen: TerrainGenerator) -> void:
 	chunk_size = p_chunk_size
 	vertex_spacing = p_vertex_spacing
 	terrain_gen = p_terrain_gen
 
-# ============================================================================
 # MESH BUILDING
-# ============================================================================
 
 func build_chunk_mesh(chunk_position: Vector2) -> ArrayMesh:
 	var t0 := Time.get_ticks_usec()
@@ -61,9 +93,7 @@ func build_chunk_mesh(chunk_position: Vector2) -> ArrayMesh:
 
 	return mesh
 
-# ============================================================================
 # VERTEX GENERATION
-# ============================================================================
 
 func _generate_vertex_data(chunk_position: Vector2) -> Dictionary:
 	var extended_size: int = chunk_size + 2 * OVERLAP
@@ -92,9 +122,7 @@ func _generate_vertex_data(chunk_position: Vector2) -> Dictionary:
 		"colors": colors
 	}
 
-# ============================================================================
 # NORMAL CALCULATION (direct from heightmap - much faster!)
-# ============================================================================
 
 func _calculate_normals_from_heights(vertices: PackedVector3Array) -> PackedVector3Array:
 	var extended_size: int = chunk_size + 2 * OVERLAP
@@ -130,52 +158,18 @@ func _calculate_normals_from_heights(vertices: PackedVector3Array) -> PackedVect
 	return normals
 
 
-# ============================================================================
-# MESH BUILDING (single pass, no intermediate mesh)
-# ============================================================================
+# MESH BUILDING (direct ArrayMesh — no SurfaceTool, no per-vertex calls)
 
 func _build_mesh_direct(vertices: PackedVector3Array, colors: PackedColorArray, normals: PackedVector3Array) -> ArrayMesh:
-	var surface_tool := SurfaceTool.new()
-	surface_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var indices: PackedInt32Array = _get_or_build_index_buffer(chunk_size, OVERLAP)
 
-	var extended_size: int = chunk_size + 2 * OVERLAP
+	var arrays: Array = []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = vertices
+	arrays[Mesh.ARRAY_NORMAL] = normals
+	arrays[Mesh.ARRAY_COLOR]  = colors
+	arrays[Mesh.ARRAY_INDEX]  = indices
 
-	# Only iterate over inner vertices (skip overlap border)
-	for z in range(OVERLAP, chunk_size + OVERLAP - 1):
-		for x in range(OVERLAP, chunk_size + OVERLAP - 1):
-			var idx: int = z * extended_size + x
-
-			# Get the 4 corners of this quad
-			var tl_idx: int = idx
-			var tr_idx: int = idx + 1
-			var bl_idx: int = idx + extended_size
-			var br_idx: int = idx + extended_size + 1
-
-			# First triangle (top-left, top-right, bottom-left)
-			surface_tool.set_normal(normals[tl_idx])
-			surface_tool.set_color(colors[tl_idx])
-			surface_tool.add_vertex(vertices[tl_idx])
-
-			surface_tool.set_normal(normals[tr_idx])
-			surface_tool.set_color(colors[tr_idx])
-			surface_tool.add_vertex(vertices[tr_idx])
-
-			surface_tool.set_normal(normals[bl_idx])
-			surface_tool.set_color(colors[bl_idx])
-			surface_tool.add_vertex(vertices[bl_idx])
-
-			# Second triangle (top-right, bottom-right, bottom-left)
-			surface_tool.set_normal(normals[tr_idx])
-			surface_tool.set_color(colors[tr_idx])
-			surface_tool.add_vertex(vertices[tr_idx])
-
-			surface_tool.set_normal(normals[br_idx])
-			surface_tool.set_color(colors[br_idx])
-			surface_tool.add_vertex(vertices[br_idx])
-
-			surface_tool.set_normal(normals[bl_idx])
-			surface_tool.set_color(colors[bl_idx])
-			surface_tool.add_vertex(vertices[bl_idx])
-
-	surface_tool.index()
-	return surface_tool.commit()
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	return mesh

@@ -4,9 +4,7 @@ extends RefCounted
 ## Centralized performance monitoring and logging
 ## Tracks timing for various subsystems and reports statistics
 
-# ============================================================================
 # CONFIGURATION
-# ============================================================================
 
 ## Enable/disable logging output
 static var logging_enabled: bool = true
@@ -17,9 +15,7 @@ static var log_threshold_ms: float = 1.0
 ## Keep history for averaging
 static var history_size: int = 100
 
-# ============================================================================
 # TIMING DATA
-# ============================================================================
 
 ## Active timers: name -> start_time_usec
 static var _active_timers: Dictionary = {}
@@ -33,9 +29,7 @@ static var _call_counts: Dictionary = {}
 ## Per-frame accumulators: name -> float (ms)
 static var _frame_accumulators: Dictionary = {}
 
-# ============================================================================
 # TIMING API
-# ============================================================================
 
 static func start(name: String) -> void:
 	_active_timers[name] = Time.get_ticks_usec()
@@ -99,9 +93,7 @@ static func stop_silent(name: String) -> float:
 
 	return elapsed_ms
 
-# ============================================================================
 # STATISTICS
-# ============================================================================
 
 static func get_stats(name: String) -> Dictionary:
 	if not _timing_history.has(name):
@@ -136,9 +128,7 @@ static func get_all_stats() -> Dictionary:
 		result[name] = get_stats(name)
 	return result
 
-# ============================================================================
 # FRAME MANAGEMENT
-# ============================================================================
 
 static func end_frame() -> void:
 	## Call at end of frame to reset accumulators
@@ -148,9 +138,7 @@ static func end_frame() -> void:
 static func get_frame_total(name: String) -> float:
 	return _frame_accumulators.get(name, 0.0)
 
-# ============================================================================
 # REPORTING
-# ============================================================================
 
 static func print_report() -> void:
 	print("\n========== PERFORMANCE REPORT ==========")
@@ -181,9 +169,7 @@ static func print_summary() -> void:
 	if not summary_items.is_empty():
 		print("[PERF SUMMARY] " + ", ".join(summary_items))
 
-# ============================================================================
 # RESET
-# ============================================================================
 
 static func reset() -> void:
 	_active_timers.clear()

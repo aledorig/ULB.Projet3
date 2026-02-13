@@ -3,9 +3,7 @@ extends CharacterBody3D
 
 ## 6DOF ship controller with smooth input handling
 
-# ============================================================================
 # EXPORTS
-# ============================================================================
 
 @export_group("Speed")
 @export var max_speed:    float = 50.0
@@ -19,18 +17,14 @@ extends CharacterBody3D
 @export_group("Input")
 @export var input_response: float = 8.0
 
-# ============================================================================
 # STATE
-# ============================================================================
 
 var forward_speed: float = 0.0
 var pitch_input: float = 0.0
 var roll_input: float = 0.0
 var yaw_input: float = 0.0
 
-# ============================================================================
 # INPUT HANDLING
-# ============================================================================
 
 func _get_input(delta: float) -> void:
 	# Throttle
@@ -44,9 +38,7 @@ func _get_input(delta: float) -> void:
 	roll_input = lerp(roll_input, Input.get_axis("roll_left", "roll_right"), input_response * delta)
 	yaw_input = lerp(yaw_input, Input.get_axis("yaw_left", "yaw_right"), input_response * delta)
 
-# ============================================================================
-# PHYSICS
-# ============================================================================
+# PHYSICS 
 
 func _physics_process(delta: float) -> void:
 	_get_input(delta)

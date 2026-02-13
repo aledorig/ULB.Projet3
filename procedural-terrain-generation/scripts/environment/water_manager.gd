@@ -3,22 +3,16 @@ extends MeshInstance3D
 
 ## Infinite water plane that follows the camera at sea level
 
-# ============================================================================
-# CONFIGURATION
-# ============================================================================
+# EXPORTS
 
 @export var water_size: float = 2000.0
 @export var follow_camera: bool = true
 
-# ============================================================================
 # REFERENCES
-# ============================================================================
 
 var camera: Camera3D
 
-# ============================================================================
 # INITIALIZATION
-# ============================================================================
 
 func _ready() -> void:
 	_setup_water_mesh()
@@ -56,9 +50,7 @@ func _setup_water_material() -> void:
 
 	material_override = mat
 
-# ============================================================================
 # UPDATE
-# ============================================================================
 
 func _process(_delta: float) -> void:
 	if follow_camera and camera:

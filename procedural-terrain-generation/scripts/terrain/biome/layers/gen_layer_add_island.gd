@@ -4,16 +4,12 @@ extends GenLayer
 ## Adds more land masses by converting ocean cells to land
 ## when they're surrounded by land neighbors
 
-# ============================================================================
 # INITIALIZATION
-# ============================================================================
 
 func _init(p_base_seed: int, p_parent: GenLayer) -> void:
 	super._init(p_base_seed, p_parent)
 
-# ============================================================================
 # GENERATION
-# ============================================================================
 
 func get_values(area_x: int, area_z: int, width: int, height: int) -> PackedInt32Array:
 	# Fetch with 1-cell border

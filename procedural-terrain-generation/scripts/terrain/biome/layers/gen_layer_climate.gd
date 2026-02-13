@@ -9,16 +9,12 @@ extends GenLayer
 ##   3 = Cold
 ##   4 = Frozen
 
-# ============================================================================
 # INITIALIZATION
-# ============================================================================
 
 func _init(p_base_seed: int, p_parent: GenLayer) -> void:
 	super._init(p_base_seed, p_parent)
 
-# ============================================================================
 # GENERATION
-# ============================================================================
 
 func get_values(area_x: int, area_z: int, width: int, height: int) -> PackedInt32Array:
 	var parent_values := parent.get_values(area_x, area_z, width, height)

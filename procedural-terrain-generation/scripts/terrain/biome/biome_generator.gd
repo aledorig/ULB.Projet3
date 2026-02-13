@@ -4,16 +4,12 @@ extends RefCounted
 ## Initializes and chains all GenLayer layers to create the biome pipeline
 ## This is the main entry point for biome generation
 
-# ============================================================================
 # STATE
-# ============================================================================
 
 var final_layer: GenLayer
 var game_seed: int
 
-# ============================================================================
 # INITIALIZATION
-# ============================================================================
 
 func _init(p_seed: int) -> void:
 	game_seed = p_seed
@@ -97,9 +93,7 @@ func _init_layers() -> GenLayer:
 
 	return layer
 
-# ============================================================================
 # PUBLIC API
-# ============================================================================
 
 func get_biome_values(area_x: int, area_z: int, width: int, height: int) -> PackedInt32Array:
 	## Generate biome IDs for a region
