@@ -56,6 +56,11 @@ func _apply_edge_rules(center: int, north: int, south: int, west: int, east: int
 		if _is_warm(north) or _is_warm(south) or _is_warm(west) or _is_warm(east):
 			return TerrainConstants.Biome.MOUNTAINS
 
+	# Rule 3b: Mountains touching low-land biomes -> Hills (gradual transition)
+	if center == TerrainConstants.Biome.MOUNTAINS:
+		if _is_lowland(north) or _is_lowland(south) or _is_lowland(west) or _is_lowland(east):
+			return TerrainConstants.Biome.HILLS
+
 	# Rule 4: Tundra touching warm biomes -> Plains/Forest
 	if center == TerrainConstants.Biome.TUNDRA:
 		if _is_warm(north) or _is_warm(south) or _is_warm(west) or _is_warm(east):
@@ -74,6 +79,16 @@ func _is_frozen(biome: int) -> bool:
 
 func _is_warm(biome: int) -> bool:
 	return biome == TerrainConstants.Biome.DESERT or biome == TerrainConstants.Biome.JUNGLE
+
+
+func _is_lowland(biome: int) -> bool:
+	# Biomes with low base height — mountains next to these get replaced with hills
+	return biome == TerrainConstants.Biome.PLAINS or \
+		   biome == TerrainConstants.Biome.FOREST or \
+		   biome == TerrainConstants.Biome.DESERT or \
+		   biome == TerrainConstants.Biome.JUNGLE or \
+		   biome == TerrainConstants.Biome.BEACH or \
+		   biome == TerrainConstants.Biome.TUNDRA
 
 
 func _is_jungle_compatible(biome: int) -> bool:

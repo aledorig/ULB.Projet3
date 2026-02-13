@@ -24,6 +24,13 @@ var pitch_input: float = 0.0
 var roll_input: float = 0.0
 var yaw_input: float = 0.0
 
+# INITIALIZATION
+
+func _ready() -> void:
+	var gen := TerrainGenerator.new()
+	var terrain_height: float = gen.get_height(global_position.x, global_position.z)
+	global_position.y = terrain_height + 10.0
+
 # INPUT HANDLING
 
 func _get_input(delta: float) -> void:

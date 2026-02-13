@@ -20,6 +20,7 @@ const MEDIUM_BIOMES: Array[int] = [
 	TerrainConstants.Biome.FOREST,
 	TerrainConstants.Biome.PLAINS,
 	TerrainConstants.Biome.PLAINS,
+	TerrainConstants.Biome.HILLS,
 	TerrainConstants.Biome.MOUNTAINS,
 ]
 
@@ -28,7 +29,7 @@ const COLD_BIOMES: Array[int] = [
 	TerrainConstants.Biome.FOREST,
 	TerrainConstants.Biome.MOUNTAINS,
 	TerrainConstants.Biome.TUNDRA,
-	TerrainConstants.Biome.PLAINS,
+	TerrainConstants.Biome.HILLS,
 ]
 
 # Frozen climate biomes (tundra/snow heavy)
