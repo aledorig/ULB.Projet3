@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://blf4e0spjtel6"]
+[gd_scene load_steps=0 format=3 uid="uid://blf4e0spjtel6"]
 
 [ext_resource type="Script" path="res://scripts/client/gui/gui_loading_world.gd" id="1_load"]
 

@@ -24,6 +24,11 @@ config/icon="res://icon.svg"
 GameSettingsAutoload="*res://scripts/init/game_settings.gd"
 OBJExporter="*uid://cypdhf5ssdtga"
 
+[display]
+
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/obj_exporter/plugin.cfg")
