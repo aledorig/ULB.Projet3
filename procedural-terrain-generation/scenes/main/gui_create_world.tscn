@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://b6okiwbkufpou" path="res://assets/ui/images/background.jpg" id="2_f7b2p"]
 [ext_resource type="FontFile" uid="uid://bu52qvomamn1b" path="res://assets/ui/fonts/Absolut Pro Ultra Condensed Light.otf" id="3_tug6r"]
 [ext_resource type="FontFile" uid="uid://udlxsk422qsh" path="res://assets/ui/fonts/Acumin-BdPro.otf" id="4_fkeur"]
+[ext_resource type="Texture2D" uid="uid://gosxr4k70sau" path="res://assets/ui/images/refresh.png" id="5_fkeur"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_cr101"]
 texture = ExtResource("2_f7b2p")
@@ -127,12 +128,11 @@ placeholder_text = "Entrer seed"
 alignment = 1
 max_length = 18
 
-[node name="RandomSeedCheck" type="CheckBox" parent="CenterContainer/MainPanel/Content/SeedRow" unique_id=2146150139]
-unique_name_in_owner = true
+[node name="RefreshSeed" type="TextureButton" parent="CenterContainer/MainPanel/Content/SeedRow" unique_id=1819111822]
 layout_mode = 2
-tooltip_text = "Generate a random seed each time"
-theme_override_fonts/font = ExtResource("4_fkeur")
-text = "Aléatoire"
+texture_normal = ExtResource("5_fkeur")
+texture_pressed = ExtResource("5_fkeur")
+texture_hover = ExtResource("5_fkeur")
 
 [node name="Spacer2" type="Control" parent="CenterContainer/MainPanel/Content" unique_id=175017735]
 custom_minimum_size = Vector2(0, 4)
@@ -395,6 +395,7 @@ text = "Annuler
 "
 
 [connection signal="ready" from="." to="." method="_on_ready"]
+[connection signal="pressed" from="CenterContainer/MainPanel/Content/SeedRow/RefreshSeed" to="." method="_on_refresh_seed_pressed"]
 [connection signal="pressed" from="CenterContainer/MainPanel/Content/AdvancedToggle" to="." method="_on_advanced_toggle_pressed"]
 [connection signal="pressed" from="CenterContainer/MainPanel/Content/ButtonRow/Play" to="." method="_on_play_pressed"]
 [connection signal="pressed" from="CenterContainer/MainPanel/Content/ButtonRow/Cancel" to="." method="_on_cancel_pressed"]
