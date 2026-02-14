@@ -3,12 +3,12 @@
 importer="font_data_dynamic"
 type="FontFile"
 uid="uid://bu52qvomamn1b"
-path="res://.godot/imported/Absolut Pro Ultra Condensed Light.otf-e2ea21c9434b99378d4cb0e1d3f2350f.fontdata"
+path="res://.godot/imported/Absolut Pro Ultra Condensed Light.otf-270fbb9d88d60ea2567dbba1b72c62b0.fontdata"
 
 [deps]
 
-source_file="res://assets/ui/font/Absolut Pro Ultra Condensed Light.otf"
-dest_files=["res://.godot/imported/Absolut Pro Ultra Condensed Light.otf-e2ea21c9434b99378d4cb0e1d3f2350f.fontdata"]
+source_file="res://assets/ui/fonts/Absolut Pro Ultra Condensed Light.otf"
+dest_files=["res://.godot/imported/Absolut Pro Ultra Condensed Light.otf-270fbb9d88d60ea2567dbba1b72c62b0.fontdata"]
 
 [params]
 

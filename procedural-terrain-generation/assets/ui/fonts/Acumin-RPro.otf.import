@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://bsat1eou16pt0"
-path="res://.godot/imported/Acumin-ItPro.otf-14e3b4733d9c176877f2ff9dfec4fad5.fontdata"
+uid="uid://h437oav6jl8i"
+path="res://.godot/imported/Acumin-RPro.otf-23888e86beefbac36b0eb62d543fe035.fontdata"
 
 [deps]
 
-source_file="res://assets/ui/font/Acumin-ItPro.otf"
-dest_files=["res://.godot/imported/Acumin-ItPro.otf-14e3b4733d9c176877f2ff9dfec4fad5.fontdata"]
+source_file="res://assets/ui/fonts/Acumin-RPro.otf"
+dest_files=["res://.godot/imported/Acumin-RPro.otf-23888e86beefbac36b0eb62d543fe035.fontdata"]
 
 [params]
 

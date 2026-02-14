@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://y54qebkp5sac"
-path="res://.godot/imported/Absolut Pro Ultra Condensed Light.ttf-14bcf237c85cec67cb91039d8c102a94.fontdata"
+uid="uid://bsat1eou16pt0"
+path="res://.godot/imported/Acumin-ItPro.otf-bdd85cb792b4200fc7cb42def82a2b70.fontdata"
 
 [deps]
 
-source_file="res://assets/ui/font/Absolut Pro Ultra Condensed Light.ttf"
-dest_files=["res://.godot/imported/Absolut Pro Ultra Condensed Light.ttf-14bcf237c85cec67cb91039d8c102a94.fontdata"]
+source_file="res://assets/ui/fonts/Acumin-ItPro.otf"
+dest_files=["res://.godot/imported/Acumin-ItPro.otf-bdd85cb792b4200fc7cb42def82a2b70.fontdata"]
 
 [params]
 

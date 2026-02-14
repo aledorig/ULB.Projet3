@@ -3,12 +3,12 @@
 importer="font_data_dynamic"
 type="FontFile"
 uid="uid://drrmy2gsk0ql5"
-path="res://.godot/imported/Acumin-BdItPro.otf-463dcde51179408717c78a00ef24fd1a.fontdata"
+path="res://.godot/imported/Acumin-BdItPro.otf-93058970d6327f75a7e3cd8f54120b91.fontdata"
 
 [deps]
 
-source_file="res://assets/ui/font/Acumin-BdItPro.otf"
-dest_files=["res://.godot/imported/Acumin-BdItPro.otf-463dcde51179408717c78a00ef24fd1a.fontdata"]
+source_file="res://assets/ui/fonts/Acumin-BdItPro.otf"
+dest_files=["res://.godot/imported/Acumin-BdItPro.otf-93058970d6327f75a7e3cd8f54120b91.fontdata"]
 
 [params]
 

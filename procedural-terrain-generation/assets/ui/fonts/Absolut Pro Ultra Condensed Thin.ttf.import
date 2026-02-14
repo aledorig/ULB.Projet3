@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://dvnrfm0k856t7"
-path="res://.godot/imported/Absolut Pro Ultra Condensed Thin.otf-0c6206d53ea5e67c1f2eddf5b7bde8c5.fontdata"
+uid="uid://7ea3frib36fb"
+path="res://.godot/imported/Absolut Pro Ultra Condensed Thin.ttf-41cdc8f7c69aa837a6fb1b40bf2a4acc.fontdata"
 
 [deps]
 
-source_file="res://assets/ui/font/Absolut Pro Ultra Condensed Thin.otf"
-dest_files=["res://.godot/imported/Absolut Pro Ultra Condensed Thin.otf-0c6206d53ea5e67c1f2eddf5b7bde8c5.fontdata"]
+source_file="res://assets/ui/fonts/Absolut Pro Ultra Condensed Thin.ttf"
+dest_files=["res://.godot/imported/Absolut Pro Ultra Condensed Thin.ttf-41cdc8f7c69aa837a6fb1b40bf2a4acc.fontdata"]
 
 [params]
 

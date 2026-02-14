@@ -2,13 +2,13 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://bitxtr3c8gpot"
-path="res://.godot/imported/Absolut UltraCondensed Red.otf-807cfb5d65cec5c186063de390ecf17e.fontdata"
+uid="uid://y54qebkp5sac"
+path="res://.godot/imported/Absolut Pro Ultra Condensed Light.ttf-23705bfb092d110f16630699eb5d0d69.fontdata"
 
 [deps]
 
-source_file="res://assets/ui/font/Absolut UltraCondensed Red.otf"
-dest_files=["res://.godot/imported/Absolut UltraCondensed Red.otf-807cfb5d65cec5c186063de390ecf17e.fontdata"]
+source_file="res://assets/ui/fonts/Absolut Pro Ultra Condensed Light.ttf"
+dest_files=["res://.godot/imported/Absolut Pro Ultra Condensed Light.ttf-23705bfb092d110f16630699eb5d0d69.fontdata"]
 
 [params]
 

@@ -1,11 +1,11 @@
 [gd_scene format=3 uid="uid://duuwuggm2xpq3"]
 
 [ext_resource type="Script" uid="uid://y4hdrrphklbr" path="res://scripts/client/gui/gui_main_menu.gd" id="1_5vafy"]
-[ext_resource type="Texture2D" uid="uid://b6okiwbkufpou" path="res://assets/ui/background.jpg" id="1_l6cm7"]
-[ext_resource type="FontFile" uid="uid://udlxsk422qsh" path="res://assets/ui/font/Acumin-BdPro.otf" id="3_37rv8"]
-[ext_resource type="FontFile" uid="uid://bu52qvomamn1b" path="res://assets/ui/font/Absolut Pro Ultra Condensed Light.otf" id="3_m0c35"]
-[ext_resource type="Texture2D" uid="uid://mmprnk0no1tb" path="res://assets/ui/LineDivider.png" id="4_37rv8"]
-[ext_resource type="FontFile" uid="uid://y54qebkp5sac" path="res://assets/ui/font/Absolut Pro Ultra Condensed Light.ttf" id="5_6maj5"]
+[ext_resource type="Texture2D" uid="uid://b6okiwbkufpou" path="res://assets/ui/images/background.jpg" id="1_l6cm7"]
+[ext_resource type="FontFile" uid="uid://udlxsk422qsh" path="res://assets/ui/fonts/Acumin-BdPro.otf" id="3_37rv8"]
+[ext_resource type="FontFile" uid="uid://bu52qvomamn1b" path="res://assets/ui/fonts/Absolut Pro Ultra Condensed Light.otf" id="3_m0c35"]
+[ext_resource type="Texture2D" uid="uid://mmprnk0no1tb" path="res://assets/ui/images/line_divider.png" id="4_37rv8"]
+[ext_resource type="FontFile" uid="uid://y54qebkp5sac" path="res://assets/ui/fonts/Absolut Pro Ultra Condensed Light.ttf" id="5_6maj5"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ekxnf"]
 texture = ExtResource("1_l6cm7")
@@ -130,6 +130,7 @@ theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
 theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
 text = "Quitter"
 
-[connection signal="button_down" from="CenterContainer/VBoxContainer/Play" to="." method="_on_play_button_down"]
-[connection signal="button_down" from="CenterContainer/VBoxContainer/Information" to="." method="_on_information_button_down"]
-[connection signal="button_down" from="CenterContainer/VBoxContainer/Quit" to="." method="_on_quit_button_down"]
+[connection signal="ready" from="." to="." method="_on_ready"]
+[connection signal="pressed" from="CenterContainer/VBoxContainer/Play" to="." method="_on_play_pressed"]
+[connection signal="pressed" from="CenterContainer/VBoxContainer/Information" to="." method="_on_information_pressed"]
+[connection signal="pressed" from="CenterContainer/VBoxContainer/Quit" to="." method="_on_quit_pressed"]

@@ -22,6 +22,9 @@ extends Control
 
 var advanced_visible: bool = false
 
+func _on_ready() -> void:
+	UIsounds.install_sounds(self)
+	
 func _ready() -> void:
 	advanced_container.visible = false
 	_sync_ui_from_settings()
@@ -57,7 +60,7 @@ func _sync_ui_from_settings() -> void:
 func _on_advanced_toggle_pressed() -> void:
 	advanced_visible = not advanced_visible
 	advanced_container.visible = advanced_visible
-	advanced_toggle.text = "Hide Advanced" if advanced_visible else "Advanced Options"
+	advanced_toggle.text = "Masquer la Configuration Avancée" if advanced_visible else "Configuration Avancée"
 
 
 func _on_random_seed_toggled(pressed: bool) -> void:
