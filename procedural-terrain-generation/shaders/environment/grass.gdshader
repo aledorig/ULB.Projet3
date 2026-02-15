@@ -19,22 +19,21 @@ float hash(vec2 p) {
 void vertex() {
 	worldPos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 
-	// Derive grass tint from per-instance climate data
 	float temperature = INSTANCE_CUSTOM.r;
 	float moisture = INSTANCE_CUSTOM.g;
 
 	grass_tint = mix(
-		vec3(0.65, 0.55, 0.25),  // dry/warm: golden-brown
-		vec3(0.2, 0.65, 0.1),   // wet: vibrant green
+		vec3(0.65, 0.55, 0.25),
+		vec3(0.2, 0.65, 0.1),
 		moisture
 	);
 	grass_tint = mix(
-		vec3(0.45, 0.6, 0.35),  // cold: muted sage
+		vec3(0.45, 0.6, 0.35),
 		grass_tint,
 		smoothstep(0.3, 0.6, temperature)
 	);
 
-	// Height factor: blade tip moves most, base stays anchored
+	// blade tip moves most, base stays anchored
 	float height_factor = clamp(VERTEX.y * 2.0, 0.0, 1.0);
 	height_factor *= height_factor;
 
@@ -60,12 +59,12 @@ void vertex() {
 }
 
 void fragment() {
-	// Darken base, lighten tips slightly — matches terrain grass tint
 	vec3 noiseLevel = texture(noise, worldPos.xz / noiseScale).rgb;
-	vec3 base_color = grass_tint * 0.8;  // base darker than terrain
-	vec3 tip_color = grass_tint * 0.95;  // tips close to terrain color
-	ALBEDO = mix(base_color, tip_color, 1.0 - UV.y) * mix(vec3(0.9), vec3(1.05), noiseLevel.r);
-	ROUGHNESS = 0.85;
+	vec3 base_color = grass_tint * 0.40;
+	vec3 tip_color = grass_tint * 0.50;
+	ALBEDO = mix(base_color, tip_color, 1.0 - UV.y) * mix(vec3(0.8), vec3(0.9), noiseLevel.r);
+	ROUGHNESS = 1.0;
+	SPECULAR = 0.0;
 
 	if (!FRONT_FACING) {
 		NORMAL = -NORMAL;

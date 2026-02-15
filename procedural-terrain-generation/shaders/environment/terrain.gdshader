@@ -8,7 +8,6 @@ uniform sampler2D snow_texture  : source_color, filter_linear_mipmap, repeat_ena
 uniform float texture_scale : hint_range(1.0, 100.0) = 20.0;
 uniform float texture_strength : hint_range(0.0, 1.0) = 0.65;
 
-// Height thresholds
 uniform float snow_height : hint_range(20.0, 250.0) = 120.0;
 uniform float snow_blend_range : hint_range(5.0, 50.0) = 30.0;
 uniform float rock_slope_start : hint_range(0.1, 0.9) = 0.55;
@@ -27,7 +26,6 @@ void vertex() {
 	world_normal = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
 }
 
-// Simple value noise for natural transition variation
 float hash(vec2 p) {
 	return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
 }
@@ -57,17 +55,16 @@ void fragment() {
 
 	vec2 uv = world_pos.xz / texture_scale;
 
-	// Snow: above snow line, shifted by temperature (hot = higher snow line)
+	// above snow line, shifted by temperature (hot = higher snow line)
 	float eff_snow = snow_height + (temperature - 0.5) * 70.0 + tn;
 	float snow_w = smoothstep(eff_snow, eff_snow + snow_blend_range, h);
 	snow_w *= smoothstep(0.7, 0.4, slope);
 
-	// Rock: steep slopes + high altitude transition
 	float slope_rock = smoothstep(rock_slope_end, rock_slope_start, slope);
-	float alt_rock = smoothstep(80.0 + tn, 140.0 + tn, h) * 0.4;
+	float alt_rock = smoothstep(40.0 + tn, 90.0 + tn, h) * 0.7;
 	float rock_w = max(slope_rock, alt_rock) * (1.0 - snow_w);
 
-	// Sand: beach near sea level OR hot+dry desert
+	// beach near sea level OR hot+dry desert
 	float beach_sand = smoothstep(beach_height + tn * 0.3, -1.0, h)
 	                 * smoothstep(0.3, 0.5, continentalness);
 	float desert_sand = smoothstep(0.65, 0.8, temperature)
@@ -75,10 +72,9 @@ void fragment() {
 	                  * smoothstep(0.4, 0.5, continentalness);
 	float sand_w = max(beach_sand, desert_sand) * (1.0 - snow_w) * (1.0 - slope_rock);
 
-	// Grass: everything else
+	// everything else is grass
 	float grass_w = max(1.0 - snow_w - rock_w - sand_w, 0.0);
 
-	// Normalize
 	float total = grass_w + sand_w + rock_w + snow_w;
 	total = max(total, 0.001);
 	grass_w /= total;
@@ -94,12 +90,12 @@ void fragment() {
 	vec3 tex_blend = grass_s * grass_w + sand_s * sand_w + rock_s * rock_w + snow_s * snow_w;
 
 	vec3 grass_tint = mix(
-		vec3(0.65, 0.55, 0.25),  // dry/warm: golden-brown
-		vec3(0.2, 0.65, 0.1),   // wet: vibrant green
+		vec3(0.65, 0.55, 0.25),
+		vec3(0.2, 0.65, 0.1),
 		moisture
 	);
 	grass_tint = mix(
-		vec3(0.45, 0.6, 0.35),  // cold: muted sage
+		vec3(0.45, 0.6, 0.35),
 		grass_tint,
 		smoothstep(0.3, 0.6, temperature)
 	);
@@ -109,10 +105,8 @@ void fragment() {
 	               + vec3(0.55, 0.5, 0.45) * rock_w
 	               + vec3(0.95, 0.97, 1.0) * snow_w;
 
-	// Combine tint with texture detail
 	vec3 final_color = mix(base_tint, base_tint * tex_blend, texture_strength);
 
-	// Underwater tinting — sandy shallows, blue-green depths
 	if (h < 0.0) {
 		float depth_factor = clamp(-h / 60.0, 0.0, 0.8);
 		vec3 shallow_tint = vec3(0.6, 0.75, 0.55);  // sandy-green shallows

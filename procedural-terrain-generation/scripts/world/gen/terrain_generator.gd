@@ -9,6 +9,7 @@ var continentalness_noise: OctaveNoise
 var peaks_noise:           OctaveNoise
 var temperature_noise:     SimplexNoise
 var moisture_noise:        SimplexNoise
+var roughness_noise:       OctaveNoise
 
 var seed_value: int
 
@@ -20,13 +21,15 @@ const MOISTURE_FREQ:     float = 0.0012
 const HEIGHT_FREQ:       float = 0.0005
 const DEPTH_FREQ:        float = 0.0008
 const SURFACE_FREQ:      float = 0.012
+const ROUGHNESS_FREQ:    float = 0.005
 
-# Height shaping
+# Height shaping — extreme mountains
 const OCEAN_BASE:     float = -50.0
-const LAND_BASE:      float = 6.0
-const MIN_AMPLITUDE:  float = 30.0
-const MAX_AMPLITUDE:  float = 350.0
+const LAND_BASE:      float = 8.0
+const MIN_AMPLITUDE:  float = 35.0
+const MAX_AMPLITUDE:  float = 500.0
 const SURFACE_AMP:    float = 3.0
+const ROUGHNESS_AMP:  float = 25.0
 
 
 func _init(p_seed: int = GameSettingsAutoload.seed, p_octaves: int = GameSettingsAutoload.octave) -> void:
@@ -42,6 +45,7 @@ func _init(p_seed: int = GameSettingsAutoload.seed, p_octaves: int = GameSetting
 	peaks_noise           = OctaveNoise.new(rng, p_octaves)
 	temperature_noise     = SimplexNoise.new(rng)
 	moisture_noise        = SimplexNoise.new(rng)
+	roughness_noise       = OctaveNoise.new(rng, p_octaves)
 
 
 static func _smoothstep(edge0: float, edge1: float, x: float) -> float:
@@ -50,19 +54,19 @@ static func _smoothstep(edge0: float, edge1: float, x: float) -> float:
 
 
 static func _shape_noise(n: float) -> float:
-	return absf(n) ** 1.6 * signf(n)
+	return absf(n) ** 1.8 * signf(n)
 
 
 func _compute_base(cont: float) -> float:
 	var sea_land: float = lerpf(OCEAN_BASE, LAND_BASE, _smoothstep(-0.5, -0.15, cont))
-	var inland_boost: float = _smoothstep(-0.15, 0.2, cont) * 35.0
+	var inland_boost: float = _smoothstep(-0.15, 0.2, cont) * 50.0
 	return sea_land + inland_boost
 
 
 func _compute_amplitude(cont: float, peaks: float) -> float:
 	var land_factor: float = _smoothstep(-0.5, -0.15, cont)
-	# Lower peaks threshold (-0.6 to 0.3) means mountains appear more often
-	return lerpf(MIN_AMPLITUDE, MAX_AMPLITUDE, _smoothstep(-0.6, 0.3, peaks)) * lerpf(0.3, 1.0, land_factor)
+	# Very aggressive: mountains appear frequently and reach extreme heights
+	return lerpf(MIN_AMPLITUDE, MAX_AMPLITUDE, _smoothstep(-0.8, 0.2, peaks)) * lerpf(0.3, 1.0, land_factor)
 
 
 func get_height(x: float, z: float) -> float:
@@ -76,7 +80,13 @@ func get_height(x: float, z: float) -> float:
 	var depth_mod: float = depth_noise.get_value(x, z, DEPTH_FREQ, DEPTH_FREQ)
 	var surface_detail: float = surface_noise.get_value(x * SURFACE_FREQ, z * SURFACE_FREQ) * SURFACE_AMP / 70.0
 
-	return base + (shaped * amplitude * (1.0 + depth_mod * 0.6)) + surface_detail
+	var base_h: float = base + (shaped * amplitude * (1.0 + depth_mod * 0.6)) + surface_detail
+
+	# High-frequency roughness at altitude — makes mountain mesh jagged/craggy
+	var altitude_factor: float = _smoothstep(30.0, 100.0, base_h)
+	var rough: float = roughness_noise.get_value(x, z, ROUGHNESS_FREQ, ROUGHNESS_FREQ) * ROUGHNESS_AMP * altitude_factor
+
+	return base_h + rough
 
 
 func get_climate_color(x: float, z: float) -> Color:
@@ -152,6 +162,15 @@ func get_vertex_data_batch(
 		SURFACE_AMP / 70.0
 	)
 
+	var roughness_grid: PackedFloat32Array = PackedFloat32Array()
+	roughness_grid.resize(total_verts)
+	roughness_noise.generate_octaves(
+		roughness_grid,
+		origin_x * inv_spacing, origin_z * inv_spacing,
+		width, height,
+		spacing * ROUGHNESS_FREQ, spacing * ROUGHNESS_FREQ
+	)
+
 	var temp_grid: PackedFloat32Array = PackedFloat32Array()
 	temp_grid.resize(total_verts)
 	temperature_noise.add(
@@ -182,7 +201,11 @@ func get_vertex_data_batch(
 			var amplitude: float = _compute_amplitude(cont, peaks)
 
 			var shaped_noise: float = _shape_noise(noise_grid[idx])
-			var h: float = base + (shaped_noise * amplitude * (1.0 + depth_grid[idx] * 0.6)) + surface_grid[idx]
+			var base_h: float = base + (shaped_noise * amplitude * (1.0 + depth_grid[idx] * 0.6)) + surface_grid[idx]
+
+			# Roughness at altitude
+			var altitude_factor: float = _smoothstep(30.0, 100.0, base_h)
+			var h: float = base_h + roughness_grid[idx] * ROUGHNESS_AMP * altitude_factor
 
 			var temp_01: float = clampf(temp_grid[idx] * 0.5 + 0.5, 0.0, 1.0)
 			var moist_01: float = clampf(moist_grid[idx] * 0.5 + 0.5, 0.0, 1.0)
