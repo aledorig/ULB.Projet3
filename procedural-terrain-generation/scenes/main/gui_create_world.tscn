@@ -1,35 +1,40 @@
 [gd_scene format=3 uid="uid://blv7t6ls0inp0"]
 
-[ext_resource type="Texture2D" uid="uid://31snryuna5j3" path="res://assets/ui/settings_background.jpg" id="1_05p07"]
 [ext_resource type="Script" uid="uid://bd6yvxrbhyhbo" path="res://scripts/client/gui/gui_create_world.gd" id="1_cr101"]
+[ext_resource type="Texture2D" uid="uid://b6okiwbkufpou" path="res://assets/ui/images/background.jpg" id="2_f7b2p"]
+[ext_resource type="FontFile" uid="uid://bu52qvomamn1b" path="res://assets/ui/fonts/Absolut Pro Ultra Condensed Light.otf" id="3_tug6r"]
+[ext_resource type="FontFile" uid="uid://udlxsk422qsh" path="res://assets/ui/fonts/Acumin-BdPro.otf" id="4_fkeur"]
+[ext_resource type="Texture2D" uid="uid://gosxr4k70sau" path="res://assets/ui/images/refresh.png" id="5_fkeur"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_cr101"]
-texture = ExtResource("1_05p07")
+texture = ExtResource("2_f7b2p")
+modulate_color = Color(0.54509807, 0.6156863, 0.5411765, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
-bg_color = Color(0, 0, 0, 0.6)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
 content_margin_left = 20.0
 content_margin_top = 20.0
 content_margin_right = 20.0
 content_margin_bottom = 20.0
+bg_color = Color(0.11927388, 0.18328124, 0.20196843, 0.6)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn"]
-bg_color = Color(0.15, 0.40, 0.23, 1)
+bg_color = Color(0.22533196, 0.402803, 0.31603044, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.25031862, 0.3471932, 0.25907072, 1)
+border_blend = true
 corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_hover"]
-bg_color = Color(0.25, 0.55, 0.35, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+shadow_color = Color(0.19651562, 0.32284665, 0.23246127, 0.6)
+shadow_size = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_pressed"]
 bg_color = Color(0.1, 0.3, 0.15, 1)
@@ -38,18 +43,25 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_hover"]
+bg_color = Color(0.21615681, 0.48322582, 0.37665713, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_advanced"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
 bg_color = Color(0, 0, 0, 0.3)
 corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
-content_margin_left = 12.0
-content_margin_top = 12.0
-content_margin_right = 12.0
-content_margin_bottom = 12.0
 
-[node name="SettingsMenu" type="Control"]
+[node name="SettingsMenu" type="Control" unique_id=446287949]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -58,7 +70,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_cr101")
 
-[node name="Background" type="Panel" parent="."]
+[node name="Background" type="Panel" parent="." unique_id=621822261]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -67,7 +79,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxTexture_cr101")
 
-[node name="CenterContainer" type="CenterContainer" parent="."]
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=398834621]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -75,98 +87,101 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="MainPanel" type="PanelContainer" parent="CenterContainer"]
+[node name="MainPanel" type="PanelContainer" parent="CenterContainer" unique_id=1580391202]
 custom_minimum_size = Vector2(500, 0)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
-[node name="Content" type="VBoxContainer" parent="CenterContainer/MainPanel"]
+[node name="Content" type="VBoxContainer" parent="CenterContainer/MainPanel" unique_id=1538816268]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Title" type="Label" parent="CenterContainer/MainPanel/Content"]
+[node name="Title" type="Label" parent="CenterContainer/MainPanel/Content" unique_id=1503503321]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("3_tug6r")
 theme_override_font_sizes/font_size = 28
-text = "Create New World"
+text = "Créer un nouveau monde"
 horizontal_alignment = 1
 
-[node name="Spacer1" type="Control" parent="CenterContainer/MainPanel/Content"]
+[node name="Spacer1" type="Control" parent="CenterContainer/MainPanel/Content" unique_id=797610518]
 custom_minimum_size = Vector2(0, 8)
 layout_mode = 2
 
-[node name="SeedRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content"]
+[node name="SeedRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content" unique_id=719358790]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="SeedLabel" type="Label" parent="CenterContainer/MainPanel/Content/SeedRow"]
+[node name="SeedLabel" type="Label" parent="CenterContainer/MainPanel/Content/SeedRow" unique_id=91124389]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+theme_override_fonts/font = ExtResource("4_fkeur")
 theme_override_font_sizes/font_size = 16
 text = "Seed"
 
-[node name="SeedInput" type="LineEdit" parent="CenterContainer/MainPanel/Content/SeedRow"]
+[node name="SeedInput" type="LineEdit" parent="CenterContainer/MainPanel/Content/SeedRow" unique_id=1565804164]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-tooltip_text = "The seed initializes the random number generator so the same seed always produces the same world."
-placeholder_text = "Enter seed"
+tooltip_text = "La graine initialise le générateur de nombres aléatoires de sorte que la même graine produise toujours le même monde."
+placeholder_text = "Entrer seed"
 alignment = 1
 max_length = 18
 
-[node name="RandomSeedCheck" type="CheckBox" parent="CenterContainer/MainPanel/Content/SeedRow"]
-unique_name_in_owner = true
+[node name="RefreshSeed" type="TextureButton" parent="CenterContainer/MainPanel/Content/SeedRow" unique_id=1819111822]
 layout_mode = 2
-tooltip_text = "Generate a random seed each time"
-text = "Random"
+texture_normal = ExtResource("5_fkeur")
+texture_pressed = ExtResource("5_fkeur")
+texture_hover = ExtResource("5_fkeur")
 
-[node name="Spacer2" type="Control" parent="CenterContainer/MainPanel/Content"]
+[node name="Spacer2" type="Control" parent="CenterContainer/MainPanel/Content" unique_id=175017735]
 custom_minimum_size = Vector2(0, 4)
 layout_mode = 2
 
-[node name="AdvancedToggle" type="Button" parent="CenterContainer/MainPanel/Content"]
+[node name="AdvancedToggle" type="Button" parent="CenterContainer/MainPanel/Content" unique_id=830594472]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_fonts/font = ExtResource("4_fkeur")
 theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
-text = "Advanced Options"
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+text = "Configuration avancée"
 
-[node name="AdvancedOptions" type="VBoxContainer" parent="CenterContainer/MainPanel/Content"]
+[node name="AdvancedOptions" type="VBoxContainer" parent="CenterContainer/MainPanel/Content" unique_id=484695968]
 unique_name_in_owner = true
-visible = false
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="AdvancedPanel" type="PanelContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions"]
+[node name="AdvancedPanel" type="PanelContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions" unique_id=1359134119]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_advanced")
 
-[node name="AdvancedContent" type="VBoxContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel"]
+[node name="AdvancedContent" type="VBoxContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel" unique_id=1675705827]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="OctaveRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent"]
+[node name="OctaveRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent" unique_id=191111721]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/OctaveRow"]
+[node name="Label" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/OctaveRow" unique_id=515831465]
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
+tooltip_text = "Superpositions successives de plusieurs couches de bruit, chacune ayant une fréquence plus élevée et une amplitude plus faible."
 theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
+theme_override_fonts/font = ExtResource("4_fkeur")
 text = "Octaves"
 
-[node name="OctaveSlider" type="HSlider" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/OctaveRow"]
+[node name="OctaveSlider" type="HSlider" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/OctaveRow" unique_id=844967914]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = 1.0
 max_value = 8.0
-step = 1.0
 value = 4.0
 tick_count = 8
 ticks_on_borders = true
 
-[node name="OctaveValue" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/OctaveRow"]
+[node name="OctaveValue" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/OctaveRow" unique_id=691481034]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(30, 0)
 layout_mode = 2
@@ -174,27 +189,27 @@ theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
 text = "4"
 horizontal_alignment = 2
 
-[node name="BiomeSizeRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent"]
+[node name="BiomeSizeRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent" unique_id=1847102723]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/BiomeSizeRow"]
+[node name="Label" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/BiomeSizeRow" unique_id=434712795]
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
-text = "Biome Size"
+theme_override_fonts/font = ExtResource("4_fkeur")
+text = "Taille des Biomes"
 
-[node name="BiomeSizeSlider" type="HSlider" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/BiomeSizeRow"]
+[node name="BiomeSizeSlider" type="HSlider" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/BiomeSizeRow" unique_id=1385100471]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = 1.0
 max_value = 8.0
-step = 1.0
 value = 4.0
 tick_count = 8
 ticks_on_borders = true
 
-[node name="BiomeSizeValue" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/BiomeSizeRow"]
+[node name="BiomeSizeValue" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/BiomeSizeRow" unique_id=1660688439]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(30, 0)
 layout_mode = 2
@@ -202,27 +217,27 @@ theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
 text = "4"
 horizontal_alignment = 2
 
-[node name="RenderDistanceRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent"]
+[node name="RenderDistanceRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent" unique_id=558068985]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/RenderDistanceRow"]
+[node name="Label" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/RenderDistanceRow" unique_id=456437127]
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
-text = "Render Distance"
+theme_override_fonts/font = ExtResource("4_fkeur")
+text = "Distance de Rendu"
 
-[node name="RenderDistanceSlider" type="HSlider" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/RenderDistanceRow"]
+[node name="RenderDistanceSlider" type="HSlider" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/RenderDistanceRow" unique_id=486842544]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = 2.0
 max_value = 12.0
-step = 1.0
 value = 4.0
 tick_count = 11
 ticks_on_borders = true
 
-[node name="RenderDistanceValue" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/RenderDistanceRow"]
+[node name="RenderDistanceValue" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/RenderDistanceRow" unique_id=1856511622]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(30, 0)
 layout_mode = 2
@@ -230,34 +245,35 @@ theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
 text = "4"
 horizontal_alignment = 2
 
-[node name="BlendingRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent"]
+[node name="BlendingRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent" unique_id=661246724]
 layout_mode = 2
 
-[node name="BiomeBlendingCheck" type="CheckBox" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/BlendingRow"]
+[node name="BiomeBlendingCheck" type="CheckBox" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/BlendingRow" unique_id=1152465610]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_fonts/font = ExtResource("4_fkeur")
 button_pressed = true
-text = "Biome Blending"
+text = "Transition entre Biomes"
 
-[node name="BlendRadiusRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent"]
+[node name="BlendRadiusRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent" unique_id=227148146]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/BlendRadiusRow"]
+[node name="Label" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/BlendRadiusRow" unique_id=1830686848]
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
-text = "Blend Radius"
+theme_override_fonts/font = ExtResource("4_fkeur")
+text = "Distance Transition"
 
-[node name="BlendRadiusSlider" type="HSlider" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/BlendRadiusRow"]
+[node name="BlendRadiusSlider" type="HSlider" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/BlendRadiusRow" unique_id=377129163]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = 4.0
 max_value = 32.0
-step = 1.0
 value = 16.0
 
-[node name="BlendRadiusValue" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/BlendRadiusRow"]
+[node name="BlendRadiusValue" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/BlendRadiusRow" unique_id=581181029]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(30, 0)
 layout_mode = 2
@@ -265,16 +281,17 @@ theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
 text = "16"
 horizontal_alignment = 2
 
-[node name="ChunkSizeRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent"]
+[node name="ChunkSizeRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent" unique_id=1132650438]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/ChunkSizeRow"]
+[node name="Label" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/ChunkSizeRow" unique_id=108945957]
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
-text = "Chunk Size"
+theme_override_fonts/font = ExtResource("4_fkeur")
+text = "Taille des Chunks"
 
-[node name="ChunkSizeSlider" type="HSlider" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/ChunkSizeRow"]
+[node name="ChunkSizeSlider" type="HSlider" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/ChunkSizeRow" unique_id=1665816300]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -283,7 +300,7 @@ max_value = 80.0
 step = 4.0
 value = 40.0
 
-[node name="ChunkSizeValue" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/ChunkSizeRow"]
+[node name="ChunkSizeValue" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/ChunkSizeRow" unique_id=1244174116]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(30, 0)
 layout_mode = 2
@@ -291,16 +308,17 @@ theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
 text = "40"
 horizontal_alignment = 2
 
-[node name="VertexSpacingRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent"]
+[node name="VertexSpacingRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent" unique_id=123213582]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/VertexSpacingRow"]
+[node name="Label" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/VertexSpacingRow" unique_id=1471958069]
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
-text = "Vertex Spacing"
+theme_override_fonts/font = ExtResource("4_fkeur")
+text = "Distance Sommets"
 
-[node name="VertexSpacingSlider" type="HSlider" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/VertexSpacingRow"]
+[node name="VertexSpacingSlider" type="HSlider" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/VertexSpacingRow" unique_id=1068014592]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
@@ -308,8 +326,10 @@ min_value = 0.5
 max_value = 4.0
 step = 0.5
 value = 2.0
+tick_count = 8
+ticks_on_borders = true
 
-[node name="VertexSpacingValue" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/VertexSpacingRow"]
+[node name="VertexSpacingValue" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/VertexSpacingRow" unique_id=1691177445]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(30, 0)
 layout_mode = 2
@@ -317,27 +337,27 @@ theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
 text = "2.0"
 horizontal_alignment = 2
 
-[node name="WorkerThreadsRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent"]
+[node name="WorkerThreadsRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent" unique_id=1533455831]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/WorkerThreadsRow"]
+[node name="Label" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/WorkerThreadsRow" unique_id=644019474]
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
-text = "Worker Threads"
+theme_override_fonts/font = ExtResource("4_fkeur")
+text = "Threads de travail"
 
-[node name="WorkerThreadsSlider" type="HSlider" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/WorkerThreadsRow"]
+[node name="WorkerThreadsSlider" type="HSlider" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/WorkerThreadsRow" unique_id=2145367791]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = 1.0
 max_value = 8.0
-step = 1.0
 value = 4.0
 tick_count = 8
 ticks_on_borders = true
 
-[node name="WorkerThreadsValue" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/WorkerThreadsRow"]
+[node name="WorkerThreadsValue" type="Label" parent="CenterContainer/MainPanel/Content/AdvancedOptions/AdvancedPanel/AdvancedContent/WorkerThreadsRow" unique_id=1279423424]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(30, 0)
 layout_mode = 2
@@ -345,33 +365,37 @@ theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
 text = "4"
 horizontal_alignment = 2
 
-[node name="Spacer3" type="Control" parent="CenterContainer/MainPanel/Content"]
+[node name="Spacer3" type="Control" parent="CenterContainer/MainPanel/Content" unique_id=2050001395]
 custom_minimum_size = Vector2(0, 8)
 layout_mode = 2
 
-[node name="ButtonRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content"]
+[node name="ButtonRow" type="HBoxContainer" parent="CenterContainer/MainPanel/Content" unique_id=2076048290]
 layout_mode = 2
 theme_override_constants/separation = 16
 alignment = 1
 
-[node name="Play" type="Button" parent="CenterContainer/MainPanel/Content/ButtonRow"]
+[node name="Play" type="Button" parent="CenterContainer/MainPanel/Content/ButtonRow" unique_id=177869371]
 custom_minimum_size = Vector2(150, 45)
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
-text = "Play"
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+text = "Commencer"
 
-[node name="Cancel" type="Button" parent="CenterContainer/MainPanel/Content/ButtonRow"]
+[node name="Cancel" type="Button" parent="CenterContainer/MainPanel/Content/ButtonRow" unique_id=2077986609]
 custom_minimum_size = Vector2(150, 45)
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pressed")
-text = "Cancel"
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_hover")
+text = "Annuler
 
+"
+
+[connection signal="ready" from="." to="." method="_on_ready"]
+[connection signal="pressed" from="CenterContainer/MainPanel/Content/SeedRow/RefreshSeed" to="." method="_on_refresh_seed_pressed"]
 [connection signal="pressed" from="CenterContainer/MainPanel/Content/AdvancedToggle" to="." method="_on_advanced_toggle_pressed"]
 [connection signal="pressed" from="CenterContainer/MainPanel/Content/ButtonRow/Play" to="." method="_on_play_pressed"]
 [connection signal="pressed" from="CenterContainer/MainPanel/Content/ButtonRow/Cancel" to="." method="_on_cancel_pressed"]
