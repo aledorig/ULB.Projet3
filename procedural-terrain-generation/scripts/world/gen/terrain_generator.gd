@@ -13,19 +13,19 @@ var moisture_noise:        SimplexNoise
 var seed_value: int
 
 # Noise frequencies
-const CONTINENT_FREQ:    float = 0.00015
-const PEAKS_FREQ:        float = 0.0003
-const TEMPERATURE_FREQ:  float = 0.0003
-const MOISTURE_FREQ:     float = 0.00025
+const CONTINENT_FREQ:    float = 0.0004
+const PEAKS_FREQ:        float = 0.0012
+const TEMPERATURE_FREQ:  float = 0.0015
+const MOISTURE_FREQ:     float = 0.0012
 const HEIGHT_FREQ:       float = 0.0005
 const DEPTH_FREQ:        float = 0.0008
 const SURFACE_FREQ:      float = 0.012
 
 # Height shaping
 const OCEAN_BASE:     float = -50.0
-const LAND_BASE:      float = 4.0
-const MIN_AMPLITUDE:  float = 25.0
-const MAX_AMPLITUDE:  float = 200.0
+const LAND_BASE:      float = 6.0
+const MIN_AMPLITUDE:  float = 30.0
+const MAX_AMPLITUDE:  float = 350.0
 const SURFACE_AMP:    float = 3.0
 
 
@@ -55,13 +55,14 @@ static func _shape_noise(n: float) -> float:
 
 func _compute_base(cont: float) -> float:
 	var sea_land: float = lerpf(OCEAN_BASE, LAND_BASE, _smoothstep(-0.5, -0.15, cont))
-	var inland_boost: float = _smoothstep(-0.15, 0.2, cont) * 20.0
+	var inland_boost: float = _smoothstep(-0.15, 0.2, cont) * 35.0
 	return sea_land + inland_boost
 
 
 func _compute_amplitude(cont: float, peaks: float) -> float:
 	var land_factor: float = _smoothstep(-0.5, -0.15, cont)
-	return lerpf(MIN_AMPLITUDE, MAX_AMPLITUDE, _smoothstep(-0.4, 0.5, peaks)) * lerpf(0.3, 1.0, land_factor)
+	# Lower peaks threshold (-0.6 to 0.3) means mountains appear more often
+	return lerpf(MIN_AMPLITUDE, MAX_AMPLITUDE, _smoothstep(-0.6, 0.3, peaks)) * lerpf(0.3, 1.0, land_factor)
 
 
 func get_height(x: float, z: float) -> float:

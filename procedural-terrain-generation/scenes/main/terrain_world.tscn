@@ -27,7 +27,7 @@ ambient_light_energy = 0.35
 reflected_light_source = 2
 fog_enabled = true
 fog_light_color = Color(0.7, 0.8, 0.9, 1)
-fog_density = 0.001
+fog_density = 0.0003
 fog_sky_affect = 0.505
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_nikly"]
@@ -155,15 +155,15 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = 2.0
-max_value = 12.0
-value = 4.0
+max_value = 50.0
+value = 8.0
 
 [node name="RenderDistanceValue" type="Label" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel/RenderDistanceRow" unique_id=1691041492]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(30, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
-text = "4"
+text = "8"
 horizontal_alignment = 2
 
 [node name="MaxSpeedRow" type="HBoxContainer" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel" unique_id=1913486600]

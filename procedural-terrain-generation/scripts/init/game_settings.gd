@@ -16,7 +16,7 @@ var enable_mesh_caching: bool = true
 var cache_max_size:      int = 256
 
 # Runtime settings (changeable in-game, emit signal)
-var render_distance: int = 4:
+var render_distance: int = 8:
 	set(value):
 		render_distance = value
 		runtime_settings_changed.emit()
@@ -44,16 +44,6 @@ var roll_speed: float = 1.9:
 var yaw_speed: float = 1.25:
 	set(value):
 		yaw_speed = value
-		runtime_settings_changed.emit()
-
-var curvature: float = 0.0003:
-	set(value):
-		curvature = value
-		runtime_settings_changed.emit()
-
-var curvature_start: float = 120.0:
-	set(value):
-		curvature_start = value
 		runtime_settings_changed.emit()
 
 

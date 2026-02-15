@@ -27,24 +27,20 @@ func _setup_water_material() -> void:
 	var shader := load("res://shaders/environment/water.gdshader") as Shader
 	var mat := ShaderMaterial.new()
 	mat.shader = shader
-	mat.set_shader_parameter("water_color", Color(0.1, 0.35, 0.55))
-	mat.set_shader_parameter("water_deep_color", Color(0.02, 0.12, 0.25))
-	mat.set_shader_parameter("water_clarity", 0.3)
+	mat.set_shader_parameter("water_shallow_color", Color(0.1, 0.55, 0.6))
+	mat.set_shader_parameter("water_mid_color", Color(0.05, 0.3, 0.55))
+	mat.set_shader_parameter("water_deep_color", Color(0.01, 0.05, 0.15))
 	mat.set_shader_parameter("roughness", 0.05)
 	mat.set_shader_parameter("wave_speed", 0.4)
 	mat.set_shader_parameter("wave_scale", 0.015)
 	mat.set_shader_parameter("wave_height", 0.2)
 	mat.set_shader_parameter("fresnel_power", 4.0)
-	mat.set_shader_parameter("curvature", GameSettingsAutoload.curvature)
-	mat.set_shader_parameter("curvature_start", GameSettingsAutoload.curvature_start)
 	water_material = mat
 	material_override = mat
 
 
 func _on_settings_changed() -> void:
-	if water_material:
-		water_material.set_shader_parameter("curvature", GameSettingsAutoload.curvature)
-		water_material.set_shader_parameter("curvature_start", GameSettingsAutoload.curvature_start)
+	pass
 
 
 func _process(_delta: float) -> void:

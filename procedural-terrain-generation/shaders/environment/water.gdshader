@@ -3,10 +3,10 @@ shader_type spatial;
 render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_burley, specular_schlick_ggx;
 
 // Water appearance
-uniform vec3 water_color : source_color = vec3(0.1, 0.3, 0.5);
-uniform vec3 water_deep_color : source_color = vec3(0.02, 0.1, 0.2);
-uniform float water_clarity : hint_range(0.0, 1.0) = 0.3;
-uniform float roughness : hint_range(0.0, 1.0) = 0.1;
+uniform vec3 water_shallow_color : source_color = vec3(0.1, 0.55, 0.6);   // turquoise coastal
+uniform vec3 water_mid_color : source_color = vec3(0.05, 0.3, 0.55);      // medium blue
+uniform vec3 water_deep_color : source_color = vec3(0.01, 0.05, 0.15);    // dark ocean
+uniform float roughness : hint_range(0.0, 1.0) = 0.05;
 uniform float metallic : hint_range(0.0, 1.0) = 0.0;
 
 // Wave animation
@@ -17,9 +17,8 @@ uniform float wave_height : hint_range(0.0, 2.0) = 0.3;
 // Fresnel
 uniform float fresnel_power : hint_range(1.0, 10.0) = 5.0;
 
-// World curvature (must match terrain shader)
-uniform float curvature : hint_range(0.0, 0.01) = 0.0003;
-uniform float curvature_start : hint_range(0.0, 200.0) = 120.0;
+// Depth coloring
+uniform sampler2D depth_texture : hint_depth_texture, filter_linear_mipmap;
 
 varying vec3 world_pos;
 varying vec3 world_normal;
@@ -35,16 +34,8 @@ void vertex() {
 
 	float wave_offset = (wave1 + wave2) * wave_height * 0.5;
 
-	// Apply world curvature (same as terrain)
-	vec3 camera_world_pos = INV_VIEW_MATRIX[3].xyz;
-	vec2 offset = world_pos.xz - camera_world_pos.xz;
-	float dist = length(offset);
-	float effective_dist = max(0.0, dist - curvature_start);
-	float curve_amount = effective_dist * effective_dist * curvature;
-
-	// Modify world position with wave and curvature
+	// Apply wave to world position
 	world_pos.y += wave_offset;
-	world_pos.y -= curve_amount;
 
 	// Convert back to local space
 	VERTEX = (inverse(MODEL_MATRIX) * vec4(world_pos, 1.0)).xyz;
@@ -60,16 +51,31 @@ void fragment() {
 	vec3 view_dir = normalize(CAMERA_POSITION_WORLD - world_pos);
 	float fresnel = pow(1.0 - max(dot(world_normal, view_dir), 0.0), fresnel_power);
 
-	// Mix between water color and deep color based on fresnel
-	vec3 final_color = mix(water_color, water_deep_color, 1.0 - fresnel);
+	// Depth-based coloring: read scene depth to determine water depth
+	float screen_depth = texture(depth_texture, SCREEN_UV).r;
+	vec4 ndc = vec4(SCREEN_UV * 2.0 - 1.0, screen_depth, 1.0);
+	vec4 view_coords = INV_PROJECTION_MATRIX * ndc;
+	view_coords.xyz /= view_coords.w;
+	float water_depth = VERTEX.z - view_coords.z; // positive = deeper
 
-	// Add slight sky reflection tint at edges
-	vec3 sky_tint = vec3(0.4, 0.6, 0.8);
-	final_color = mix(final_color, sky_tint, fresnel * 0.3);
+	// Blend shallow → mid → deep based on depth
+	float shallow_factor = smoothstep(0.0, 8.0, water_depth);   // 0-8 units: shallow
+	float deep_factor = smoothstep(8.0, 40.0, water_depth);      // 8-40 units: mid→deep
+
+	vec3 depth_color = mix(water_shallow_color, water_mid_color, shallow_factor);
+	depth_color = mix(depth_color, water_deep_color, deep_factor);
+
+	// Add sky reflection at glancing angles
+	vec3 sky_tint = vec3(0.45, 0.65, 0.85);
+	vec3 final_color = mix(depth_color, sky_tint, fresnel * 0.35);
+
+	// Specular highlight boost for sun
+	float specular_boost = pow(max(dot(reflect(-view_dir, world_normal), normalize(vec3(0.3, 0.8, 0.5))), 0.0), 64.0);
+	final_color += vec3(1.0, 0.95, 0.85) * specular_boost * 0.3;
 
 	ALBEDO = final_color;
 	ROUGHNESS = roughness;
 	METALLIC = metallic;
 	NORMAL = world_normal;
-	ALPHA = mix(0.7, 0.95, fresnel);
+	ALPHA = mix(0.6, 0.95, shallow_factor);
 }

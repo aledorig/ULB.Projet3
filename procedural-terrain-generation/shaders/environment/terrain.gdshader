@@ -1,8 +1,5 @@
 shader_type spatial;
 
-uniform float curvature : hint_range(0.0, 0.01) = 0.0003;
-uniform float curvature_start : hint_range(0.0, 500.0) = 120.0;
-
 uniform sampler2D grass_texture : source_color, filter_linear_mipmap, repeat_enable;
 uniform sampler2D sand_texture  : source_color, filter_linear_mipmap, repeat_enable;
 uniform sampler2D rock_texture  : source_color, filter_linear_mipmap, repeat_enable;
@@ -26,16 +23,6 @@ varying float terrain_height;
 void vertex() {
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	terrain_height = world_pos.y;
-
-	vec3 camera_world_pos = INV_VIEW_MATRIX[3].xyz;
-	vec2 offset = world_pos.xz - camera_world_pos.xz;
-	float dist = length(offset);
-	float effective_dist = max(0.0, dist - curvature_start);
-	float curve_amount = effective_dist * effective_dist * curvature;
-
-	world_pos.y -= curve_amount;
-	VERTEX.y -= curve_amount;
-
 	climate_data = COLOR.rgb;
 	world_normal = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
 }
@@ -66,7 +53,7 @@ void fragment() {
 	float slope = 1.0 - wn.y;
 
 	// Transition noise to break up sharp horizontal boundaries
-	float tn = (value_noise(world_pos.xz * 0.04) - 0.5) * 15.0;
+	float tn = (value_noise(world_pos.xz * 0.06) - 0.5) * 10.0;
 
 	vec2 uv = world_pos.xz / texture_scale;
 
@@ -107,28 +94,31 @@ void fragment() {
 	vec3 tex_blend = grass_s * grass_w + sand_s * sand_w + rock_s * rock_w + snow_s * snow_w;
 
 	vec3 grass_tint = mix(
-		vec3(0.6, 0.55, 0.3),   // dry/warm: brown-yellow
-		vec3(0.25, 0.6, 0.15),  // wet: lush green
+		vec3(0.65, 0.55, 0.25),  // dry/warm: golden-brown
+		vec3(0.2, 0.65, 0.1),   // wet: vibrant green
 		moisture
 	);
 	grass_tint = mix(
-		vec3(0.55, 0.6, 0.45),  // cold: grayish-green
+		vec3(0.45, 0.6, 0.35),  // cold: muted sage
 		grass_tint,
 		smoothstep(0.3, 0.6, temperature)
 	);
 
 	vec3 base_tint = grass_tint * grass_w
-	               + vec3(0.9, 0.85, 0.6) * sand_w
-	               + vec3(0.5, 0.48, 0.45) * rock_w
+	               + vec3(0.95, 0.88, 0.55) * sand_w
+	               + vec3(0.55, 0.5, 0.45) * rock_w
 	               + vec3(0.95, 0.97, 1.0) * snow_w;
 
 	// Combine tint with texture detail
 	vec3 final_color = mix(base_tint, base_tint * tex_blend, texture_strength);
 
-	// Underwater darkening
+	// Underwater tinting — sandy shallows, blue-green depths
 	if (h < 0.0) {
-		float depth_factor = clamp(-h / 80.0, 0.0, 0.7);
-		final_color = mix(final_color, final_color * vec3(0.2, 0.35, 0.55), depth_factor);
+		float depth_factor = clamp(-h / 60.0, 0.0, 0.8);
+		vec3 shallow_tint = vec3(0.6, 0.75, 0.55);  // sandy-green shallows
+		vec3 deep_tint = vec3(0.1, 0.25, 0.4);       // dark blue depths
+		vec3 underwater_color = mix(shallow_tint, deep_tint, depth_factor);
+		final_color = mix(final_color, underwater_color, depth_factor * 0.8);
 	}
 
 	ALBEDO = final_color;
