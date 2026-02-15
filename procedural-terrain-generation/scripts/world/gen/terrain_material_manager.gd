@@ -1,104 +1,26 @@
 class_name TerrainMaterialManager
 extends RefCounted
 
-const DEFAULT_CURVATURE:       float = 0.0008
-const DEFAULT_CURVATURE_START: float = 50.0
+const TERRAIN_SHADER_PATH := "res://shaders/environment/terrain.gdshader"
+const GRASS_TEXTURE_PATH  := "res://assets/textures/grass.png"
+const SAND_TEXTURE_PATH   := "res://assets/textures/sand.png"
+const ROCK_TEXTURE_PATH   := "res://assets/textures/rock.png"
+const SNOW_TEXTURE_PATH   := "res://assets/textures/snow.png"
+
+const DEFAULT_CURVATURE:        float = 0.0008
+const DEFAULT_CURVATURE_START:  float = 50.0
+const DEFAULT_TEXTURE_SCALE:    float = 20.0
+const DEFAULT_TEXTURE_STRENGTH: float = 0.5
 
 func create_terrain_material() -> ShaderMaterial:
 	var mat := ShaderMaterial.new()
-	mat.shader = _create_terrain_shader()
+	mat.shader = load(TERRAIN_SHADER_PATH)
 	mat.set_shader_parameter("curvature", DEFAULT_CURVATURE)
 	mat.set_shader_parameter("curvature_start", DEFAULT_CURVATURE_START)
-	return mat
-
-
-func _create_terrain_shader() -> Shader:
-	var shader_code := """
-shader_type spatial;
-
-uniform float curvature : hint_range(0.0, 0.01) = 0.0008;
-uniform float curvature_start : hint_range(0.0, 200.0) = 50.0;
-
-varying vec3 vertex_color_srgb;
-
-vec3 srgb_to_linear(vec3 srgb) {
-	return mix(
-		srgb / 12.92,
-		pow((srgb + 0.055) / 1.055, vec3(2.4)),
-		step(0.04045, srgb)
-	);
-}
-
-void vertex() {
-	vec3 world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
-	vec3 camera_world_pos = INV_VIEW_MATRIX[3].xyz;
-
-	vec2 offset = world_pos.xz - camera_world_pos.xz;
-	float dist = length(offset);
-	float effective_dist = max(0.0, dist - curvature_start);
-	float curve_amount = effective_dist * effective_dist * curvature;
-
-	world_pos.y -= curve_amount;
-	VERTEX = (inverse(MODEL_MATRIX) * vec4(world_pos, 1.0)).xyz;
-
-	vertex_color_srgb = COLOR.rgb;
-}
-
-void fragment() {
-	vec3 linear_color = srgb_to_linear(vertex_color_srgb);
-
-	ALBEDO = linear_color;
-	ROUGHNESS = 1.0;
-	METALLIC = 0.0;
-	AO = 1.0;
-	AO_LIGHT_AFFECT = 0.5;
-}
-"""
-
-	var shader := Shader.new()
-	shader.code = shader_code
-	return shader
-
-func create_biome_shader() -> Shader:
-	var shader_code := """
-shader_type spatial;
-
-uniform sampler2D sand_texture : source_color;
-uniform sampler2D grass_texture : source_color;
-uniform sampler2D rock_texture : source_color;
-uniform sampler2D snow_texture : source_color;
-
-uniform float texture_scale = 20.0;
-uniform float snow_line = 25.0;
-
-varying vec3 world_pos;
-varying vec3 vertex_color;
-
-void vertex() {
-	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
-	vertex_color = COLOR.rgb;
-}
-
-void fragment() {
-	vec3 base_color = vertex_color;
-
-	float snow_factor = smoothstep(snow_line, snow_line + 15.0, world_pos.y);
-	vec3 snow_color = vec3(0.95, 0.95, 1.0);
-
-	ALBEDO = mix(base_color, snow_color, snow_factor);
-	ROUGHNESS = mix(1.0, 0.7, snow_factor);
-	METALLIC = 0.0;
-}
-"""
-
-	var shader := Shader.new()
-	shader.code = shader_code
-	return shader
-
-
-func create_biome_material() -> ShaderMaterial:
-	var mat := ShaderMaterial.new()
-	mat.shader = create_biome_shader()
-	mat.set_shader_parameter("texture_scale", 20.0)
-	mat.set_shader_parameter("snow_line", 25.0)
+	mat.set_shader_parameter("texture_scale", DEFAULT_TEXTURE_SCALE)
+	mat.set_shader_parameter("texture_strength", DEFAULT_TEXTURE_STRENGTH)
+	mat.set_shader_parameter("grass_texture", load(GRASS_TEXTURE_PATH))
+	mat.set_shader_parameter("sand_texture", load(SAND_TEXTURE_PATH))
+	mat.set_shader_parameter("rock_texture", load(ROCK_TEXTURE_PATH))
+	mat.set_shader_parameter("snow_texture", load(SNOW_TEXTURE_PATH))
 	return mat

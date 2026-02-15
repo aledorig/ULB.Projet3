@@ -24,6 +24,12 @@ func _init(p_seed: int = GameSettingsAutoload.seed, p_octaves: int = GameSetting
 func _sample_noise(x: float, z: float) -> float:
 	return height_noise.get_value(x, z, 0.005, 0.005)
 
+
+# flattens low noise values (rolling terrain) while preserving peaks
+static func _shape_noise(n: float) -> float:
+	return absf(n) ** 1.4 * signf(n)
+
+
 func get_height(x: float, z: float) -> float:
 	var params: Dictionary
 
@@ -35,9 +41,9 @@ func get_height(x: float, z: float) -> float:
 	var base_height: float = params.base
 	var variation: float = params.variation
 
-	var noise_val: float = _sample_noise(x, z)
+	var noise_val: float = _shape_noise(_sample_noise(x, z))
 	var depth_mod: float = depth_noise.get_value(x, z, 0.003, 0.003)
-	var surface_detail: float = surface_noise.get_value(x * 0.02, z * 0.02) * 2.0
+	var surface_detail: float = surface_noise.get_value(x * 0.02, z * 0.02) * 1.0
 
 	var height: float = base_height + (noise_val * variation * (1.0 + depth_mod * 0.3)) + surface_detail
 
@@ -61,8 +67,8 @@ func get_surface_color(x: float, z: float, height: float) -> Color:
 		var darkness: float = clampf(depth / 40.0, 0.0, 0.6)
 		color = color.darkened(darkness)
 
-	if height > 60.0:
-		var snow_amount: float = smoothstep(60.0, 80.0, height)
+	if height > TerrainConstants.SNOW_START_HEIGHT:
+		var snow_amount: float = smoothstep(TerrainConstants.SNOW_START_HEIGHT, TerrainConstants.SNOW_FULL_HEIGHT, height)
 		var snow_color: Color = Color(0.95, 0.97, 1.0)
 		color = color.lerp(snow_color, snow_amount)
 
@@ -82,9 +88,9 @@ func get_vertex_data(x: float, z: float) -> Dictionary:
 			"color": TerrainConstants.BIOME_COLORS[biome],
 		}
 
-	var noise_val: float = _sample_noise(x, z)
+	var noise_val: float = _shape_noise(_sample_noise(x, z))
 	var depth_mod: float = depth_noise.get_value(x, z, 0.003, 0.003)
-	var surface_detail: float = surface_noise.get_value(x * 0.02, z * 0.02) * 2.0
+	var surface_detail: float = surface_noise.get_value(x * 0.02, z * 0.02) * 1.0
 	var height: float = params.base + (noise_val * params.variation * (1.0 + depth_mod * 0.3)) + surface_detail
 	var color: Color = params.color
 
@@ -93,8 +99,8 @@ func get_vertex_data(x: float, z: float) -> Dictionary:
 		var darkness: float = clampf(depth / 40.0, 0.0, 0.6)
 		color = color.darkened(darkness)
 
-	if height > 60.0:
-		var snow_amount: float = smoothstep(60.0, 80.0, height)
+	if height > TerrainConstants.SNOW_START_HEIGHT:
+		var snow_amount: float = smoothstep(TerrainConstants.SNOW_START_HEIGHT, TerrainConstants.SNOW_FULL_HEIGHT, height)
 		color = color.lerp(Color(0.95, 0.97, 1.0), snow_amount)
 
 	return {"height": height, "color": color}
@@ -159,7 +165,7 @@ func get_vertex_data_batch(
 		origin_x * inv_spacing, origin_z * inv_spacing,
 		width, height,
 		spacing * 0.02, spacing * 0.02,
-		2.0
+		1.0
 	)
 
 	var sea_level: float = TerrainConstants.SEA_LEVEL
@@ -168,7 +174,8 @@ func get_vertex_data_batch(
 	var idx: int = 0
 	for z in range(height):
 		for x in range(width):
-			var h: float = base_heights[idx] + (noise_grid[idx] * variations[idx] * (1.0 + depth_grid[idx] * 0.3)) + surface_grid[idx]
+			var shaped_noise: float = _shape_noise(noise_grid[idx])
+			var h: float = base_heights[idx] + (shaped_noise * variations[idx] * (1.0 + depth_grid[idx] * 0.3)) + surface_grid[idx]
 			var color: Color = biome_colors[idx]
 
 			if h < sea_level:
@@ -176,8 +183,8 @@ func get_vertex_data_batch(
 				var darkness: float = clampf(depth / 40.0, 0.0, 0.6)
 				color = color.darkened(darkness)
 
-			if h > 60.0:
-				var snow_amount: float = smoothstep(60.0, 80.0, h)
+			if h > TerrainConstants.SNOW_START_HEIGHT:
+				var snow_amount: float = smoothstep(TerrainConstants.SNOW_START_HEIGHT, TerrainConstants.SNOW_FULL_HEIGHT, h)
 				color = color.lerp(snow_color, snow_amount)
 
 			var local_x: float = x * spacing
