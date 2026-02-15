@@ -23,7 +23,7 @@ extends Control
 var advanced_visible: bool = false
 
 func _ready() -> void:
-	UIsounds.install_sounds(self)
+	# UIsounds.install_sounds(self)
 	advanced_container.visible = false
 	_sync_ui_from_settings()
 	octave_slider.value_changed.connect(_on_octave_changed)

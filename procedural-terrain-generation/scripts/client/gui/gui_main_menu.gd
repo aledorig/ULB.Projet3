@@ -1,7 +1,7 @@
 extends Control
 
-func _on_ready() -> void:
-	UIsounds.install_sounds(self)
+# func _on_ready() -> void:
+	# UIsounds.install_sounds(self)
 
 func _on_play_pressed() -> void:
 	var error := get_tree().change_scene_to_file("res://scenes/main/gui_create_world.tscn")
