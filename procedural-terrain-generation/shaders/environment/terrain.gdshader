@@ -12,7 +12,7 @@ uniform float snow_height : hint_range(20.0, 250.0) = 120.0;
 uniform float snow_blend_range : hint_range(5.0, 50.0) = 30.0;
 uniform float rock_slope_start : hint_range(0.1, 0.9) = 0.55;
 uniform float rock_slope_end : hint_range(0.1, 0.9) = 0.35;
-uniform float beach_height : hint_range(0.0, 15.0) = 3.0;
+uniform float beach_height : hint_range(0.0, 15.0) = 6.0;
 
 varying vec3 climate_data;
 varying vec3 world_pos;
@@ -107,12 +107,16 @@ void fragment() {
 
 	vec3 final_color = mix(base_tint, base_tint * tex_blend, texture_strength);
 
+	// highlight shore for better contrast with water
+	float shore_glow = smoothstep(6.0, 1.0, h) * smoothstep(-2.0, 1.0, h);
+	final_color = mix(final_color, vec3(0.85, 0.8, 0.6), shore_glow * 0.4);
+
 	if (h < 0.0) {
 		float depth_factor = clamp(-h / 60.0, 0.0, 0.8);
-		vec3 shallow_tint = vec3(0.6, 0.75, 0.55);  // sandy-green shallows
-		vec3 deep_tint = vec3(0.1, 0.25, 0.4);       // dark blue depths
+		vec3 shallow_tint = vec3(0.55, 0.7, 0.5);
+		vec3 deep_tint = vec3(0.05, 0.15, 0.35);
 		vec3 underwater_color = mix(shallow_tint, deep_tint, depth_factor);
-		final_color = mix(final_color, underwater_color, depth_factor * 0.8);
+		final_color = mix(final_color, underwater_color, depth_factor * 0.85);
 	}
 
 	ALBEDO = final_color;
