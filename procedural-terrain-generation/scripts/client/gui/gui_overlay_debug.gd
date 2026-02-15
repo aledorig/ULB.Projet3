@@ -52,15 +52,17 @@ func _process(delta: float) -> void:
 	var chunk_stats := chunk_manager.get_stats()
 
 	text = ""
-	text += "Boundless Horizons v0.1\n"
+	text += "Boundless Horizons v0.2\n"
 	text += "%d fps (avg %.0f)\n" % [Engine.get_frames_per_second(), avg_fps]
 	text += "\n"
 	text += "XYZ: %.1f / %.1f / %.1f\n" % [pos.x, pos.y, pos.z]
 	text += "Chunk: %d %d, %d L, %d P\n" % [chunk_pos.x, chunk_pos.y, chunk_stats.loaded_chunks, chunk_stats.pending_chunks]
 	text += "Speed: %.1f (vel %.1f)\n" % [ship.forward_speed, ship.velocity.length()]
 	text += "\n"
-	text += "Biome: %s [%s]\n" % [debug_data.biome, debug_data.temp_category]
+	text += "Zone: %s\n" % debug_data.zone
 	text += "Height: %.1f %s\n" % [debug_data.height, "(underwater)" if debug_data.underwater else ""]
+	text += "Cont: %.2f  Peaks: %.2f\n" % [debug_data.continentalness, debug_data.peaks]
+	text += "Temp: %.2f  Moist: %.2f\n" % [debug_data.temperature, debug_data.moisture]
 
 func _update_fps(delta: float) -> void:
 	fps_samples.append(1.0 / delta)
@@ -80,8 +82,6 @@ func _print_performance_report() -> void:
 	print("[CHUNKS] loaded=%d pending=%d cached=%d unload_queue=%d" % [
 		stats.loaded_chunks, stats.pending_chunks, stats.cached_meshes, stats.queued_for_unload
 	])
-
-	chunk_manager.debug_terrain_generator.biome_manager.print_cache_stats()
 
 	var mem_static := Performance.get_monitor(Performance.MEMORY_STATIC)
 	var mem_peak := Performance.get_monitor(Performance.MEMORY_STATIC_MAX)

@@ -5,13 +5,8 @@ extends Control
 @onready var advanced_toggle: Button = %AdvancedToggle
 @onready var octave_slider: HSlider = %OctaveSlider
 @onready var octave_label: Label = %OctaveValue
-@onready var biome_size_slider: HSlider = %BiomeSizeSlider
-@onready var biome_size_label: Label = %BiomeSizeValue
 @onready var render_distance_slider: HSlider = %RenderDistanceSlider
 @onready var render_distance_label: Label = %RenderDistanceValue
-@onready var biome_blending_check: CheckBox = %BiomeBlendingCheck
-@onready var blend_radius_slider: HSlider = %BlendRadiusSlider
-@onready var blend_radius_label: Label = %BlendRadiusValue
 @onready var chunk_size_slider: HSlider = %ChunkSizeSlider
 @onready var chunk_size_label: Label = %ChunkSizeValue
 @onready var vertex_spacing_slider: HSlider = %VertexSpacingSlider
@@ -27,9 +22,7 @@ func _ready() -> void:
 	advanced_container.visible = false
 	_sync_ui_from_settings()
 	octave_slider.value_changed.connect(_on_octave_changed)
-	biome_size_slider.value_changed.connect(_on_biome_size_changed)
 	render_distance_slider.value_changed.connect(_on_render_distance_changed)
-	blend_radius_slider.value_changed.connect(_on_blend_radius_changed)
 	chunk_size_slider.value_changed.connect(_on_chunk_size_changed)
 	vertex_spacing_slider.value_changed.connect(_on_vertex_spacing_changed)
 	worker_threads_slider.value_changed.connect(_on_worker_threads_changed)
@@ -38,13 +31,8 @@ func _sync_ui_from_settings() -> void:
 	seed_input.text = str(GameSettingsAutoload.seed)
 	octave_slider.value = GameSettingsAutoload.octave
 	octave_label.text = str(GameSettingsAutoload.octave)
-	biome_size_slider.value = GameSettingsAutoload.biome_size
-	biome_size_label.text = str(GameSettingsAutoload.biome_size)
 	render_distance_slider.value = GameSettingsAutoload.render_distance
 	render_distance_label.text = str(GameSettingsAutoload.render_distance)
-	biome_blending_check.button_pressed = GameSettingsAutoload.biome_blending
-	blend_radius_slider.value = GameSettingsAutoload.blend_radius
-	blend_radius_label.text = str(int(GameSettingsAutoload.blend_radius))
 	chunk_size_slider.value = GameSettingsAutoload.chunk_size
 	chunk_size_label.text = str(GameSettingsAutoload.chunk_size)
 	vertex_spacing_slider.value = GameSettingsAutoload.vertex_spacing
@@ -61,18 +49,12 @@ func _on_advanced_toggle_pressed() -> void:
 func _on_refresh_seed_pressed() -> void:
 	GameSettingsAutoload.randomize_seed()
 	seed_input.text = str(GameSettingsAutoload.seed)
-	
+
 func _on_octave_changed(value: float) -> void:
 	octave_label.text = str(int(value))
 
-func _on_biome_size_changed(value: float) -> void:
-	biome_size_label.text = str(int(value))
-
 func _on_render_distance_changed(value: float) -> void:
 	render_distance_label.text = str(int(value))
-
-func _on_blend_radius_changed(value: float) -> void:
-	blend_radius_label.text = str(int(value))
 
 func _on_chunk_size_changed(value: float) -> void:
 	chunk_size_label.text = str(int(value))
@@ -94,10 +76,7 @@ func _on_play_pressed() -> void:
 			GameSettingsAutoload.seed = GameSettings.DEFAULT_SEED
 
 	GameSettingsAutoload.octave = int(octave_slider.value)
-	GameSettingsAutoload.biome_size = int(biome_size_slider.value)
 	GameSettingsAutoload.render_distance = int(render_distance_slider.value)
-	GameSettingsAutoload.biome_blending = biome_blending_check.button_pressed
-	GameSettingsAutoload.blend_radius = blend_radius_slider.value
 	GameSettingsAutoload.chunk_size = int(chunk_size_slider.value)
 	GameSettingsAutoload.vertex_spacing = vertex_spacing_slider.value
 	GameSettingsAutoload.max_worker_threads = int(worker_threads_slider.value)

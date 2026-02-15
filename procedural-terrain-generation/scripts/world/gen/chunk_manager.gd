@@ -91,8 +91,6 @@ func _initialize_systems() -> void:
 		p_seed = randi()
 
 	debug_terrain_generator = TerrainGenerator.new(p_seed, GameSettingsAutoload.octave)
-	debug_terrain_generator.use_biome_blending = GameSettingsAutoload.biome_blending
-	debug_terrain_generator.blend_radius = GameSettingsAutoload.blend_radius
 
 	print("ChunkManager: Initialized with %d worker threads" % max_worker_threads)
 
@@ -411,6 +409,10 @@ func _on_settings_changed() -> void:
 	var old_distance := render_distance
 	render_distance = GameSettingsAutoload.render_distance
 	unload_distance = render_distance * 2
+
+	if terrain_material:
+		terrain_material.set_shader_parameter("curvature", GameSettingsAutoload.curvature)
+		terrain_material.set_shader_parameter("curvature_start", GameSettingsAutoload.curvature_start)
 
 	if render_distance != old_distance:
 		update_chunks(true)

@@ -18,8 +18,8 @@ uniform float wave_height : hint_range(0.0, 2.0) = 0.3;
 uniform float fresnel_power : hint_range(1.0, 10.0) = 5.0;
 
 // World curvature (must match terrain shader)
-uniform float curvature : hint_range(0.0, 0.01) = 0.0008;
-uniform float curvature_start : hint_range(0.0, 200.0) = 50.0;
+uniform float curvature : hint_range(0.0, 0.01) = 0.0003;
+uniform float curvature_start : hint_range(0.0, 200.0) = 120.0;
 
 varying vec3 world_pos;
 varying vec3 world_normal;

@@ -1,108 +1,97 @@
 class_name TerrainGenerator
 extends RefCounted
 
-var biome_manager: BiomeManager
 var height_noise:  OctaveNoise
 var depth_noise:   OctaveNoise
 var surface_noise: SimplexNoise
-var seed_value:    int
 
-var use_biome_blending: bool = true
-var blend_radius: float = 16.0
+var continentalness_noise: OctaveNoise
+var peaks_noise:           OctaveNoise
+var temperature_noise:     SimplexNoise
+var moisture_noise:        SimplexNoise
+
+var seed_value: int
+
+# Noise frequencies
+const CONTINENT_FREQ:    float = 0.00015
+const PEAKS_FREQ:        float = 0.0003
+const TEMPERATURE_FREQ:  float = 0.0003
+const MOISTURE_FREQ:     float = 0.00025
+const HEIGHT_FREQ:       float = 0.0005
+const DEPTH_FREQ:        float = 0.0008
+const SURFACE_FREQ:      float = 0.012
+
+# Height shaping
+const OCEAN_BASE:     float = -50.0
+const LAND_BASE:      float = 4.0
+const MIN_AMPLITUDE:  float = 25.0
+const MAX_AMPLITUDE:  float = 200.0
+const SURFACE_AMP:    float = 3.0
+
 
 func _init(p_seed: int = GameSettingsAutoload.seed, p_octaves: int = GameSettingsAutoload.octave) -> void:
 	seed_value = p_seed
-	biome_manager = BiomeManager.new(p_seed)
-
 	var rng := RandomNumberGenerator.new()
 	rng.seed = p_seed
+
 	height_noise  = OctaveNoise.new(rng, p_octaves)
 	depth_noise   = OctaveNoise.new(rng, p_octaves)
 	surface_noise = SimplexNoise.new(rng)
 
+	continentalness_noise = OctaveNoise.new(rng, p_octaves)
+	peaks_noise           = OctaveNoise.new(rng, p_octaves)
+	temperature_noise     = SimplexNoise.new(rng)
+	moisture_noise        = SimplexNoise.new(rng)
 
-func _sample_noise(x: float, z: float) -> float:
-	return height_noise.get_value(x, z, 0.005, 0.005)
+
+static func _smoothstep(edge0: float, edge1: float, x: float) -> float:
+	var t: float = clampf((x - edge0) / (edge1 - edge0), 0.0, 1.0)
+	return t * t * (3.0 - 2.0 * t)
 
 
-# flattens low noise values (rolling terrain) while preserving peaks
 static func _shape_noise(n: float) -> float:
-	return absf(n) ** 1.4 * signf(n)
+	return absf(n) ** 1.6 * signf(n)
+
+
+func _compute_base(cont: float) -> float:
+	var sea_land: float = lerpf(OCEAN_BASE, LAND_BASE, _smoothstep(-0.5, -0.15, cont))
+	var inland_boost: float = _smoothstep(-0.15, 0.2, cont) * 20.0
+	return sea_land + inland_boost
+
+
+func _compute_amplitude(cont: float, peaks: float) -> float:
+	var land_factor: float = _smoothstep(-0.5, -0.15, cont)
+	return lerpf(MIN_AMPLITUDE, MAX_AMPLITUDE, _smoothstep(-0.4, 0.5, peaks)) * lerpf(0.3, 1.0, land_factor)
 
 
 func get_height(x: float, z: float) -> float:
-	var params: Dictionary
+	var cont: float = continentalness_noise.get_value(x, z, CONTINENT_FREQ, CONTINENT_FREQ)
+	var peaks: float = peaks_noise.get_value(x, z, PEAKS_FREQ, PEAKS_FREQ)
 
-	if use_biome_blending:
-		params = biome_manager.get_blended_params(x, z, blend_radius)
-	else:
-		params = biome_manager.get_terrain_params(x, z)
+	var base: float = _compute_base(cont)
+	var amplitude: float = _compute_amplitude(cont, peaks)
 
-	var base_height: float = params.base
-	var variation: float = params.variation
+	var shaped: float = _shape_noise(height_noise.get_value(x, z, HEIGHT_FREQ, HEIGHT_FREQ))
+	var depth_mod: float = depth_noise.get_value(x, z, DEPTH_FREQ, DEPTH_FREQ)
+	var surface_detail: float = surface_noise.get_value(x * SURFACE_FREQ, z * SURFACE_FREQ) * SURFACE_AMP / 70.0
 
-	var noise_val: float = _shape_noise(_sample_noise(x, z))
-	var depth_mod: float = depth_noise.get_value(x, z, 0.003, 0.003)
-	var surface_detail: float = surface_noise.get_value(x * 0.02, z * 0.02) * 1.0
-
-	var height: float = base_height + (noise_val * variation * (1.0 + depth_mod * 0.3)) + surface_detail
-
-	return height
-
-func get_biome(x: float, z: float) -> TerrainConstants.Biome:
-	return biome_manager.get_biome(x, z)
+	return base + (shaped * amplitude * (1.0 + depth_mod * 0.6)) + surface_detail
 
 
-func get_surface_color(x: float, z: float, height: float) -> Color:
-	var color: Color
-
-	if use_biome_blending:
-		var params: Dictionary = biome_manager.get_blended_params(x, z, blend_radius)
-		color = params.color
-	else:
-		color = biome_manager.get_biome_color(x, z)
-
-	if height < TerrainConstants.SEA_LEVEL:
-		var depth: float = TerrainConstants.SEA_LEVEL - height
-		var darkness: float = clampf(depth / 40.0, 0.0, 0.6)
-		color = color.darkened(darkness)
-
-	if height > TerrainConstants.SNOW_START_HEIGHT:
-		var snow_amount: float = smoothstep(TerrainConstants.SNOW_START_HEIGHT, TerrainConstants.SNOW_FULL_HEIGHT, height)
-		var snow_color: Color = Color(0.95, 0.97, 1.0)
-		color = color.lerp(snow_color, snow_amount)
-
-	return color
+func get_climate_color(x: float, z: float) -> Color:
+	var temp_raw: float = temperature_noise.get_value(x * TEMPERATURE_FREQ, z * TEMPERATURE_FREQ)
+	var moist_raw: float = moisture_noise.get_value(x * MOISTURE_FREQ, z * MOISTURE_FREQ)
+	var cont_raw: float = continentalness_noise.get_value(x, z, CONTINENT_FREQ, CONTINENT_FREQ)
+	return Color(
+		clampf(temp_raw * 0.5 + 0.5, 0.0, 1.0),
+		clampf(moist_raw * 0.5 + 0.5, 0.0, 1.0),
+		clampf(cont_raw * 0.5 + 0.5, 0.0, 1.0),
+	)
 
 
 func get_vertex_data(x: float, z: float) -> Dictionary:
-	var params: Dictionary
-
-	if use_biome_blending:
-		params = biome_manager.get_blended_params(x, z, blend_radius)
-	else:
-		var biome: TerrainConstants.Biome = biome_manager.get_biome(x, z)
-		params = {
-			"base": TerrainConstants.BIOME_PARAMS[biome].base,
-			"variation": TerrainConstants.BIOME_PARAMS[biome].variation,
-			"color": TerrainConstants.BIOME_COLORS[biome],
-		}
-
-	var noise_val: float = _shape_noise(_sample_noise(x, z))
-	var depth_mod: float = depth_noise.get_value(x, z, 0.003, 0.003)
-	var surface_detail: float = surface_noise.get_value(x * 0.02, z * 0.02) * 1.0
-	var height: float = params.base + (noise_val * params.variation * (1.0 + depth_mod * 0.3)) + surface_detail
-	var color: Color = params.color
-
-	if height < TerrainConstants.SEA_LEVEL:
-		var depth: float = TerrainConstants.SEA_LEVEL - height
-		var darkness: float = clampf(depth / 40.0, 0.0, 0.6)
-		color = color.darkened(darkness)
-
-	if height > TerrainConstants.SNOW_START_HEIGHT:
-		var snow_amount: float = smoothstep(TerrainConstants.SNOW_START_HEIGHT, TerrainConstants.SNOW_FULL_HEIGHT, height)
-		color = color.lerp(Color(0.95, 0.97, 1.0), snow_amount)
-
+	var height: float = get_height(x, z)
+	var color: Color = get_climate_color(x, z)
 	return {"height": height, "color": color}
 
 
@@ -114,31 +103,25 @@ func get_vertex_data_batch(
 	out_colors: PackedColorArray
 ) -> void:
 	var total_verts: int = width * height
-
-	var base_heights: PackedFloat32Array = PackedFloat32Array()
-	var variations: PackedFloat32Array = PackedFloat32Array()
-	var biome_colors: PackedColorArray = PackedColorArray()
-
-	base_heights.resize(total_verts)
-	variations.resize(total_verts)
-	biome_colors.resize(total_verts)
-
-	if use_biome_blending:
-		biome_manager.get_params_batch_catmull_rom(
-			origin_x, origin_z, width, height, spacing,
-			base_heights, variations, biome_colors
-		)
-	else:
-		biome_manager.get_params_batch_packed(
-			origin_x, origin_z, width, height, spacing, 0.0,
-			base_heights, variations, biome_colors
-		)
-
-	# Grid offset for batch noise: gx goes 0..width-1, world pos = origin + gx*spacing
-	# generate_octaves computes: d3 * x_scale * (x_off + gx)
-	# We want:                   d3 * 0.005 * (origin + gx * spacing)
-	# So: x_scale = spacing * freq, x_off = origin / spacing
 	var inv_spacing: float = 1.0 / spacing
+
+	var cont_grid: PackedFloat32Array = PackedFloat32Array()
+	cont_grid.resize(total_verts)
+	continentalness_noise.generate_octaves(
+		cont_grid,
+		origin_x * inv_spacing, origin_z * inv_spacing,
+		width, height,
+		spacing * CONTINENT_FREQ, spacing * CONTINENT_FREQ
+	)
+
+	var peaks_grid: PackedFloat32Array = PackedFloat32Array()
+	peaks_grid.resize(total_verts)
+	peaks_noise.generate_octaves(
+		peaks_grid,
+		origin_x * inv_spacing, origin_z * inv_spacing,
+		width, height,
+		spacing * PEAKS_FREQ, spacing * PEAKS_FREQ
+	)
 
 	var noise_grid: PackedFloat32Array = PackedFloat32Array()
 	noise_grid.resize(total_verts)
@@ -146,7 +129,7 @@ func get_vertex_data_batch(
 		noise_grid,
 		origin_x * inv_spacing, origin_z * inv_spacing,
 		width, height,
-		spacing * 0.005, spacing * 0.005
+		spacing * HEIGHT_FREQ, spacing * HEIGHT_FREQ
 	)
 
 	var depth_grid: PackedFloat32Array = PackedFloat32Array()
@@ -155,7 +138,7 @@ func get_vertex_data_batch(
 		depth_grid,
 		origin_x * inv_spacing, origin_z * inv_spacing,
 		width, height,
-		spacing * 0.003, spacing * 0.003
+		spacing * DEPTH_FREQ, spacing * DEPTH_FREQ
 	)
 
 	var surface_grid: PackedFloat32Array = PackedFloat32Array()
@@ -164,66 +147,100 @@ func get_vertex_data_batch(
 		surface_grid,
 		origin_x * inv_spacing, origin_z * inv_spacing,
 		width, height,
-		spacing * 0.02, spacing * 0.02,
+		spacing * SURFACE_FREQ, spacing * SURFACE_FREQ,
+		SURFACE_AMP / 70.0
+	)
+
+	var temp_grid: PackedFloat32Array = PackedFloat32Array()
+	temp_grid.resize(total_verts)
+	temperature_noise.add(
+		temp_grid,
+		origin_x * inv_spacing, origin_z * inv_spacing,
+		width, height,
+		spacing * TEMPERATURE_FREQ, spacing * TEMPERATURE_FREQ,
 		1.0
 	)
 
-	var sea_level: float = TerrainConstants.SEA_LEVEL
-	var snow_color := Color(0.95, 0.97, 1.0)
+	var moist_grid: PackedFloat32Array = PackedFloat32Array()
+	moist_grid.resize(total_verts)
+	moisture_noise.add(
+		moist_grid,
+		origin_x * inv_spacing, origin_z * inv_spacing,
+		width, height,
+		spacing * MOISTURE_FREQ, spacing * MOISTURE_FREQ,
+		1.0
+	)
 
 	var idx: int = 0
 	for z in range(height):
 		for x in range(width):
+			var cont: float = cont_grid[idx]
+			var peaks: float = peaks_grid[idx]
+
+			var base: float = _compute_base(cont)
+			var amplitude: float = _compute_amplitude(cont, peaks)
+
 			var shaped_noise: float = _shape_noise(noise_grid[idx])
-			var h: float = base_heights[idx] + (shaped_noise * variations[idx] * (1.0 + depth_grid[idx] * 0.3)) + surface_grid[idx]
-			var color: Color = biome_colors[idx]
+			var h: float = base + (shaped_noise * amplitude * (1.0 + depth_grid[idx] * 0.6)) + surface_grid[idx]
 
-			if h < sea_level:
-				var depth: float = sea_level - h
-				var darkness: float = clampf(depth / 40.0, 0.0, 0.6)
-				color = color.darkened(darkness)
-
-			if h > TerrainConstants.SNOW_START_HEIGHT:
-				var snow_amount: float = smoothstep(TerrainConstants.SNOW_START_HEIGHT, TerrainConstants.SNOW_FULL_HEIGHT, h)
-				color = color.lerp(snow_color, snow_amount)
+			var temp_01: float = clampf(temp_grid[idx] * 0.5 + 0.5, 0.0, 1.0)
+			var moist_01: float = clampf(moist_grid[idx] * 0.5 + 0.5, 0.0, 1.0)
+			var cont_01: float = clampf(cont * 0.5 + 0.5, 0.0, 1.0)
 
 			var local_x: float = x * spacing
 			var local_z: float = z * spacing
 			out_vertices[idx] = Vector3(local_x, h, local_z)
-			out_colors[idx] = color
+			out_colors[idx] = Color(temp_01, moist_01, cont_01)
 			idx += 1
 
 
-func is_underwater(height: float) -> bool:
-	return height < TerrainConstants.SEA_LEVEL
-
-func get_biome_name(x: float, z: float) -> String:
-	var biome: TerrainConstants.Biome = get_biome(x, z)
-	return TerrainConstants.BIOME_NAMES[biome]
+func is_underwater(height_val: float) -> bool:
+	return height_val < TerrainConstants.SEA_LEVEL
 
 
 func get_debug_info(x: float, z: float) -> Dictionary:
-	var biome: TerrainConstants.Biome = get_biome(x, z)
-	var height: float = get_height(x, z)
-	var temp_category: int = TerrainConstants.BIOME_TEMPERATURES.get(biome, TerrainConstants.TempCategory.MEDIUM)
+	var height_val: float = get_height(x, z)
+	var cont: float = continentalness_noise.get_value(x, z, CONTINENT_FREQ, CONTINENT_FREQ)
+	var peaks: float = peaks_noise.get_value(x, z, PEAKS_FREQ, PEAKS_FREQ)
+	var temp: float = temperature_noise.get_value(x * TEMPERATURE_FREQ, z * TEMPERATURE_FREQ)
+	var moist: float = moisture_noise.get_value(x * MOISTURE_FREQ, z * MOISTURE_FREQ)
 
 	return {
-		"biome": TerrainConstants.BIOME_NAMES[biome],
-		"height": height,
-		"temp_category": _temp_category_name(temp_category),
-		"underwater": is_underwater(height),
+		"zone": _get_zone_name(cont, peaks, temp, moist, height_val),
+		"height": height_val,
+		"continentalness": cont,
+		"peaks": peaks,
+		"temperature": temp,
+		"moisture": moist,
+		"underwater": is_underwater(height_val),
 	}
 
 
-func _temp_category_name(category: int) -> String:
-	match category:
-		TerrainConstants.TempCategory.OCEAN:
-			return "Ocean"
-		TerrainConstants.TempCategory.COLD:
-			return "Cold"
-		TerrainConstants.TempCategory.MEDIUM:
-			return "Medium"
-		TerrainConstants.TempCategory.WARM:
-			return "Warm"
-		_:
-			return "Unknown"
+func _get_zone_name(_cont: float, _peaks: float, temp: float, moist: float, h: float) -> String:
+	if h < TerrainConstants.SEA_LEVEL - 20.0:
+		return "Deep Ocean"
+	if h < TerrainConstants.SEA_LEVEL:
+		return "Ocean"
+	if h < 8.0:
+		return "Coast"
+	if h >= 200.0:
+		if temp < -0.2:
+			return "Snow Peaks"
+		return "High Peaks"
+	if h >= 120.0:
+		if temp < -0.2:
+			return "Snow Mountains"
+		return "Mountains"
+	if h >= 60.0:
+		if temp < -0.2:
+			return "Tundra Hills"
+		return "Highlands"
+	if temp > 0.4:
+		if moist < -0.1:
+			return "Desert"
+		return "Jungle"
+	if temp < -0.3:
+		return "Tundra"
+	if moist > 0.1:
+		return "Forest"
+	return "Plains"

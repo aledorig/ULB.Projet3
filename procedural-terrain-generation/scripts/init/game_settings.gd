@@ -8,15 +8,12 @@ const DEFAULT_SEED := 732647346203746
 # Pre-game settings (set before world loads)
 var seed:                int = DEFAULT_SEED
 var octave:              int = 4
-var biome_size:          int = 4
 var chunk_size:          int = 40
 var vertex_spacing:      float = 2.0
 var max_worker_threads:  int = 4
 var chunks_per_frame:    int = 2
 var enable_mesh_caching: bool = true
 var cache_max_size:      int = 256
-var biome_blending:      bool = true
-var blend_radius:        float = 16.0
 
 # Runtime settings (changeable in-game, emit signal)
 var render_distance: int = 4:
@@ -47,6 +44,16 @@ var roll_speed: float = 1.9:
 var yaw_speed: float = 1.25:
 	set(value):
 		yaw_speed = value
+		runtime_settings_changed.emit()
+
+var curvature: float = 0.0003:
+	set(value):
+		curvature = value
+		runtime_settings_changed.emit()
+
+var curvature_start: float = 120.0:
+	set(value):
+		curvature_start = value
 		runtime_settings_changed.emit()
 
 

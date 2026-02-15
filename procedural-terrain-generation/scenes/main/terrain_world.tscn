@@ -27,12 +27,14 @@ ambient_light_energy = 0.35
 reflected_light_source = 2
 fog_enabled = true
 fog_light_color = Color(0.7, 0.8, 0.9, 1)
-fog_density = 0.002
+fog_density = 0.001
 fog_sky_affect = 0.505
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_nikly"]
 shader = ExtResource("6_htxxt")
-shader_parameter/pixel_size = 3
+shader_parameter/pixel_size = 2
+shader_parameter/color_depth = 24
+shader_parameter/dither_strength = 0.4
 
 [node name="TerrainWorld" type="Node3D" unique_id=1309497319]
 script = ExtResource("1_2nvvr")

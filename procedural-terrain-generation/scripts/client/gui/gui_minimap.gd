@@ -2,17 +2,18 @@ class_name GuiMinimap
 extends Control
 
 @export var display_size:    int   = 200
-@export var sample_size:     int   = 50
+@export var sample_size:     int   = 20
 @export var world_scale:     float = 16.0
-@export var update_interval: float = 0.2
+@export var update_interval: float = 0.5
 
 @onready var ship: CharacterBody3D = get_node("/root/TerrainWorld/Executioner")
 @onready var chunk_manager: ChunkManager = get_node("/root/TerrainWorld")
 
-var biome_manager: BiomeManager = null
+var terrain_gen:   TerrainGenerator = null
 var texture_rect:  TextureRect  = null
-var image:         Image     = null
-var player_marker: ColorRect = null
+var image:         Image        = null
+var map_texture:   ImageTexture = null
+var player_marker: ColorRect    = null
 var update_timer:  float = 0.0
 
 func _ready() -> void:
@@ -25,7 +26,7 @@ func _ready() -> void:
 	if not chunk_manager.is_node_ready():
 		await chunk_manager.ready
 
-	biome_manager = chunk_manager.debug_terrain_generator.biome_manager
+	terrain_gen = chunk_manager.debug_terrain_generator
 	_setup_ui()
 	_update_map()
 
@@ -60,6 +61,8 @@ func _setup_ui() -> void:
 
 	# Small image that gets scaled up by TextureRect
 	image = Image.create(sample_size, sample_size, false, Image.FORMAT_RGB8)
+	map_texture = ImageTexture.create_from_image(image)
+	texture_rect.texture = map_texture
 
 func _process(delta: float) -> void:
 	update_timer += delta
@@ -69,7 +72,7 @@ func _process(delta: float) -> void:
 
 
 func _update_map() -> void:
-	if ship == null or biome_manager == null:
+	if ship == null or terrain_gen == null:
 		return
 
 	var center_x: float = ship.global_position.x
@@ -81,7 +84,44 @@ func _update_map() -> void:
 			var world_x: float = center_x + (px - half) * world_scale
 			var world_z: float = center_z + (py - half) * world_scale
 
-			var biome: TerrainConstants.Biome = biome_manager.get_biome(world_x, world_z)
-			image.set_pixel(px, py, TerrainConstants.BIOME_COLORS[biome])
+			var h: float = terrain_gen.get_height(world_x, world_z)
+			var climate: Color = terrain_gen.get_climate_color(world_x, world_z)
 
-	texture_rect.texture = ImageTexture.create_from_image(image)
+			var map_color: Color
+			if h < TerrainConstants.SEA_LEVEL:
+				var depth_factor: float = clampf(-h / 80.0, 0.0, 0.7)
+				map_color = Color(0.1, 0.3 - depth_factor * 0.2, 0.6 - depth_factor * 0.3)
+			else:
+				var temp: float = climate.r
+				var moist: float = climate.g
+				var cont: float = climate.b
+
+				# Desert: hot + dry
+				var is_desert: float = clampf((temp - 0.65) / 0.15, 0.0, 1.0) * clampf((0.45 - moist) / 0.15, 0.0, 1.0)
+
+				# Beach: near sea level
+				var is_beach: float = clampf((4.0 - h) / 4.0, 0.0, 1.0) * clampf((cont - 0.3) / 0.2, 0.0, 1.0)
+
+				var sand_f: float = maxf(is_desert, is_beach)
+
+				# Grass base color
+				var grass_color: Color = Color(0.3, 0.6, 0.2).lerp(Color(0.6, 0.5, 0.3), 1.0 - moist)
+				grass_color = grass_color.lerp(Color(0.55, 0.6, 0.45), clampf((0.5 - temp) * 2.0, 0.0, 1.0))
+
+				var sand_color: Color = Color(0.85, 0.8, 0.55)
+				map_color = grass_color.lerp(sand_color, sand_f)
+
+				# Mountain rock at height > 80
+				if h > 80.0:
+					var rock_f: float = clampf((h - 80.0) / 60.0, 0.0, 1.0)
+					map_color = map_color.lerp(Color(0.5, 0.48, 0.45), rock_f * 0.7)
+
+				# Snow (temperature-adjusted)
+				var snow_line: float = 120.0 + (temp - 0.5) * 70.0
+				if h > snow_line:
+					var snow_f: float = clampf((h - snow_line) / 30.0, 0.0, 1.0)
+					map_color = map_color.lerp(Color(0.95, 0.97, 1.0), snow_f)
+
+			image.set_pixel(px, py, map_color)
+
+	map_texture.update(image)

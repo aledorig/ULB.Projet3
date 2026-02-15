@@ -5,12 +5,14 @@ extends MeshInstance3D
 @export var follow_camera: bool = true
 
 var camera: Camera3D
+var water_material: ShaderMaterial
 
 func _ready() -> void:
 	_setup_water_mesh()
 	_setup_water_material()
 	camera = get_viewport().get_camera_3d()
 	position.y = TerrainConstants.SEA_LEVEL
+	GameSettingsAutoload.runtime_settings_changed.connect(_on_settings_changed)
 
 
 func _setup_water_mesh() -> void:
@@ -33,7 +35,17 @@ func _setup_water_material() -> void:
 	mat.set_shader_parameter("wave_scale", 0.015)
 	mat.set_shader_parameter("wave_height", 0.2)
 	mat.set_shader_parameter("fresnel_power", 4.0)
+	mat.set_shader_parameter("curvature", GameSettingsAutoload.curvature)
+	mat.set_shader_parameter("curvature_start", GameSettingsAutoload.curvature_start)
+	water_material = mat
 	material_override = mat
+
+
+func _on_settings_changed() -> void:
+	if water_material:
+		water_material.set_shader_parameter("curvature", GameSettingsAutoload.curvature)
+		water_material.set_shader_parameter("curvature_start", GameSettingsAutoload.curvature_start)
+
 
 func _process(_delta: float) -> void:
 	if follow_camera and camera:
