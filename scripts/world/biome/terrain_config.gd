@@ -99,8 +99,14 @@ const GRASS_TEXTURE_PATH:  String = "res://assets/textures/grass.png"
 const SAND_TEXTURE_PATH:   String = "res://assets/textures/sand.png"
 const ROCK_TEXTURE_PATH:   String = "res://assets/textures/rock.png"
 const SNOW_TEXTURE_PATH:   String = "res://assets/textures/snow.png"
+const GRASS_DRY_TEXTURE_PATH:   String = "res://assets/textures/grass-dirt-1.png"
+const GRASS_LUSH_TEXTURE_PATH:  String = "res://assets/textures/grass-forest.png"
+const SAND_DESERT_TEXTURE_PATH: String = "res://assets/textures/sand-dune.png"
+const ROCK_CLIFF_TEXTURE_PATH:  String = "res://assets/textures/stone-cliff-1.png"
+const ROCK_DARK_TEXTURE_PATH:   String = "res://assets/textures/stone-dark-1.png"
+const SNOW_CHUNKY_TEXTURE_PATH: String = "res://assets/textures/snow-chunk-1.png"
+const ICE_TEXTURE_PATH:         String = "res://assets/textures/ice-1.png"
 const TEXTURE_SCALE:       float  = 20.0
-const TEXTURE_STRENGTH:    float  = 0.65
 
 # Shader-facing
 const SNOW_HEIGHT:      float = 180.0

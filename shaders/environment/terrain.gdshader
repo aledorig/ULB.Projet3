@@ -5,8 +5,15 @@ uniform sampler2D sand_texture  : source_color, filter_linear_mipmap, repeat_ena
 uniform sampler2D rock_texture  : source_color, filter_linear_mipmap, repeat_enable;
 uniform sampler2D snow_texture  : source_color, filter_linear_mipmap, repeat_enable;
 
+uniform sampler2D grass_dry_texture : source_color, filter_linear_mipmap, repeat_enable;
+uniform sampler2D grass_lush_texture : source_color, filter_linear_mipmap, repeat_enable;
+uniform sampler2D sand_desert_texture : source_color, filter_linear_mipmap, repeat_enable;
+uniform sampler2D rock_cliff_texture : source_color, filter_linear_mipmap, repeat_enable;
+uniform sampler2D rock_dark_texture : source_color, filter_linear_mipmap, repeat_enable;
+uniform sampler2D snow_chunky_texture : source_color, filter_linear_mipmap, repeat_enable;
+uniform sampler2D ice_texture : source_color, filter_linear_mipmap, repeat_enable;
+
 uniform float texture_scale : hint_range(1.0, 100.0) = 20.0;
-uniform float texture_strength : hint_range(0.0, 1.0) = 0.65;
 
 uniform float snow_height : hint_range(20.0, 400.0) = 180.0;
 uniform float snow_blend_range : hint_range(5.0, 80.0) = 45.0;
@@ -82,10 +89,40 @@ void fragment() {
 	rock_w /= total;
 	snow_w /= total;
 
-	vec3 grass_s = texture(grass_texture, uv).rgb;
-	vec3 sand_s  = texture(sand_texture, uv).rgb;
-	vec3 rock_s  = texture(rock_texture, uv).rgb;
-	vec3 snow_s  = texture(snow_texture, uv).rgb;
+	// grass variants
+	// dry grass appears in hot+dry areas, lush grass in cool+wet areas
+	vec3 grass_base = texture(grass_texture, uv).rgb;
+	vec3 grass_dry = texture(grass_dry_texture, uv).rgb;
+	vec3 grass_lush = texture(grass_lush_texture, uv).rgb;
+	float dry_factor = smoothstep(0.4, 0.55, temperature) * smoothstep(0.55, 0.3, moisture);
+	float lush_factor = smoothstep(0.55, 0.3, temperature) * smoothstep(0.35, 0.6, moisture);
+	float base_factor = max(1.0 - dry_factor - lush_factor, 0.0);
+	vec3 grass_s = grass_base * base_factor + grass_dry * dry_factor + grass_lush * lush_factor;
+
+	// sand variants
+	// desert dune texture shows in hot+dry regions, otherwise beach sand
+	vec3 sand_base = texture(sand_texture, uv).rgb;
+	vec3 sand_desert = texture(sand_desert_texture, uv).rgb;
+	float dune_factor = smoothstep(0.55, 0.7, temperature) * smoothstep(0.55, 0.3, moisture);
+	vec3 sand_s = mix(sand_base, sand_desert, dune_factor);
+
+	// rock variants
+	// cliff texture on steep slopes, dark rock at high altitude
+	vec3 rock_base = texture(rock_texture, uv).rgb;
+	vec3 rock_cliff = texture(rock_cliff_texture, uv).rgb;
+	vec3 rock_dark = texture(rock_dark_texture, uv).rgb;
+	float cliff_factor = smoothstep(0.4, 0.7, slope);
+	float dark_factor = smoothstep(100.0, 200.0, h) * (1.0 - cliff_factor);
+	vec3 rock_s = mix(mix(rock_base, rock_dark, dark_factor), rock_cliff, cliff_factor);
+
+	// snow/ice variants
+	// chunky snow at high peaks, ice on cold flat surfaces
+	vec3 snow_base = texture(snow_texture, uv).rgb;
+	vec3 snow_chunky = texture(snow_chunky_texture, uv).rgb;
+	vec3 ice_s = texture(ice_texture, uv).rgb;
+	float chunky_factor = smoothstep(200.0, 280.0, h);
+	float ice_factor = smoothstep(0.4, 0.2, temperature) * smoothstep(0.15, 0.05, slope) * (1.0 - chunky_factor);
+	vec3 snow_s = mix(mix(snow_base, snow_chunky, chunky_factor), ice_s, ice_factor);
 
 	vec3 tex_blend = grass_s * grass_w + sand_s * sand_w + rock_s * rock_w + snow_s * snow_w;
 
@@ -106,7 +143,8 @@ void fragment() {
 	               + vec3(0.5, 0.45, 0.4) * rock_w
 	               + vec3(0.95, 0.97, 1.0) * snow_w;
 
-	vec3 final_color = mix(base_tint, base_tint * tex_blend, 0.5);
+	vec3 tinted_tex = tex_blend * mix(vec3(1.0), base_tint, 0.45);
+	vec3 final_color = mix(base_tint, tinted_tex, 0.75);
 
 	// highlight shore for better contrast with water
 	float shore_glow = smoothstep(9.0, 1.5, h) * smoothstep(-3.0, 1.5, h);
