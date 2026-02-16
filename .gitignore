@@ -5,8 +5,4 @@
 .godot/
 
 # Addons
-procedural-terrain-generation/addons/gdscript-linter/
-procedural-terrain-generation/addons/script-ide/
-
-# Other
-insp/
+addons/gdscript-linter/
