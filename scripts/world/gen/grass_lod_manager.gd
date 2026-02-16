@@ -28,7 +28,7 @@ func rebuild_queue(loaded_chunks: Dictionary, camera_chunk: Vector2i) -> void:
 func process_queue(
 	loaded_chunks: Dictionary, camera_chunk: Vector2i,
 	terrain_gen: TerrainGenerator, chunk_size: int, vertex_spacing: float,
-	p_seed: int, vegetation_mgr: VegetationManager, max_updates: int = 2
+	p_seed: int, vegetation_mgr: VegetationManager, max_updates: int = 1
 ) -> void:
 	var updates: int = 0
 	while not _queue.is_empty() and updates < max_updates:

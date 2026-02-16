@@ -9,10 +9,6 @@ var tree_variant_id: int = 0
 var tree_transforms:  PackedFloat32Array = PackedFloat32Array()
 var tree_count:       int = 0
 
-var rock_variant_id: int = 0
-var rock_transforms:  PackedFloat32Array = PackedFloat32Array()
-var rock_count:       int = 0
-
 var foliage_variant_ids: PackedInt32Array = PackedInt32Array()
 var foliage_transforms:  Array[PackedFloat32Array] = []
 var foliage_counts:      PackedInt32Array = PackedInt32Array()

@@ -7,6 +7,9 @@ var terrain_material: ShaderMaterial
 var vegetation_mgr:   VegetationManager
 
 
+const COLLISION_DISTANCE: int = 3
+
+
 func _init(p_chunk_size: int, p_vertex_spacing: float, p_terrain_material: ShaderMaterial, p_vegetation_mgr: VegetationManager) -> void:
 	chunk_size = p_chunk_size
 	vertex_spacing = p_vertex_spacing
@@ -28,13 +31,6 @@ func instantiate(result: ChunkResult, parent: Node3D, camera_chunk: Vector2i, ch
 	if result.mesh_data.get_surface_count() > 0:
 		result.mesh_data.surface_set_material(0, terrain_material)
 
-	# Collision
-	var static_body = StaticBody3D.new()
-	var collision_shape = CollisionShape3D.new()
-	collision_shape.shape = result.mesh_data.create_trimesh_shape()
-	static_body.add_child(collision_shape)
-	chunk_node.add_child(static_body)
-
 	var chunk_world_size = (chunk_size - 1) * vertex_spacing
 	chunk_node.position = Vector3(
 		result.chunk_pos.x * chunk_world_size,
@@ -44,16 +40,35 @@ func instantiate(result: ChunkResult, parent: Node3D, camera_chunk: Vector2i, ch
 
 	var chunk_instance = ChunkInstance.new(chunk_node, mesh_instance, result.chunk_pos)
 
+	# Only create collision for nearby chunks (create_trimesh_shape is expensive)
+	var distance: float = (result.chunk_pos - camera_chunk).length()
+	if distance <= COLLISION_DISTANCE:
+		_add_collision(chunk_instance)
+
 	# Grass
 	chunk_instance.grass_instance = vegetation_mgr.create_vegetation(chunk_node, result.vegetation)
-	chunk_instance.grass_lod = GrassLodManager.get_lod((result.chunk_pos - camera_chunk).length())
+	chunk_instance.grass_lod = GrassLodManager.get_lod(distance)
 
-	# Trees, rocks, foliage
+	# Trees, foliage
 	chunk_instance.tree_instance = vegetation_mgr.create_tree(chunk_node, result.vegetation)
-	chunk_instance.rock_instance = vegetation_mgr.create_rock(chunk_node, result.vegetation)
 	chunk_instance.foliage_instances = vegetation_mgr.create_foliage(chunk_node, result.vegetation)
 
 	return chunk_instance
+
+
+func ensure_collision(chunk_instance: ChunkInstance) -> void:
+	if chunk_instance.has_collision:
+		return
+	_add_collision(chunk_instance)
+
+
+func _add_collision(chunk_instance: ChunkInstance) -> void:
+	var static_body = StaticBody3D.new()
+	var collision_shape = CollisionShape3D.new()
+	collision_shape.shape = chunk_instance.mesh_instance.mesh.create_trimesh_shape()
+	static_body.add_child(collision_shape)
+	chunk_instance.node.add_child(static_body)
+	chunk_instance.has_collision = true
 
 
 func _find_or_create_mesh_instance(node: Node) -> MeshInstance3D:

@@ -10,7 +10,6 @@ var _grass_mesh:      Mesh = null
 var _grass_material:  ShaderMaterial = null
 
 var _pine_meshes:    Array = []  # [5] Mesh, Pine_1..5
-var _rock_meshes:    Array = []  # [3] Mesh, Rock_Medium_1..3
 var _foliage_meshes: Array = []  # [6] Mesh
 var _meshes_loaded:  bool = false
 
@@ -178,10 +177,6 @@ func _ensure_meshes_loaded() -> void:
 	for i in range(5):
 		_pine_meshes[i] = _load_mesh_from_gltf(GLTF_BASE + "Pine_%d.gltf" % (i + 1))
 
-	_rock_meshes.resize(3)
-	for i in range(3):
-		_rock_meshes[i] = _load_mesh_from_gltf(GLTF_BASE + "Rock_Medium_%d.gltf" % (i + 1))
-
 	var foliage_names: Array[String] = [
 		"Bush_Common", "Fern_1", "Mushroom_Common",
 		"Flower_3_Group", "Plant_7", "Plant_7_Big"
@@ -216,7 +211,7 @@ func _find_mesh_recursive(node: Node) -> Mesh:
 
 func _create_multimesh_instance(parent: Node3D, mesh: Mesh,
 		transforms: PackedFloat32Array, count: int,
-		vis_range: float) -> MultiMeshInstance3D:
+		vis_range: float, shadows: bool = false) -> MultiMeshInstance3D:
 	if count == 0 or mesh == null:
 		return null
 
@@ -236,7 +231,10 @@ func _create_multimesh_instance(parent: Node3D, mesh: Mesh,
 		mm.set_instance_transform(i, t)
 
 	mmi.multimesh = mm
-	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	if shadows:
+		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	else:
+		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	mmi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 	mmi.visibility_range_end = vis_range
 	mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_DISABLED
@@ -250,16 +248,7 @@ func create_tree(chunk_node: Node3D, veg: VegetationData) -> MultiMeshInstance3D
 	return _create_multimesh_instance(
 		chunk_node, _pine_meshes[veg.tree_variant_id],
 		veg.tree_transforms, veg.tree_count,
-		TerrainConfig.VIS_RANGE_TREE
-	)
-
-
-func create_rock(chunk_node: Node3D, veg: VegetationData) -> MultiMeshInstance3D:
-	_ensure_meshes_loaded()
-	return _create_multimesh_instance(
-		chunk_node, _rock_meshes[veg.rock_variant_id],
-		veg.rock_transforms, veg.rock_count,
-		TerrainConfig.VIS_RANGE_ROCK
+		TerrainConfig.VIS_RANGE_TREE, true
 	)
 
 

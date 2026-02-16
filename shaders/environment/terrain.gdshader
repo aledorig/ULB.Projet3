@@ -89,16 +89,17 @@ void fragment() {
 
 	vec3 tex_blend = grass_s * grass_w + sand_s * sand_w + rock_s * rock_w + snow_s * snow_w;
 
-	vec3 grass_tint = mix(
+	vec3 warm_tint = mix(
 		vec3(0.7, 0.55, 0.15),   // dry/warm: rich golden
 		vec3(0.15, 0.7, 0.05),   // wet: vivid green
 		moisture
 	);
-	grass_tint = mix(
-		vec3(0.35, 0.6, 0.3),    // cold: forest green
-		grass_tint,
-		smoothstep(0.3, 0.6, temperature)
+	vec3 cold_tint = mix(
+		vec3(0.45, 0.42, 0.35),  // cold+dry: gray-brown tundra
+		vec3(0.25, 0.5, 0.25),   // cold+wet: muted boreal green
+		moisture
 	);
+	vec3 grass_tint = mix(cold_tint, warm_tint, smoothstep(0.3, 0.6, temperature));
 
 	vec3 base_tint = grass_tint * grass_w
 	               + vec3(0.95, 0.85, 0.45) * sand_w

@@ -51,25 +51,14 @@ const TREE_SCALE_MIN:      float = 2.0
 const TREE_SCALE_MAX:      float = 3.5
 const TREE_Y_OFFSET:       float = -1.0
 
-# Rocks (Rock_Medium_1..3)
-const ROCK_MIN_HEIGHT:     float = 60.0
-const ROCK_STEEP_NORMAL_Y: float = 0.6
-const ROCK_CANDIDATES:     int   = 15
-const ROCK_DENSITY:        float = 0.5
-const ROCK_VARIANTS:       int   = 3
-const ROCK_SCALE_MIN:      float = 1.5
-const ROCK_SCALE_MAX:      float = 4.0
-const ROCK_Y_OFFSET:       float = -0.5
-
 # Foliage (Bush, Fern, Mushroom, Flower, Plant_7, Plant_7_Big)
-const FOLIAGE_TOTAL_TYPES:    int   = 6
+const FOLIAGE_TOTAL_TYPES:     int   = 6
 const FOLIAGE_TYPES_PER_CHUNK: int  = 2
-const FOLIAGE_CANDIDATES:     int   = 40
-const FOLIAGE_Y_OFFSET:       float = -0.2
+const FOLIAGE_CANDIDATES:      int   = 60
+const FOLIAGE_Y_OFFSET:        float = -0.8
 
 # Visibility ranges (GPU distance culling)
 const VIS_RANGE_TREE:    float = 600.0
-const VIS_RANGE_ROCK:    float = 500.0
 const VIS_RANGE_FOLIAGE: float = 300.0
 
 # Shader-facing (pushed to terrain.gdshader via TerrainMaterialManager)

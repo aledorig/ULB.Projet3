@@ -5,10 +5,11 @@ extends RefCounted
 ## Pre-computes a height/climate grid via batch noise, then samples from it
 ## avoids thousands of individual noise calls
 
-const LOD_CANDIDATES: Array[int] = [8000, 1600, 150]
+const LOD_CANDIDATES: Array[int] = [12000, 2400, 200]
 const LOD_GRID_RES: Array[int] = [32, 16, 8]
 
 const SAMPLE_JITTER: float = 0.85
+const FOLIAGE_DENSITIES: Array[float] = [0.35, 0.30, 0.12, 0.20, 0.25, 0.12]
 
 var terrain_gen:    TerrainGenerator
 var chunk_size:     int
@@ -27,19 +28,41 @@ func _init(p_terrain_gen: TerrainGenerator, p_chunk_size: int, p_vertex_spacing:
 
 static func _write_transform(arr: PackedFloat32Array, idx: int,
 		local_x: float, height: float, local_z: float,
-		scale: float, angle: float, y_offset: float) -> void:
+		scale: float, angle: float, y_offset: float,
+		tilt_x: float = 0.0, tilt_z: float = 0.0) -> void:
+	# Y-rotation
 	var cos_a: float = cos(angle)
 	var sin_a: float = sin(angle)
 	var base: int = idx * 12
-	arr[base]      = cos_a * scale
-	arr[base + 1]  = 0.0
-	arr[base + 2]  = sin_a * scale
-	arr[base + 3]  = 0.0
-	arr[base + 4]  = scale
-	arr[base + 5]  = 0.0
-	arr[base + 6]  = -sin_a * scale
-	arr[base + 7]  = 0.0
-	arr[base + 8]  = cos_a * scale
+
+	if tilt_x == 0.0 and tilt_z == 0.0:
+		# Fast path: Y-rotation only
+		arr[base]      = cos_a * scale
+		arr[base + 1]  = 0.0
+		arr[base + 2]  = sin_a * scale
+		arr[base + 3]  = 0.0
+		arr[base + 4]  = scale
+		arr[base + 5]  = 0.0
+		arr[base + 6]  = -sin_a * scale
+		arr[base + 7]  = 0.0
+		arr[base + 8]  = cos_a * scale
+	else:
+		# Tilted: rotate around X by tilt_x, Z by tilt_z, then Y by angle
+		var cx: float = cos(tilt_x)
+		var sx: float = sin(tilt_x)
+		var cz: float = cos(tilt_z)
+		var sz: float = sin(tilt_z)
+		# Combined rotation: Ry * Rx * Rz (applied right to left)
+		arr[base]      = (cos_a * cz + sin_a * sx * sz) * scale
+		arr[base + 1]  = (-cos_a * sz + sin_a * sx * cz) * scale
+		arr[base + 2]  = (sin_a * cx) * scale
+		arr[base + 3]  = (cx * sz) * scale
+		arr[base + 4]  = (cx * cz) * scale
+		arr[base + 5]  = (-sx) * scale
+		arr[base + 6]  = (-sin_a * cz + cos_a * sx * sz) * scale
+		arr[base + 7]  = (sin_a * sz + cos_a * sx * cz) * scale
+		arr[base + 8]  = (cos_a * cx) * scale
+
 	arr[base + 9]  = local_x
 	arr[base + 10] = height + y_offset
 	arr[base + 11] = local_z
@@ -292,10 +315,12 @@ func generate_trees(chunk_pos: Vector2i, grid: Dictionary) -> Dictionary:
 			if rng.randf() > TerrainConfig.TREE_DENSITY:
 				continue
 
-			# Build transform with random Y rotation and random scale
+			# Build transform with random Y rotation, slight tilt, random scale
 			var angle: float = rng.randf() * TAU
 			var tree_scale: float = rng.randf_range(TerrainConfig.TREE_SCALE_MIN, TerrainConfig.TREE_SCALE_MAX)
-			_write_transform(transforms, count, local_x, height, local_z, tree_scale, angle, TerrainConfig.TREE_Y_OFFSET)
+			var tilt_x: float = rng.randf_range(-0.06, 0.06)  # ~3.4 degrees max
+			var tilt_z: float = rng.randf_range(-0.06, 0.06)
+			_write_transform(transforms, count, local_x, height, local_z, tree_scale, angle, TerrainConfig.TREE_Y_OFFSET, tilt_x, tilt_z)
 			count += 1
 
 	transforms.resize(count * 12)
@@ -306,80 +331,6 @@ func generate_trees(chunk_pos: Vector2i, grid: Dictionary) -> Dictionary:
 		"count": count
 	}
 
-
-func generate_rocks(chunk_pos: Vector2i, grid: Dictionary) -> Dictionary:
-	var variant_id: int = _pick_variant(chunk_pos, TerrainConfig.ROCK_VARIANTS, 2)
-	var candidates: int = TerrainConfig.ROCK_CANDIDATES
-
-	var grid_verts: PackedVector3Array = grid["verts"]
-	var _grid_colors: PackedColorArray = grid["colors"]
-	var grid_res: int = grid["grid_res"]
-	var grid_spacing: float = grid["grid_spacing"]
-	var chunk_world_size: float = grid["chunk_world_size"]
-
-	var transforms := PackedFloat32Array()
-	transforms.resize(candidates * 12)
-	var count: int = 0
-
-	var grid_side: int = ceili(sqrt(float(candidates)))
-	var cell_size: float = chunk_world_size / float(grid_side)
-	var inv_grid_spacing: float = 1.0 / grid_spacing
-	var max_gi: int = grid_res - 2
-
-	for gz in range(grid_side):
-		for gx in range(grid_side):
-			if count >= candidates:
-				break
-
-			# Jittered position within cell
-			var jx: float = rng.randf() * SAMPLE_JITTER
-			var jz: float = rng.randf() * SAMPLE_JITTER
-			var local_x: float = (float(gx) + jx) * cell_size
-			var local_z: float = (float(gz) + jz) * cell_size
-
-			# Map to grid coordinates
-			var gi: int = clampi(int(local_x * inv_grid_spacing), 0, max_gi)
-			var gj: int = clampi(int(local_z * inv_grid_spacing), 0, max_gi)
-			var grid_idx: int = gj * grid_res + gi
-
-			# Height from grid
-			var height: float = grid_verts[grid_idx].y
-
-			# Skip underwater
-			if height < TerrainConfig.GRASS_MIN_HEIGHT:
-				continue
-
-			# Slope from grid neighbors
-			var h_right: float = grid_verts[grid_idx + 1].y
-			var h_down: float = grid_verts[grid_idx + grid_res].y
-			var dx: float = (h_right - height) * inv_grid_spacing
-			var dz: float = (h_down - height) * inv_grid_spacing
-			var normal_y: float = 1.0 / sqrt(dx * dx + dz * dz + 1.0)
-
-			# Place if: high altitude OR steep slope
-			if height < TerrainConfig.ROCK_MIN_HEIGHT and normal_y >= TerrainConfig.ROCK_STEEP_NORMAL_Y:
-				continue
-
-			# Density filter
-			if rng.randf() > TerrainConfig.ROCK_DENSITY:
-				continue
-
-			# Build transform with random Y rotation and random scale
-			var angle: float = rng.randf() * TAU
-			var rock_scale: float = rng.randf_range(TerrainConfig.ROCK_SCALE_MIN, TerrainConfig.ROCK_SCALE_MAX)
-			_write_transform(transforms, count, local_x, height, local_z, rock_scale, angle, TerrainConfig.ROCK_Y_OFFSET)
-			count += 1
-
-	transforms.resize(count * 12)
-
-	return {
-		"variant_id": variant_id,
-		"transforms": transforms,
-		"count": count
-	}
-
-
-const FOLIAGE_DENSITIES: Array[float] = [0.25, 0.20, 0.08, 0.10, 0.15, 0.08]
 
 func generate_foliage(chunk_pos: Vector2i, grid: Dictionary) -> Dictionary:
 	var picked: PackedInt32Array = _pick_variant_pair(chunk_pos, TerrainConfig.FOLIAGE_TOTAL_TYPES, 3)
@@ -500,6 +451,5 @@ func generate_all_non_grass(chunk_pos: Vector2i) -> Dictionary:
 	var grid: Dictionary = _query_shared_grid(chunk_pos)
 	return {
 		"trees": generate_trees(chunk_pos, grid),
-		"rocks": generate_rocks(chunk_pos, grid),
 		"foliage": generate_foliage(chunk_pos, grid)
 	}

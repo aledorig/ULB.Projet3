@@ -74,7 +74,7 @@ void fragment() {
 
 	vec3 ground_color = texture(ground_texture, worldPos.xz / ground_texture_scale).rgb;
 
-	float blade_gradient = mix(0.55, 0.85, 1.0 - UV.y);
+	float blade_gradient = mix(0.7, 1.0, 1.0 - UV.y);
 	vec3 grass_color = ground_color * blade_gradient;
 
 	// Cloud shadows: multi-octave noise scrolling with wind

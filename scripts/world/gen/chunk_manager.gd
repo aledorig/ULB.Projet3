@@ -38,6 +38,11 @@ var terrain_material: ShaderMaterial
 var chunks_generated_this_frame: int = 0
 var last_camera_chunk:           Vector2i = Vector2i.ZERO
 
+# Debug logging
+var _log_timer:     float = 0.0
+const LOG_INTERVAL: float = 5.0
+var _capture_frame: bool = false
+
 
 func _ready() -> void:
 	p_seed = GameSettingsAutoload.seed
@@ -45,7 +50,7 @@ func _ready() -> void:
 	vertex_spacing      = GameSettingsAutoload.vertex_spacing
 	max_worker_threads  = GameSettingsAutoload.max_worker_threads
 	render_distance     = GameSettingsAutoload.render_distance
-	unload_distance     = render_distance * 2
+	unload_distance     = render_distance + 2
 	chunks_per_frame    = GameSettingsAutoload.chunks_per_frame
 	enable_mesh_caching = GameSettingsAutoload.enable_mesh_caching
 
@@ -86,16 +91,92 @@ func _initialize_systems() -> void:
 	print("ChunkManager: Initialized with %d worker threads" % max_worker_threads)
 
 
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F4:
+		_capture_frame = true
+		get_viewport().set_input_as_handled()
+
+
 func _process(_delta: float) -> void:
+	var profiling: bool = _capture_frame
+	var t0: int = 0
+	var t1: int = 0
+	if profiling:
+		t0 = Time.get_ticks_usec()
+
 	chunks_generated_this_frame = 0
+
 	_process_completed_chunks()
+	if profiling:
+		t1 = Time.get_ticks_usec()
+		print("[PROFILE] _process_completed_chunks: %.2fms (%d instantiated)" % [(t1 - t0) / 1000.0, chunks_generated_this_frame])
+		t0 = t1
+
 	update_chunks(false)
+	if profiling:
+		t1 = Time.get_ticks_usec()
+		print("[PROFILE] update_chunks: %.2fms" % [(t1 - t0) / 1000.0])
+		t0 = t1
+
 	grass_lod_mgr.process_queue(loaded_chunks, last_camera_chunk, debug_terrain_generator, chunk_size, vertex_spacing, p_seed, vegetation_mgr)
+	if profiling:
+		t1 = Time.get_ticks_usec()
+		print("[PROFILE] grass_lod_mgr.process_queue: %.2fms" % [(t1 - t0) / 1000.0])
+		t0 = t1
+
 	_process_unload_queue()
+	if profiling:
+		t1 = Time.get_ticks_usec()
+		print("[PROFILE] _process_unload_queue: %.2fms" % [(t1 - t0) / 1000.0])
+		t0 = t1
 
 	if not _initial_load_done and pending_chunks.is_empty() and not loaded_chunks.is_empty():
 		_initial_load_done = true
 		initial_chunks_ready.emit()
+
+	if profiling:
+		var fps: int = Engine.get_frames_per_second()
+		var frame_ms: float = 1000.0 / maxf(fps, 1)
+		var draw_calls: int = int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))
+		var primitives: int = int(Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME))
+		var mem_mb: float = Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0
+		var objects: int = int(Performance.get_monitor(Performance.OBJECT_COUNT))
+		var physics_ms: float = Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0
+		var nav_ms: float = Performance.get_monitor(Performance.TIME_NAVIGATION_PROCESS) * 1000.0
+
+		print("[PROFILE] === Frame Capture (F4) ===")
+		print("[PROFILE] fps=%d frame=%.1fms physics=%.2fms nav=%.2fms" % [fps, frame_ms, physics_ms, nav_ms])
+		print("[PROFILE] draw_calls=%d primitives=%d mem=%.0fMB objects=%d" % [draw_calls, primitives, mem_mb, objects])
+		print("[PROFILE] loaded=%d pending=%d unload_queue=%d cached=%d" % [
+			loaded_chunks.size(), pending_chunks.size(),
+			chunks_queued_for_unload.size(), mesh_cache.size()
+		])
+
+		# Count vegetation instances
+		var total_grass: int = 0
+		var total_trees: int = 0
+		var total_foliage: int = 0
+		var total_mmi: int = 0
+		for ci: ChunkInstance in loaded_chunks.values():
+			if ci.grass_instance:
+				total_grass += ci.grass_instance.multimesh.instance_count
+				total_mmi += 1
+			if ci.tree_instance:
+				total_trees += ci.tree_instance.multimesh.instance_count
+				total_mmi += 1
+			for fi in ci.foliage_instances:
+				if fi:
+					total_foliage += fi.multimesh.instance_count
+					total_mmi += 1
+
+		print("[PROFILE] mmi=%d | grass=%d trees=%d foliage=%d" % [total_mmi, total_grass, total_trees, total_foliage])
+		print("[PROFILE] === End Frame Capture ===")
+		_capture_frame = false
+
+	_log_timer += _delta
+	if _log_timer >= LOG_INTERVAL:
+		_log_timer = 0.0
+		_print_frame_stats()
 
 
 func update_chunks(force_update: bool = false) -> void:
@@ -127,6 +208,7 @@ func update_chunks(force_update: bool = false) -> void:
 				thread_pool.submit(request)
 
 	_mark_distant_chunks_for_unload(chunks_to_keep)
+	_ensure_nearby_collision()
 	grass_lod_mgr.rebuild_queue(loaded_chunks, last_camera_chunk)
 
 
@@ -152,18 +234,13 @@ func _generate_chunk_data(request: ChunkRequest) -> ChunkResult:
 	result.vegetation.grass_custom_data = veg_result.custom_data
 	result.vegetation.grass_count = veg_result.count
 
-	# Trees, rocks, foliage (shared grid query)
+	# Trees, foliage (shared grid query)
 	var non_grass: Dictionary = veg_placer.generate_all_non_grass(request.chunk_pos)
 
 	var trees: Dictionary = non_grass.trees
 	result.vegetation.tree_variant_id = trees.variant_id
 	result.vegetation.tree_transforms = trees.transforms
 	result.vegetation.tree_count = trees.count
-
-	var rocks: Dictionary = non_grass.rocks
-	result.vegetation.rock_variant_id = rocks.variant_id
-	result.vegetation.rock_transforms = rocks.transforms
-	result.vegetation.rock_count = rocks.count
 
 	var foliage: Dictionary = non_grass.foliage
 	result.vegetation.foliage_variant_ids = foliage.variant_ids
@@ -175,8 +252,17 @@ func _generate_chunk_data(request: ChunkRequest) -> ChunkResult:
 	var elapsed_ms: float = (Time.get_ticks_usec() - start_time) / 1000.0
 	result.generation_time_ms = elapsed_ms
 
-	if elapsed_ms > 100:
-		print("[CHUNK] %v generated in %.1f ms (SLOW)" % [request.chunk_pos, elapsed_ms])
+	# Debug logging: vegetation counts per chunk
+	var veg: VegetationData = result.vegetation
+	var foliage_total: int = 0
+	for i in range(veg.foliage_counts.size()):
+		foliage_total += veg.foliage_counts[i]
+
+	print("[CHUNK] %v  %.1fms  grass=%d tree=%d foliage=%d (lod=%d)" % [
+		request.chunk_pos, elapsed_ms,
+		veg.grass_count, veg.tree_count, foliage_total,
+		request.grass_lod
+	])
 
 	return result
 
@@ -201,6 +287,14 @@ func _process_completed_chunks() -> void:
 			push_error("Failed to generate chunk %v: %s" % [result.chunk_pos, result.error_message])
 
 		pending_chunks.erase(result.chunk_pos)
+
+
+func _ensure_nearby_collision() -> void:
+	for x in range(-ChunkInstantiator.COLLISION_DISTANCE, ChunkInstantiator.COLLISION_DISTANCE + 1):
+		for z in range(-ChunkInstantiator.COLLISION_DISTANCE, ChunkInstantiator.COLLISION_DISTANCE + 1):
+			var chunk_pos: Vector2i = last_camera_chunk + Vector2i(x, z)
+			if loaded_chunks.has(chunk_pos):
+				instantiator.ensure_collision(loaded_chunks[chunk_pos])
 
 
 func _mark_distant_chunks_for_unload(chunks_to_keep: Dictionary) -> void:
@@ -290,21 +384,40 @@ func get_stats() -> Dictionary:
 	}
 
 
-func print_stats() -> void:
-	var stats: Dictionary = get_stats()
-	print("=== Chunk Manager Stats ===")
-	print("  Loaded: %d" % stats.loaded_chunks)
-	print("  Pending: %d" % stats.pending_chunks)
-	print("  Queued for unload: %d" % stats.queued_for_unload)
-	print("  Cached meshes: %d" % stats.cached_meshes)
-	print("  Worker threads: %d" % stats.worker_threads)
-	print("  Chunks this frame: %d" % stats.chunks_this_frame)
+func _print_frame_stats() -> void:
+	var fps: int = Engine.get_frames_per_second()
+	var draw_calls: int = int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))
+	var primitives: int = int(Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME))
+	var mem_mb: float = Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0
+	var objects: int = int(Performance.get_monitor(Performance.OBJECT_COUNT))
+
+	var total_grass: int = 0
+	var total_trees: int = 0
+	var total_foliage: int = 0
+	var total_mmi: int = 0
+
+	for ci: ChunkInstance in loaded_chunks.values():
+		if ci.grass_instance:
+			total_grass += ci.grass_instance.multimesh.instance_count
+			total_mmi += 1
+		if ci.tree_instance:
+			total_trees += ci.tree_instance.multimesh.instance_count
+			total_mmi += 1
+		for fi in ci.foliage_instances:
+			if fi:
+				total_foliage += fi.multimesh.instance_count
+				total_mmi += 1
+
+	print("[STATS] fps=%d draw=%d prims=%d mem=%.0fMB obj=%d" % [fps, draw_calls, primitives, mem_mb, objects])
+	print("[STATS] chunks=%d mmi=%d | grass=%d trees=%d foliage=%d" % [
+		loaded_chunks.size(), total_mmi, total_grass, total_trees, total_foliage
+	])
 
 
 func _on_settings_changed() -> void:
 	var old_distance := render_distance
 	render_distance = GameSettingsAutoload.render_distance
-	unload_distance = render_distance * 2
+	unload_distance = render_distance + 2
 
 	if render_distance != old_distance:
 		update_chunks(true)

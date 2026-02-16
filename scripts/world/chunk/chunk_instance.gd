@@ -11,8 +11,9 @@ var grass_instance:    MultiMeshInstance3D = null
 var grass_lod:         int = 0
 
 var tree_instance:     MultiMeshInstance3D = null
-var rock_instance:     MultiMeshInstance3D = null
 var foliage_instances: Array = []
+
+var has_collision: bool = false
 
 
 func _init(p_node: Node3D, p_mesh_instance: MeshInstance3D, p_chunk_pos: Vector2i) -> void:
