@@ -15,10 +15,14 @@ var shutdown_flag:         bool = false
 var generation_timeout_ms: int = 30000
 
 var _generate_func: Callable
+var _seed: int
+var _octave: int
 
 
-func start(num_threads: int, generate_func: Callable) -> void:
+func start(num_threads: int, generate_func: Callable, p_seed: int, p_octave: int) -> void:
 	_generate_func = generate_func
+	_seed = p_seed
+	_octave = p_octave
 	work_queue_mutex = Mutex.new()
 	results_queue_mutex = Mutex.new()
 	thread_pool_semaphore = Semaphore.new()
@@ -66,6 +70,9 @@ func shutdown() -> void:
 
 
 func _worker_func(thread_id: int) -> void:
+	# One TerrainGenerator per thread
+	# avoids rebuilding permutation tables per chunk
+	var terrain_gen := TerrainGenerator.new(_seed, _octave)
 	print("Worker thread %d started" % thread_id)
 
 	while not shutdown_flag:
@@ -85,7 +92,6 @@ func _worker_func(thread_id: int) -> void:
 
 		var elapsed = Time.get_ticks_msec() - request.timestamp
 		if elapsed > generation_timeout_ms:
-			# Still produce a failed result so pending_chunks gets cleaned up
 			var failed := ChunkResult.new(request.chunk_pos)
 			failed.success = false
 			failed.error_message = "Timeout after %d ms" % elapsed
@@ -94,7 +100,7 @@ func _worker_func(thread_id: int) -> void:
 			results_queue_mutex.unlock()
 			continue
 
-		var result: ChunkResult = _generate_func.call(request)
+		var result: ChunkResult = _generate_func.call(request, terrain_gen)
 
 		results_queue_mutex.lock()
 		results_queue.append(result)

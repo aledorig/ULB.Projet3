@@ -12,8 +12,8 @@ const LAND_BASE:       float = 12.0
 const MIN_AMPLITUDE:   float = 52.5
 const MAX_AMPLITUDE:   float = 750.0
 const SURFACE_AMP:     float = 4.5
-const ROUGHNESS_AMP:   float = 37.5
-const ROUGHNESS_ALT_LOW:  float = 45.0
+const ROUGHNESS_AMP:   float = 60.0
+const ROUGHNESS_ALT_LOW:  float = 30.0
 const ROUGHNESS_ALT_HIGH: float = 150.0
 const INLAND_BOOST:    float = 75.0
 
@@ -76,6 +76,13 @@ const VIS_RANGE_GRASS:   float = 400.0
 const VIS_RANGE_TREE:    float = 600.0
 const VIS_RANGE_FOLIAGE: float = 300.0
 
+# Mesh LOD
+const MESH_LOD_SIZES: Array[int] = [40, 20, 10]
+const MESH_LOD_OCTAVES: Array[int] = [6, 4, 3]
+# LOD 0 (dist <= 3): 42x42 = 1764 verts, 6 octaves (full quality)
+# LOD 1 (dist <= 6): 22x22 = 484 verts, 4 octaves
+# LOD 2 (dist >  6): 12x12 = 144 verts, 3 octaves
+
 # Noise frequencies
 const CONTINENT_FREQ:   float = 0.0004
 const PEAKS_FREQ:       float = 0.0012
@@ -84,7 +91,7 @@ const MOISTURE_FREQ:    float = 0.0012
 const HEIGHT_FREQ:      float = 0.0005
 const DEPTH_FREQ:       float = 0.0008
 const SURFACE_FREQ:     float = 0.012
-const ROUGHNESS_FREQ:   float = 0.005
+const ROUGHNESS_FREQ:   float = 0.007
 
 # Terrain material
 const TERRAIN_SHADER_PATH: String = "res://shaders/environment/terrain.gdshader"

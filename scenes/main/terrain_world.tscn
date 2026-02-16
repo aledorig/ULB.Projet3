@@ -157,7 +157,6 @@ fog_sky_affect = 0.138
 fog_depth_curve = 2.000001
 fog_depth_begin = 0.0
 fog_depth_end = 1131.2
-volumetric_fog_enabled = false
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_nikly"]
 shader = ExtResource("6_htxxt")

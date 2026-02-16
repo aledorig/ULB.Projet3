@@ -93,7 +93,8 @@ func get_vertex_data_batch(
 	width: int, height: int,
 	spacing: float,
 	out_vertices: PackedVector3Array,
-	out_colors: PackedColorArray
+	out_colors: PackedColorArray,
+	max_octaves: int = -1
 ) -> void:
 	var total_verts: int = width * height
 	var inv_spacing: float = 1.0 / spacing
@@ -104,7 +105,8 @@ func get_vertex_data_batch(
 		cont_grid,
 		origin_x * inv_spacing, origin_z * inv_spacing,
 		width, height,
-		spacing * TerrainConfig.CONTINENT_FREQ, spacing * TerrainConfig.CONTINENT_FREQ
+		spacing * TerrainConfig.CONTINENT_FREQ, spacing * TerrainConfig.CONTINENT_FREQ,
+		max_octaves
 	)
 
 	var peaks_grid: PackedFloat32Array = PackedFloat32Array()
@@ -113,7 +115,8 @@ func get_vertex_data_batch(
 		peaks_grid,
 		origin_x * inv_spacing, origin_z * inv_spacing,
 		width, height,
-		spacing * TerrainConfig.PEAKS_FREQ, spacing * TerrainConfig.PEAKS_FREQ
+		spacing * TerrainConfig.PEAKS_FREQ, spacing * TerrainConfig.PEAKS_FREQ,
+		max_octaves
 	)
 
 	var noise_grid: PackedFloat32Array = PackedFloat32Array()
@@ -122,7 +125,8 @@ func get_vertex_data_batch(
 		noise_grid,
 		origin_x * inv_spacing, origin_z * inv_spacing,
 		width, height,
-		spacing * TerrainConfig.HEIGHT_FREQ, spacing * TerrainConfig.HEIGHT_FREQ
+		spacing * TerrainConfig.HEIGHT_FREQ, spacing * TerrainConfig.HEIGHT_FREQ,
+		max_octaves
 	)
 
 	var depth_grid: PackedFloat32Array = PackedFloat32Array()
@@ -131,7 +135,8 @@ func get_vertex_data_batch(
 		depth_grid,
 		origin_x * inv_spacing, origin_z * inv_spacing,
 		width, height,
-		spacing * TerrainConfig.DEPTH_FREQ, spacing * TerrainConfig.DEPTH_FREQ
+		spacing * TerrainConfig.DEPTH_FREQ, spacing * TerrainConfig.DEPTH_FREQ,
+		max_octaves
 	)
 
 	var surface_grid: PackedFloat32Array = PackedFloat32Array()
@@ -150,7 +155,8 @@ func get_vertex_data_batch(
 		roughness_grid,
 		origin_x * inv_spacing, origin_z * inv_spacing,
 		width, height,
-		spacing * TerrainConfig.ROUGHNESS_FREQ, spacing * TerrainConfig.ROUGHNESS_FREQ
+		spacing * TerrainConfig.ROUGHNESS_FREQ, spacing * TerrainConfig.ROUGHNESS_FREQ,
+		max_octaves
 	)
 
 	var temp_grid: PackedFloat32Array = PackedFloat32Array()

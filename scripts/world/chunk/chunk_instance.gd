@@ -14,6 +14,7 @@ var tree_instance:     MultiMeshInstance3D = null
 var foliage_instances: Array = []
 var foliage_lod:       int = 0
 
+var mesh_lod:      int = 0
 var has_collision: bool = false
 
 

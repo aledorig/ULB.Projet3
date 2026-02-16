@@ -25,11 +25,12 @@ var pending_chunks: Dictionary = {}
 var chunks_queued_for_unload: Dictionary = {}
 
 # Subsystems
-var thread_pool:    ChunkThreadPool
-var vegetation_mgr: VegetationManager
-var mesh_cache:     MeshCache
-var veg_lod_mgr:    VegetationLodManager
-var instantiator:   ChunkInstantiator
+var thread_pool:      ChunkThreadPool
+var vegetation_mgr:   VegetationManager
+var mesh_cache:       MeshCache
+var veg_lod_mgr:      VegetationLodManager
+var terrain_lod_mgr:  TerrainLodManager
+var instantiator:     ChunkInstantiator
 
 var camera:           Camera3D
 var material_manager: TerrainMaterialManager
@@ -57,11 +58,12 @@ func _ready() -> void:
 	_initialize_systems()
 
 	thread_pool = ChunkThreadPool.new()
-	thread_pool.start(max_worker_threads, _generate_chunk_data)
+	thread_pool.start(max_worker_threads, _generate_chunk_data, p_seed, GameSettingsAutoload.octave)
 
 	vegetation_mgr = VegetationManager.new()
 	mesh_cache = MeshCache.new(GameSettingsAutoload.cache_max_size)
 	veg_lod_mgr = VegetationLodManager.new()
+	terrain_lod_mgr = TerrainLodManager.new()
 	instantiator = ChunkInstantiator.new(chunk_size, vertex_spacing, terrain_material, vegetation_mgr)
 
 	GameSettingsAutoload.runtime_settings_changed.connect(_on_settings_changed)
@@ -85,8 +87,9 @@ func _initialize_systems() -> void:
 
 	debug_terrain_generator = TerrainGenerator.new(p_seed, GameSettingsAutoload.octave)
 
-	# Pre-build index buffer
-	ChunkMeshBuilder._get_or_build_index_buffer(chunk_size, ChunkMeshBuilder.OVERLAP)
+	# Pre-build index buffers for all LOD levels
+	for lod_size in TerrainConfig.MESH_LOD_SIZES:
+		ChunkMeshBuilder._get_or_build_index_buffer(lod_size, ChunkMeshBuilder.OVERLAP)
 
 	print("ChunkManager: Initialized with %d worker threads" % max_worker_threads)
 
@@ -119,9 +122,10 @@ func _process(_delta: float) -> void:
 		t0 = t1
 
 	veg_lod_mgr.process_queue(loaded_chunks, last_camera_chunk, debug_terrain_generator, chunk_size, vertex_spacing, p_seed, vegetation_mgr)
+	terrain_lod_mgr.process_queue(loaded_chunks, last_camera_chunk, chunk_size, vertex_spacing, terrain_material)
 	if profiling:
 		t1 = Time.get_ticks_usec()
-		print("[PROFILE] veg_lod_mgr.process_queue: %.2fms" % [(t1 - t0) / 1000.0])
+		print("[PROFILE] lod_mgr.process_queue: %.2fms" % [(t1 - t0) / 1000.0])
 		t0 = t1
 
 	_ensure_nearby_collision()
@@ -207,25 +211,26 @@ func update_chunks(force_update: bool = false) -> void:
 			if not is_chunk_loaded(chunk_pos) and not is_chunk_pending(chunk_pos):
 				var grass_lod: int = VegetationLodManager.get_grass_lod(distance)
 				var foliage_lod: int = VegetationLodManager.get_foliage_lod(distance)
-				var request = ChunkRequest.new(chunk_pos, distance, grass_lod, foliage_lod)
+				var mesh_lod: int = TerrainLodManager.get_mesh_lod(distance)
+				var request = ChunkRequest.new(chunk_pos, distance, grass_lod, foliage_lod, mesh_lod)
 				pending_chunks[chunk_pos] = request
 				thread_pool.submit(request)
 
 	_mark_distant_chunks_for_unload(chunks_to_keep)
 	veg_lod_mgr.rebuild_queue(loaded_chunks, last_camera_chunk)
+	terrain_lod_mgr.rebuild_queue(loaded_chunks, last_camera_chunk)
 
 
-func _generate_chunk_data(request: ChunkRequest) -> ChunkResult:
+func _generate_chunk_data(request: ChunkRequest, terrain_gen: TerrainGenerator) -> ChunkResult:
 	var result = ChunkResult.new(request.chunk_pos)
 	var start_time = Time.get_ticks_usec()
 
-	var terrain_gen = TerrainGenerator.new(GameSettingsAutoload.seed, GameSettingsAutoload.octave)
-
-	# Mesh (use cache if available)
-	if enable_mesh_caching and mesh_cache.has(request.chunk_pos):
+	# Mesh (use cache for LOD 0 only)
+	var lod_mesh_size: int = TerrainLodManager.get_mesh_size(request.mesh_lod)
+	if enable_mesh_caching and request.mesh_lod == 0 and mesh_cache.has(request.chunk_pos):
 		result.mesh_data = mesh_cache.get_mesh(request.chunk_pos)
 	else:
-		var mesh_builder = ChunkMeshBuilder.new(chunk_size, vertex_spacing, terrain_gen)
+		var mesh_builder = ChunkMeshBuilder.new(chunk_size, vertex_spacing, terrain_gen, lod_mesh_size)
 		result.mesh_data = mesh_builder.build_chunk_mesh(request.chunk_pos)
 
 	result.success = true
@@ -261,10 +266,10 @@ func _generate_chunk_data(request: ChunkRequest) -> ChunkResult:
 		for i in range(veg.foliage_counts.size()):
 			foliage_total += veg.foliage_counts[i]
 
-		print("[CHUNK] %v  %.1fms  grass=%d tree=%d foliage=%d (g_lod=%d f_lod=%d)" % [
+		print("[CHUNK] %v  %.1fms  grass=%d tree=%d foliage=%d (g_lod=%d f_lod=%d m_lod=%d)" % [
 			request.chunk_pos, elapsed_ms,
 			veg.grass_count, veg.tree_count, foliage_total,
-			request.grass_lod, request.foliage_lod
+			request.grass_lod, request.foliage_lod, request.mesh_lod
 		])
 
 	return result
@@ -282,8 +287,12 @@ func _process_completed_chunks() -> void:
 			var chunk_instance = instantiator.instantiate(result, self, last_camera_chunk, chunk_scene)
 			loaded_chunks[result.chunk_pos] = chunk_instance
 
-			if enable_mesh_caching and not mesh_cache.has(result.chunk_pos):
-				mesh_cache.store(result.chunk_pos, result.mesh_data)
+			# Track initial mesh LOD
+			var req: ChunkRequest = pending_chunks.get(result.chunk_pos)
+			if req:
+				chunk_instance.mesh_lod = req.mesh_lod
+				if enable_mesh_caching and req.mesh_lod == 0 and not mesh_cache.has(result.chunk_pos):
+					mesh_cache.store(result.chunk_pos, result.mesh_data)
 
 			chunks_generated_this_frame += 1
 		else:
@@ -297,7 +306,10 @@ func _ensure_nearby_collision() -> void:
 		for z in range(-ChunkInstantiator.COLLISION_DISTANCE, ChunkInstantiator.COLLISION_DISTANCE + 1):
 			var chunk_pos: Vector2i = last_camera_chunk + Vector2i(x, z)
 			if loaded_chunks.has(chunk_pos):
-				instantiator.ensure_collision(loaded_chunks[chunk_pos])
+				var ci: ChunkInstance = loaded_chunks[chunk_pos]
+				# Only create collision from LOD 0 meshes (full quality)
+				if ci.mesh_lod == 0:
+					instantiator.ensure_collision(ci)
 
 
 func _mark_distant_chunks_for_unload(chunks_to_keep: Dictionary) -> void:
@@ -427,6 +439,8 @@ func _on_settings_changed() -> void:
 
 
 func _exit_tree() -> void:
+	if terrain_lod_mgr:
+		terrain_lod_mgr.shutdown()
 	if veg_lod_mgr:
 		veg_lod_mgr.shutdown()
 	if thread_pool:
