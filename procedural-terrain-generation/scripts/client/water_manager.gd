@@ -15,7 +15,7 @@ func _ready() -> void:
 	_setup_water_mesh()
 	_setup_water_material()
 	camera = get_viewport().get_camera_3d()
-	position.y = TerrainConstants.SEA_LEVEL
+	position.y = TerrainConfig.SEA_LEVEL
 	GameSettingsAutoload.runtime_settings_changed.connect(_on_settings_changed)
 
 

@@ -8,11 +8,6 @@ extends RefCounted
 const LOD_CANDIDATES: Array[int] = [8000, 1600, 150]
 const LOD_GRID_RES: Array[int] = [32, 16, 8]
 
-const MIN_HEIGHT:    float = 10.0
-const MAX_HEIGHT:    float = 120.0
-const MIN_NORMAL_Y:  float = 0.7
-const DESERT_TEMP:   float = 0.65
-const DESERT_MOIST:  float = 0.38
 const SAMPLE_JITTER: float = 0.85
 
 var terrain_gen:    TerrainGenerator
@@ -91,7 +86,7 @@ func generate_vegetation(chunk_pos: Vector2i, lod_level: int) -> Dictionary:
 			# Height from grid
 			var height: float = grid_verts[grid_idx].y
 
-			if height < MIN_HEIGHT or height > MAX_HEIGHT:
+			if height < TerrainConfig.GRASS_MIN_HEIGHT or height > TerrainConfig.GRASS_MAX_HEIGHT:
 				continue
 
 			# Slope from grid neighbors (cheap — no noise calls)
@@ -100,7 +95,7 @@ func generate_vegetation(chunk_pos: Vector2i, lod_level: int) -> Dictionary:
 			var dx: float = (h_right - height) * inv_grid_spacing
 			var dz: float = (h_down - height) * inv_grid_spacing
 			var normal_y: float = 1.0 / sqrt(dx * dx + dz * dz + 1.0)
-			if normal_y < MIN_NORMAL_Y:
+			if normal_y < TerrainConfig.MIN_NORMAL_Y:
 				continue
 
 			# Climate from grid
@@ -109,7 +104,7 @@ func generate_vegetation(chunk_pos: Vector2i, lod_level: int) -> Dictionary:
 			var moisture: float = climate.g
 
 			# Skip desert (hot + dry)
-			if temperature > DESERT_TEMP and moisture < DESERT_MOIST:
+			if temperature > TerrainConfig.DESERT_TEMP and moisture < TerrainConfig.DESERT_MOIST:
 				continue
 
 			# Thin out at high altitude (rock zone starts ~60)
@@ -217,7 +212,7 @@ func generate_trees(chunk_pos: Vector2i) -> Dictionary:
 			# Height from grid
 			var height: float = grid_verts[grid_idx].y
 
-			if height < MIN_HEIGHT:
+			if height < TerrainConfig.GRASS_MIN_HEIGHT:
 				continue
 
 			# Slope from grid neighbors
@@ -226,7 +221,7 @@ func generate_trees(chunk_pos: Vector2i) -> Dictionary:
 			var dx: float = (h_right - height) * inv_grid_spacing
 			var dz: float = (h_down - height) * inv_grid_spacing
 			var normal_y: float = 1.0 / sqrt(dx * dx + dz * dz + 1.0)
-			if normal_y < MIN_NORMAL_Y:
+			if normal_y < TerrainConfig.MIN_NORMAL_Y:
 				continue
 
 			# Climate from grid
@@ -235,7 +230,7 @@ func generate_trees(chunk_pos: Vector2i) -> Dictionary:
 			var moist_01: float = climate.g
 
 			# Skip desert (hot + dry)
-			if temp_01 > DESERT_TEMP and moist_01 < DESERT_MOIST:
+			if temp_01 > TerrainConfig.DESERT_TEMP and moist_01 < TerrainConfig.DESERT_MOIST:
 				continue
 
 			# Classify tree type with per-type height limits
@@ -244,14 +239,14 @@ func generate_trees(chunk_pos: Vector2i) -> Dictionary:
 
 			# Forest: temp_01 in 0.35-0.7 AND moist_01 > 0.55
 			if temp_01 >= 0.35 and temp_01 <= 0.7 and moist_01 > 0.55:
-				if height <= MAX_HEIGHT:
+				if height <= TerrainConfig.TREE_MAX_HEIGHT:
 					is_pine = true
 			# Jungle: temp_01 > 0.7 AND moist_01 > 0.45, only 20% chance
 			elif temp_01 > 0.7 and moist_01 > 0.45:
-				if height <= MAX_HEIGHT and rng.randf() < 0.2:
+				if height <= TerrainConfig.TREE_MAX_HEIGHT and rng.randf() < 0.2:
 					is_pine = true
 			# Snow pine: temp_01 < 0.35 (Tundra/Snow zones) — can grow on peaks
-			elif temp_01 < 0.35 and height <= 195.0:
+			elif temp_01 < 0.35 and height <= TerrainConfig.SNOW_PINE_MAX_HEIGHT:
 				is_snow_pine = true
 
 			if not is_pine and not is_snow_pine:

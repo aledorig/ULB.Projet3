@@ -23,13 +23,6 @@ const DEPTH_FREQ:        float = 0.0008
 const SURFACE_FREQ:      float = 0.012
 const ROUGHNESS_FREQ:    float = 0.005
 
-# Height shaping — extreme mountains (1.5x vertical scale)
-const OCEAN_BASE:     float = -75.0
-const LAND_BASE:      float = 12.0
-const MIN_AMPLITUDE:  float = 52.5
-const MAX_AMPLITUDE:  float = 750.0
-const SURFACE_AMP:    float = 4.5
-const ROUGHNESS_AMP:  float = 37.5
 
 
 func _init(p_seed: int = GameSettingsAutoload.seed, p_octaves: int = GameSettingsAutoload.octave) -> void:
@@ -58,15 +51,15 @@ static func _shape_noise(n: float) -> float:
 
 
 func _compute_base(cont: float) -> float:
-	var sea_land: float = lerpf(OCEAN_BASE, LAND_BASE, _smoothstep(-0.5, -0.15, cont))
-	var inland_boost: float = _smoothstep(-0.15, 0.2, cont) * 75.0
+	var sea_land: float = lerpf(TerrainConfig.OCEAN_BASE, TerrainConfig.LAND_BASE, _smoothstep(-0.5, -0.15, cont))
+	var inland_boost: float = _smoothstep(-0.15, 0.2, cont) * TerrainConfig.INLAND_BOOST
 	return sea_land + inland_boost
 
 
 func _compute_amplitude(cont: float, peaks: float) -> float:
 	var land_factor: float = _smoothstep(-0.5, -0.15, cont)
 	# Very aggressive: mountains appear frequently and reach extreme heights
-	return lerpf(MIN_AMPLITUDE, MAX_AMPLITUDE, _smoothstep(-0.8, 0.2, peaks)) * lerpf(0.3, 1.0, land_factor)
+	return lerpf(TerrainConfig.MIN_AMPLITUDE, TerrainConfig.MAX_AMPLITUDE, _smoothstep(-0.8, 0.2, peaks)) * lerpf(0.3, 1.0, land_factor)
 
 
 func get_height(x: float, z: float) -> float:
@@ -78,13 +71,13 @@ func get_height(x: float, z: float) -> float:
 
 	var shaped: float = _shape_noise(height_noise.get_value(x, z, HEIGHT_FREQ, HEIGHT_FREQ))
 	var depth_mod: float = depth_noise.get_value(x, z, DEPTH_FREQ, DEPTH_FREQ)
-	var surface_detail: float = surface_noise.get_value(x * SURFACE_FREQ, z * SURFACE_FREQ) * SURFACE_AMP / 70.0
+	var surface_detail: float = surface_noise.get_value(x * SURFACE_FREQ, z * SURFACE_FREQ) * TerrainConfig.SURFACE_AMP / 70.0
 
 	var base_h: float = base + (shaped * amplitude * (1.0 + depth_mod * 0.6)) + surface_detail
 
 	# High-frequency roughness at altitude — makes mountain mesh jagged/craggy
-	var altitude_factor: float = _smoothstep(45.0, 150.0, base_h)
-	var rough: float = roughness_noise.get_value(x, z, ROUGHNESS_FREQ, ROUGHNESS_FREQ) * ROUGHNESS_AMP * altitude_factor
+	var altitude_factor: float = _smoothstep(TerrainConfig.ROUGHNESS_ALT_LOW, TerrainConfig.ROUGHNESS_ALT_HIGH, base_h)
+	var rough: float = roughness_noise.get_value(x, z, ROUGHNESS_FREQ, ROUGHNESS_FREQ) * TerrainConfig.ROUGHNESS_AMP * altitude_factor
 
 	return base_h + rough
 
@@ -159,7 +152,7 @@ func get_vertex_data_batch(
 		origin_x * inv_spacing, origin_z * inv_spacing,
 		width, height,
 		spacing * SURFACE_FREQ, spacing * SURFACE_FREQ,
-		SURFACE_AMP / 70.0
+		TerrainConfig.SURFACE_AMP / 70.0
 	)
 
 	var roughness_grid: PackedFloat32Array = PackedFloat32Array()
@@ -204,8 +197,8 @@ func get_vertex_data_batch(
 			var base_h: float = base + (shaped_noise * amplitude * (1.0 + depth_grid[idx] * 0.6)) + surface_grid[idx]
 
 			# Roughness at altitude
-			var altitude_factor: float = _smoothstep(45.0, 150.0, base_h)
-			var h: float = base_h + roughness_grid[idx] * ROUGHNESS_AMP * altitude_factor
+			var altitude_factor: float = _smoothstep(TerrainConfig.ROUGHNESS_ALT_LOW, TerrainConfig.ROUGHNESS_ALT_HIGH, base_h)
+			var h: float = base_h + roughness_grid[idx] * TerrainConfig.ROUGHNESS_AMP * altitude_factor
 
 			var temp_01: float = clampf(temp_grid[idx] * 0.5 + 0.5, 0.0, 1.0)
 			var moist_01: float = clampf(moist_grid[idx] * 0.5 + 0.5, 0.0, 1.0)
@@ -219,7 +212,7 @@ func get_vertex_data_batch(
 
 
 func is_underwater(height_val: float) -> bool:
-	return height_val < TerrainConstants.SEA_LEVEL
+	return height_val < TerrainConfig.SEA_LEVEL
 
 
 func get_debug_info(x: float, z: float) -> Dictionary:
@@ -241,30 +234,30 @@ func get_debug_info(x: float, z: float) -> Dictionary:
 
 
 func _get_zone_name(_cont: float, _peaks: float, temp: float, moist: float, h: float) -> String:
-	if h < TerrainConstants.SEA_LEVEL - 30.0:
+	if h < TerrainConfig.SEA_LEVEL - TerrainConfig.DEEP_OCEAN_OFFSET:
 		return "Deep Ocean"
-	if h < TerrainConstants.SEA_LEVEL:
+	if h < TerrainConfig.SEA_LEVEL:
 		return "Ocean"
-	if h < 12.0:
+	if h < TerrainConfig.COAST_MAX:
 		return "Coast"
-	if h >= 300.0:
-		if temp < -0.2:
+	if h >= TerrainConfig.HIGH_PEAKS_MIN:
+		if temp < TerrainConfig.TUNDRA_TEMP:
 			return "Snow Peaks"
 		return "High Peaks"
-	if h >= 180.0:
-		if temp < -0.2:
+	if h >= TerrainConfig.MOUNTAINS_MIN:
+		if temp < TerrainConfig.TUNDRA_TEMP:
 			return "Snow Mountains"
 		return "Mountains"
-	if h >= 90.0:
-		if temp < -0.2:
+	if h >= TerrainConfig.HIGHLANDS_MIN:
+		if temp < TerrainConfig.TUNDRA_TEMP:
 			return "Tundra Hills"
 		return "Highlands"
-	if temp > 0.4:
-		if moist < -0.1:
+	if temp > TerrainConfig.HOT_TEMP:
+		if moist < TerrainConfig.JUNGLE_MOIST:
 			return "Desert"
 		return "Jungle"
-	if temp < -0.3:
+	if temp < TerrainConfig.COLD_TEMP:
 		return "Tundra"
-	if moist > 0.1:
+	if moist > TerrainConfig.FOREST_MOIST:
 		return "Forest"
 	return "Plains"

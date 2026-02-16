@@ -2,7 +2,7 @@ class_name VegetationManager
 extends RefCounted
 
 ## Handles grass mesh/material caching and vegetation instantiation
-## from pre-computed data on ChunkResult
+## from pre-computed VegetationData
 
 var _grass_mesh:      Mesh = null
 var _grass_material:  ShaderMaterial = null
@@ -13,8 +13,8 @@ var _pine_material:   ShaderMaterial = null
 var _snow_material:   ShaderMaterial = null
 
 
-func create_vegetation(chunk_node: Node3D, result: ChunkResult) -> MultiMeshInstance3D:
-	if result.vegetation_count == 0:
+func create_vegetation(chunk_node: Node3D, veg: VegetationData) -> MultiMeshInstance3D:
+	if veg.grass_count == 0:
 		return null
 
 	var grass_mm := MultiMeshInstance3D.new()
@@ -22,23 +22,23 @@ func create_vegetation(chunk_node: Node3D, result: ChunkResult) -> MultiMeshInst
 	multimesh.transform_format = MultiMesh.TRANSFORM_3D
 	multimesh.use_custom_data = true
 	multimesh.mesh = _get_grass_mesh()
-	multimesh.instance_count = result.vegetation_count
+	multimesh.instance_count = veg.grass_count
 
-	for i in range(result.vegetation_count):
+	for i in range(veg.grass_count):
 		var base: int = i * 12
 		var t := Transform3D()
-		t.basis.x = Vector3(result.vegetation_data[base], result.vegetation_data[base + 1], result.vegetation_data[base + 2])
-		t.basis.y = Vector3(result.vegetation_data[base + 3], result.vegetation_data[base + 4], result.vegetation_data[base + 5])
-		t.basis.z = Vector3(result.vegetation_data[base + 6], result.vegetation_data[base + 7], result.vegetation_data[base + 8])
-		t.origin = Vector3(result.vegetation_data[base + 9], result.vegetation_data[base + 10], result.vegetation_data[base + 11])
+		t.basis.x = Vector3(veg.grass_transforms[base], veg.grass_transforms[base + 1], veg.grass_transforms[base + 2])
+		t.basis.y = Vector3(veg.grass_transforms[base + 3], veg.grass_transforms[base + 4], veg.grass_transforms[base + 5])
+		t.basis.z = Vector3(veg.grass_transforms[base + 6], veg.grass_transforms[base + 7], veg.grass_transforms[base + 8])
+		t.origin = Vector3(veg.grass_transforms[base + 9], veg.grass_transforms[base + 10], veg.grass_transforms[base + 11])
 		multimesh.set_instance_transform(i, t)
 
 		var cd_base: int = i * 4
 		multimesh.set_instance_custom_data(i, Color(
-			result.vegetation_custom_data[cd_base],
-			result.vegetation_custom_data[cd_base + 1],
-			result.vegetation_custom_data[cd_base + 2],
-			result.vegetation_custom_data[cd_base + 3]
+			veg.grass_custom_data[cd_base],
+			veg.grass_custom_data[cd_base + 1],
+			veg.grass_custom_data[cd_base + 2],
+			veg.grass_custom_data[cd_base + 3]
 		))
 
 	grass_mm.multimesh = multimesh
@@ -222,23 +222,23 @@ func _create_tree_material(mesh: Mesh) -> ShaderMaterial:
 	return mat
 
 
-func create_trees(chunk_node: Node3D, pine_data: PackedFloat32Array, pine_count: int, snow_data: PackedFloat32Array, snow_count: int) -> Dictionary:
+func create_trees(chunk_node: Node3D, veg: VegetationData) -> Dictionary:
 	var result: Dictionary = {"pine": null, "snow": null}
 
-	if pine_count > 0:
+	if veg.pine_count > 0:
 		var pine_mm := MultiMeshInstance3D.new()
 		var multimesh := MultiMesh.new()
 		multimesh.transform_format = MultiMesh.TRANSFORM_3D
 		multimesh.mesh = _get_pine_mesh()
-		multimesh.instance_count = pine_count
+		multimesh.instance_count = veg.pine_count
 
-		for i in range(pine_count):
+		for i in range(veg.pine_count):
 			var base: int = i * 12
 			var t := Transform3D()
-			t.basis.x = Vector3(pine_data[base], pine_data[base + 1], pine_data[base + 2])
-			t.basis.y = Vector3(pine_data[base + 3], pine_data[base + 4], pine_data[base + 5])
-			t.basis.z = Vector3(pine_data[base + 6], pine_data[base + 7], pine_data[base + 8])
-			t.origin = Vector3(pine_data[base + 9], pine_data[base + 10], pine_data[base + 11])
+			t.basis.x = Vector3(veg.pine_transforms[base], veg.pine_transforms[base + 1], veg.pine_transforms[base + 2])
+			t.basis.y = Vector3(veg.pine_transforms[base + 3], veg.pine_transforms[base + 4], veg.pine_transforms[base + 5])
+			t.basis.z = Vector3(veg.pine_transforms[base + 6], veg.pine_transforms[base + 7], veg.pine_transforms[base + 8])
+			t.origin = Vector3(veg.pine_transforms[base + 9], veg.pine_transforms[base + 10], veg.pine_transforms[base + 11])
 			multimesh.set_instance_transform(i, t)
 
 		pine_mm.multimesh = multimesh
@@ -246,20 +246,20 @@ func create_trees(chunk_node: Node3D, pine_data: PackedFloat32Array, pine_count:
 		chunk_node.add_child(pine_mm)
 		result.pine = pine_mm
 
-	if snow_count > 0:
+	if veg.snow_count > 0:
 		var snow_mm := MultiMeshInstance3D.new()
 		var multimesh := MultiMesh.new()
 		multimesh.transform_format = MultiMesh.TRANSFORM_3D
 		multimesh.mesh = _get_snow_pine_mesh()
-		multimesh.instance_count = snow_count
+		multimesh.instance_count = veg.snow_count
 
-		for i in range(snow_count):
+		for i in range(veg.snow_count):
 			var base: int = i * 12
 			var t := Transform3D()
-			t.basis.x = Vector3(snow_data[base], snow_data[base + 1], snow_data[base + 2])
-			t.basis.y = Vector3(snow_data[base + 3], snow_data[base + 4], snow_data[base + 5])
-			t.basis.z = Vector3(snow_data[base + 6], snow_data[base + 7], snow_data[base + 8])
-			t.origin = Vector3(snow_data[base + 9], snow_data[base + 10], snow_data[base + 11])
+			t.basis.x = Vector3(veg.snow_transforms[base], veg.snow_transforms[base + 1], veg.snow_transforms[base + 2])
+			t.basis.y = Vector3(veg.snow_transforms[base + 3], veg.snow_transforms[base + 4], veg.snow_transforms[base + 5])
+			t.basis.z = Vector3(veg.snow_transforms[base + 6], veg.snow_transforms[base + 7], veg.snow_transforms[base + 8])
+			t.origin = Vector3(veg.snow_transforms[base + 9], veg.snow_transforms[base + 10], veg.snow_transforms[base + 11])
 			multimesh.set_instance_transform(i, t)
 
 		snow_mm.multimesh = multimesh

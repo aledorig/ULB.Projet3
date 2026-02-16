@@ -88,7 +88,7 @@ func _update_map() -> void:
 			var climate: Color = terrain_gen.get_climate_color(world_x, world_z)
 
 			var map_color: Color
-			if h < TerrainConstants.SEA_LEVEL:
+			if h < TerrainConfig.SEA_LEVEL:
 				var depth_factor: float = clampf(-h / 80.0, 0.0, 0.7)
 				map_color = Color(0.1, 0.3 - depth_factor * 0.2, 0.6 - depth_factor * 0.3)
 			else:
@@ -97,10 +97,10 @@ func _update_map() -> void:
 				var cont: float = climate.b
 
 				# Desert: hot + dry
-				var is_desert: float = clampf((temp - 0.65) / 0.15, 0.0, 1.0) * clampf((0.45 - moist) / 0.15, 0.0, 1.0)
+				var is_desert: float = clampf((temp - TerrainConfig.DESERT_TEMP) / 0.15, 0.0, 1.0) * clampf((0.45 - moist) / 0.15, 0.0, 1.0)
 
 				# Beach: near sea level
-				var is_beach: float = clampf((4.0 - h) / 4.0, 0.0, 1.0) * clampf((cont - 0.3) / 0.2, 0.0, 1.0)
+				var is_beach: float = clampf((TerrainConfig.BEACH_HEIGHT - h) / TerrainConfig.BEACH_HEIGHT, 0.0, 1.0) * clampf((cont - 0.3) / 0.2, 0.0, 1.0)
 
 				var sand_f: float = maxf(is_desert, is_beach)
 
@@ -111,15 +111,15 @@ func _update_map() -> void:
 				var sand_color: Color = Color(0.85, 0.8, 0.55)
 				map_color = grass_color.lerp(sand_color, sand_f)
 
-				# Mountain rock at height > 80
-				if h > 80.0:
-					var rock_f: float = clampf((h - 80.0) / 60.0, 0.0, 1.0)
+				# Mountain rock
+				if h > TerrainConfig.ALT_ROCK_LOW:
+					var rock_f: float = clampf((h - TerrainConfig.ALT_ROCK_LOW) / (TerrainConfig.ALT_ROCK_HIGH - TerrainConfig.ALT_ROCK_LOW), 0.0, 1.0)
 					map_color = map_color.lerp(Color(0.5, 0.48, 0.45), rock_f * 0.7)
 
 				# Snow (temperature-adjusted)
-				var snow_line: float = 120.0 + (temp - 0.5) * 70.0
+				var snow_line: float = TerrainConfig.SNOW_HEIGHT + (temp - 0.5) * 70.0
 				if h > snow_line:
-					var snow_f: float = clampf((h - snow_line) / 30.0, 0.0, 1.0)
+					var snow_f: float = clampf((h - snow_line) / TerrainConfig.SNOW_BLEND_RANGE, 0.0, 1.0)
 					map_color = map_color.lerp(Color(0.95, 0.97, 1.0), snow_f)
 
 			image.set_pixel(px, py, map_color)
