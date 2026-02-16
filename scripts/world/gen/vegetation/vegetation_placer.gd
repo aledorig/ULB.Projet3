@@ -30,42 +30,44 @@ static func _write_transform(arr: PackedFloat32Array, idx: int,
 		local_x: float, height: float, local_z: float,
 		scale: float, angle: float, y_offset: float,
 		tilt_x: float = 0.0, tilt_z: float = 0.0) -> void:
-	# Y-rotation
+	# Writes 12 floats in Godot MultiMesh.buffer row-major format:
+	# [bx.x, by.x, bz.x, ox,  bx.y, by.y, bz.y, oy,  bx.z, by.z, bz.z, oz]
 	var cos_a: float = cos(angle)
 	var sin_a: float = sin(angle)
 	var base: int = idx * 12
 
 	if tilt_x == 0.0 and tilt_z == 0.0:
-		# Fast path: Y-rotation only
-		arr[base]      = cos_a * scale
-		arr[base + 1]  = 0.0
-		arr[base + 2]  = sin_a * scale
-		arr[base + 3]  = 0.0
-		arr[base + 4]  = scale
-		arr[base + 5]  = 0.0
-		arr[base + 6]  = -sin_a * scale
-		arr[base + 7]  = 0.0
-		arr[base + 8]  = cos_a * scale
+		# Fast path: Y-rotation only (row-major)
+		arr[base]      = cos_a * scale     # bx.x
+		arr[base + 1]  = 0.0               # by.x
+		arr[base + 2]  = -sin_a * scale    # bz.x
+		arr[base + 3]  = local_x           # ox
+		arr[base + 4]  = 0.0               # bx.y
+		arr[base + 5]  = scale             # by.y
+		arr[base + 6]  = 0.0               # bz.y
+		arr[base + 7]  = height + y_offset # oy
+		arr[base + 8]  = sin_a * scale     # bx.z
+		arr[base + 9]  = 0.0               # by.z
+		arr[base + 10] = cos_a * scale     # bz.z
+		arr[base + 11] = local_z           # oz
 	else:
-		# Tilted: rotate around X by tilt_x, Z by tilt_z, then Y by angle
+		# Tilted: Ry * Rx * Rz (row-major)
 		var cx: float = cos(tilt_x)
 		var sx: float = sin(tilt_x)
 		var cz: float = cos(tilt_z)
 		var sz: float = sin(tilt_z)
-		# Combined rotation: Ry * Rx * Rz (applied right to left)
-		arr[base]      = (cos_a * cz + sin_a * sx * sz) * scale
-		arr[base + 1]  = (-cos_a * sz + sin_a * sx * cz) * scale
-		arr[base + 2]  = (sin_a * cx) * scale
-		arr[base + 3]  = (cx * sz) * scale
-		arr[base + 4]  = (cx * cz) * scale
-		arr[base + 5]  = (-sx) * scale
-		arr[base + 6]  = (-sin_a * cz + cos_a * sx * sz) * scale
-		arr[base + 7]  = (sin_a * sz + cos_a * sx * cz) * scale
-		arr[base + 8]  = (cos_a * cx) * scale
-
-	arr[base + 9]  = local_x
-	arr[base + 10] = height + y_offset
-	arr[base + 11] = local_z
+		arr[base]      = (cos_a * cz + sin_a * sx * sz) * scale    # bx.x
+		arr[base + 1]  = (cx * sz) * scale                         # by.x
+		arr[base + 2]  = (-sin_a * cz + cos_a * sx * sz) * scale   # bz.x
+		arr[base + 3]  = local_x                                   # ox
+		arr[base + 4]  = (-cos_a * sz + sin_a * sx * cz) * scale   # bx.y
+		arr[base + 5]  = (cx * cz) * scale                         # by.y
+		arr[base + 6]  = (sin_a * sz + cos_a * sx * cz) * scale    # bz.y
+		arr[base + 7]  = height + y_offset                         # oy
+		arr[base + 8]  = (sin_a * cx) * scale                      # bx.z
+		arr[base + 9]  = (-sx) * scale                             # by.z
+		arr[base + 10] = (cos_a * cx) * scale                      # bz.z
+		arr[base + 11] = local_z                                   # oz
 
 
 static func _pick_variant(chunk_pos: Vector2i, total: int, salt: int) -> int:
@@ -109,9 +111,11 @@ func _query_shared_grid(chunk_pos: Vector2i) -> Dictionary:
 
 
 func generate_vegetation(chunk_pos: Vector2i, lod_level: int) -> Dictionary:
+	## Returns {buffer: PackedFloat32Array, count: int}
+	## Buffer is interleaved 16 floats/instance: 12 transform (row-major) + 4 custom_data
+	## Ready to assign directly to MultiMesh.buffer
 	var result := {
-		"transforms": PackedFloat32Array(),
-		"custom_data": PackedFloat32Array(),
+		"buffer": PackedFloat32Array(),
 		"count": 0
 	}
 
@@ -139,10 +143,9 @@ func generate_vegetation(chunk_pos: Vector2i, lod_level: int) -> Dictionary:
 		grid_verts, grid_colors
 	)
 
-	var transforms := PackedFloat32Array()
-	transforms.resize(candidates * 12)
-	var custom_data := PackedFloat32Array()
-	custom_data.resize(candidates * 4)
+	# 16 floats per instance: 12 transform (row-major) + 4 custom_data
+	var buf := PackedFloat32Array()
+	buf.resize(candidates * 16)
 	var count: int = 0
 
 	var grid_side: int = ceili(sqrt(float(candidates)))
@@ -198,39 +201,38 @@ func generate_vegetation(chunk_pos: Vector2i, lod_level: int) -> Dictionary:
 			if rng.randf() > density_chance:
 				continue
 
-			# Build transform
-			# random Y rotation only
+			# Build interleaved row-major transform + custom_data (16 floats)
 			var angle: float = rng.randf() * TAU
 			var cos_a: float = cos(angle)
 			var sin_a: float = sin(angle)
 
-			var base: int = count * 12
-			transforms[base]      = cos_a
-			transforms[base + 1]  = 0.0
-			transforms[base + 2]  = sin_a
-			transforms[base + 3]  = 0.0
-			transforms[base + 4]  = 1.0
-			transforms[base + 5]  = 0.0
-			transforms[base + 6]  = -sin_a
-			transforms[base + 7]  = 0.0
-			transforms[base + 8]  = cos_a
-			transforms[base + 9]  = local_x
-			transforms[base + 10] = height - 0.3
-			transforms[base + 11] = local_z
-
-			var cd_base: int = count * 4
-			custom_data[cd_base]     = temperature
-			custom_data[cd_base + 1] = moisture
-			custom_data[cd_base + 2] = float(rng.randi() % 2)  # 0.0 or 1.0: silhouette texture variant
-			custom_data[cd_base + 3] = 0.0
+			var b: int = count * 16
+			# Row 0: bx.x, by.x, bz.x, origin.x
+			buf[b]      = cos_a
+			buf[b + 1]  = 0.0
+			buf[b + 2]  = -sin_a
+			buf[b + 3]  = local_x
+			# Row 1: bx.y, by.y, bz.y, origin.y
+			buf[b + 4]  = 0.0
+			buf[b + 5]  = 1.0
+			buf[b + 6]  = 0.0
+			buf[b + 7]  = height - 0.3
+			# Row 2: bx.z, by.z, bz.z, origin.z
+			buf[b + 8]  = sin_a
+			buf[b + 9]  = 0.0
+			buf[b + 10] = cos_a
+			buf[b + 11] = local_z
+			# Custom data (Color as r,g,b,a)
+			buf[b + 12] = temperature
+			buf[b + 13] = moisture
+			buf[b + 14] = float(rng.randi() % 2)
+			buf[b + 15] = 0.0
 
 			count += 1
 
-	transforms.resize(count * 12)
-	custom_data.resize(count * 4)
+	buf.resize(count * 16)
 
-	result.transforms = transforms
-	result.custom_data = custom_data
+	result.buffer = buf
 	result.count = count
 	return result
 

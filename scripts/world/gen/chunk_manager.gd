@@ -230,8 +230,7 @@ func _generate_chunk_data(request: ChunkRequest) -> ChunkResult:
 	# Vegetation (thread-safe, no scene tree access)
 	var veg_placer = VegetationPlacer.new(terrain_gen, chunk_size, vertex_spacing, p_seed, request.chunk_pos)
 	var veg_result: Dictionary = veg_placer.generate_vegetation(request.chunk_pos, request.grass_lod)
-	result.vegetation.grass_transforms = veg_result.transforms
-	result.vegetation.grass_custom_data = veg_result.custom_data
+	result.vegetation.grass_buffer = veg_result.buffer
 	result.vegetation.grass_count = veg_result.count
 
 	# Trees, foliage (shared grid query)
@@ -290,11 +289,13 @@ func _process_completed_chunks() -> void:
 
 
 func _ensure_nearby_collision() -> void:
+	# Limit to 1 collision creation per call (create_trimesh_shape is ~44ms each)
 	for x in range(-ChunkInstantiator.COLLISION_DISTANCE, ChunkInstantiator.COLLISION_DISTANCE + 1):
 		for z in range(-ChunkInstantiator.COLLISION_DISTANCE, ChunkInstantiator.COLLISION_DISTANCE + 1):
 			var chunk_pos: Vector2i = last_camera_chunk + Vector2i(x, z)
 			if loaded_chunks.has(chunk_pos):
-				instantiator.ensure_collision(loaded_chunks[chunk_pos])
+				if instantiator.ensure_collision(loaded_chunks[chunk_pos]):
+					return  # max 1 per frame
 
 
 func _mark_distant_chunks_for_unload(chunks_to_keep: Dictionary) -> void:
@@ -424,6 +425,8 @@ func _on_settings_changed() -> void:
 
 
 func _exit_tree() -> void:
+	if grass_lod_mgr:
+		grass_lod_mgr.shutdown()
 	if thread_pool:
 		thread_pool.shutdown()
 	_clear_all_chunks()

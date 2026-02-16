@@ -56,10 +56,12 @@ func instantiate(result: ChunkResult, parent: Node3D, camera_chunk: Vector2i, ch
 	return chunk_instance
 
 
-func ensure_collision(chunk_instance: ChunkInstance) -> void:
+func ensure_collision(chunk_instance: ChunkInstance) -> bool:
+	## Returns true if a new collision was created (expensive)
 	if chunk_instance.has_collision:
-		return
+		return false
 	_add_collision(chunk_instance)
+	return true
 
 
 func _add_collision(chunk_instance: ChunkInstance) -> void:

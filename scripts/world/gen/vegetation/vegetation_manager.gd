@@ -24,23 +24,7 @@ func create_vegetation(chunk_node: Node3D, veg: VegetationData) -> MultiMeshInst
 	multimesh.use_custom_data = true
 	multimesh.mesh = _get_grass_mesh()
 	multimesh.instance_count = veg.grass_count
-
-	for i in range(veg.grass_count):
-		var base: int = i * 12
-		var t := Transform3D()
-		t.basis.x = Vector3(veg.grass_transforms[base], veg.grass_transforms[base + 1], veg.grass_transforms[base + 2])
-		t.basis.y = Vector3(veg.grass_transforms[base + 3], veg.grass_transforms[base + 4], veg.grass_transforms[base + 5])
-		t.basis.z = Vector3(veg.grass_transforms[base + 6], veg.grass_transforms[base + 7], veg.grass_transforms[base + 8])
-		t.origin = Vector3(veg.grass_transforms[base + 9], veg.grass_transforms[base + 10], veg.grass_transforms[base + 11])
-		multimesh.set_instance_transform(i, t)
-
-		var cd_base: int = i * 4
-		multimesh.set_instance_custom_data(i, Color(
-			veg.grass_custom_data[cd_base],
-			veg.grass_custom_data[cd_base + 1],
-			veg.grass_custom_data[cd_base + 2],
-			veg.grass_custom_data[cd_base + 3]
-		))
+	multimesh.buffer = veg.grass_buffer  # one native call, no GDScript loop
 
 	grass_mm.multimesh = multimesh
 	grass_mm.material_override = _get_grass_material()
@@ -50,7 +34,7 @@ func create_vegetation(chunk_node: Node3D, veg: VegetationData) -> MultiMeshInst
 	return grass_mm
 
 
-func replace_vegetation(chunk_instance: ChunkInstance, veg_data: PackedFloat32Array, veg_custom: PackedFloat32Array, veg_count: int) -> void:
+func replace_vegetation(chunk_instance: ChunkInstance, grass_buffer: PackedFloat32Array, veg_count: int) -> void:
 	# Remove old grass
 	if chunk_instance.grass_instance:
 		chunk_instance.grass_instance.queue_free()
@@ -65,21 +49,7 @@ func replace_vegetation(chunk_instance: ChunkInstance, veg_data: PackedFloat32Ar
 	multimesh.use_custom_data = true
 	multimesh.mesh = _get_grass_mesh()
 	multimesh.instance_count = veg_count
-
-	for i in range(veg_count):
-		var base: int = i * 12
-		var t := Transform3D()
-		t.basis.x = Vector3(veg_data[base], veg_data[base + 1], veg_data[base + 2])
-		t.basis.y = Vector3(veg_data[base + 3], veg_data[base + 4], veg_data[base + 5])
-		t.basis.z = Vector3(veg_data[base + 6], veg_data[base + 7], veg_data[base + 8])
-		t.origin = Vector3(veg_data[base + 9], veg_data[base + 10], veg_data[base + 11])
-		multimesh.set_instance_transform(i, t)
-
-		var cd_base: int = i * 4
-		multimesh.set_instance_custom_data(i, Color(
-			veg_custom[cd_base], veg_custom[cd_base + 1],
-			veg_custom[cd_base + 2], veg_custom[cd_base + 3]
-		))
+	multimesh.buffer = grass_buffer  # one native call, no GDScript loop
 
 	grass_mm.multimesh = multimesh
 	grass_mm.material_override = _get_grass_material()
@@ -220,15 +190,7 @@ func _create_multimesh_instance(parent: Node3D, mesh: Mesh,
 	mm.transform_format = MultiMesh.TRANSFORM_3D
 	mm.mesh = mesh
 	mm.instance_count = count
-
-	for i in range(count):
-		var base: int = i * 12
-		var t := Transform3D()
-		t.basis.x = Vector3(transforms[base], transforms[base + 1], transforms[base + 2])
-		t.basis.y = Vector3(transforms[base + 3], transforms[base + 4], transforms[base + 5])
-		t.basis.z = Vector3(transforms[base + 6], transforms[base + 7], transforms[base + 8])
-		t.origin = Vector3(transforms[base + 9], transforms[base + 10], transforms[base + 11])
-		mm.set_instance_transform(i, t)
+	mm.buffer = transforms  # one native call, no GDScript loop
 
 	mmi.multimesh = mm
 	if shadows:
