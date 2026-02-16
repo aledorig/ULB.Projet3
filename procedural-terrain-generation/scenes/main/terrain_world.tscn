@@ -83,7 +83,6 @@ offset_bottom = 40.0
 script = ExtResource("5_qvro2")
 
 [node name="ColorRect" type="ColorRect" parent="CanvasLayer" unique_id=125111344]
-visible = false
 z_index = 1
 material = SubResource("ShaderMaterial_nikly")
 anchors_preset = 15

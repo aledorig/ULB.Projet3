@@ -44,6 +44,45 @@ func create_vegetation(chunk_node: Node3D, result: ChunkResult) -> MultiMeshInst
 	return grass_mm
 
 
+func replace_vegetation(chunk_instance: ChunkInstance, veg_data: PackedFloat32Array, veg_custom: PackedFloat32Array, veg_count: int) -> void:
+	# Remove old grass
+	if chunk_instance.grass_instance:
+		chunk_instance.grass_instance.queue_free()
+		chunk_instance.grass_instance = null
+
+	if veg_count == 0:
+		return
+
+	var grass_mm := MultiMeshInstance3D.new()
+	var multimesh := MultiMesh.new()
+	multimesh.transform_format = MultiMesh.TRANSFORM_3D
+	multimesh.use_custom_data = true
+	multimesh.mesh = _get_grass_mesh()
+	multimesh.instance_count = veg_count
+
+	for i in range(veg_count):
+		var base: int = i * 12
+		var t := Transform3D()
+		t.basis.x = Vector3(veg_data[base], veg_data[base + 1], veg_data[base + 2])
+		t.basis.y = Vector3(veg_data[base + 3], veg_data[base + 4], veg_data[base + 5])
+		t.basis.z = Vector3(veg_data[base + 6], veg_data[base + 7], veg_data[base + 8])
+		t.origin = Vector3(veg_data[base + 9], veg_data[base + 10], veg_data[base + 11])
+		multimesh.set_instance_transform(i, t)
+
+		var cd_base: int = i * 4
+		multimesh.set_instance_custom_data(i, Color(
+			veg_custom[cd_base], veg_custom[cd_base + 1],
+			veg_custom[cd_base + 2], veg_custom[cd_base + 3]
+		))
+
+	grass_mm.multimesh = multimesh
+	grass_mm.material_override = _get_grass_material()
+	grass_mm.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+
+	chunk_instance.node.add_child(grass_mm)
+	chunk_instance.grass_instance = grass_mm
+
+
 func _get_grass_mesh() -> Mesh:
 	if _grass_mesh == null:
 		var grass_scene: PackedScene = load("res://assets/environment/grass.glb")
