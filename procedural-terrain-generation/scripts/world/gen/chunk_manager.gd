@@ -271,8 +271,7 @@ func _process_grass_lod_queue() -> void:
 		if new_lod == chunk_instance.grass_lod:
 			continue
 
-		var terrain_gen := TerrainGenerator.new(GameSettingsAutoload.seed, GameSettingsAutoload.octave)
-		var veg_placer := VegetationPlacer.new(terrain_gen, chunk_size, vertex_spacing, p_seed, chunk_pos)
+		var veg_placer := VegetationPlacer.new(debug_terrain_generator, chunk_size, vertex_spacing, p_seed, chunk_pos)
 		var veg_result: Dictionary = veg_placer.generate_vegetation(chunk_pos, new_lod)
 
 		vegetation_mgr.replace_vegetation(chunk_instance, veg_result.transforms, veg_result.custom_data, veg_result.count)

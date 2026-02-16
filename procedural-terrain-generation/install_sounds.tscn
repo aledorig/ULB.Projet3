@@ -1,6 +1,0 @@
-[gd_scene format=3 uid="uid://dn1hmwb2u4j38"]
-
-[ext_resource type="Script" uid="uid://dau5oyyksbxa" path="res://install_sounds.gd" id="1_vg5t4"]
-
-[node name="InstallSounds" type="Node" unique_id=115103365]
-script = ExtResource("1_vg5t4")

@@ -5,8 +5,8 @@ extends RefCounted
 ## Pre-computes a height/climate grid via batch noise, then samples from it
 ## avoids thousands of individual noise calls
 
-const LOD_CANDIDATES: Array[int] = [2000, 600, 150]
-const GRID_RES: int = 32
+const LOD_CANDIDATES: Array[int] = [8000, 1600, 150]
+const LOD_GRID_RES: Array[int] = [32, 16, 8]
 
 const MIN_HEIGHT:    float = 6.5
 const MAX_HEIGHT:    float = 80.0
@@ -41,12 +41,13 @@ func generate_vegetation(chunk_pos: Vector2i, lod_level: int) -> Dictionary:
 		return result
 
 	var candidates: int = LOD_CANDIDATES[lod_level]
+	var grid_res: int = LOD_GRID_RES[lod_level] if lod_level < LOD_GRID_RES.size() else 8
 	var chunk_world_size: float = (chunk_size - 1) * vertex_spacing
 	var origin_x: float = chunk_pos.x * chunk_world_size
 	var origin_z: float = chunk_pos.y * chunk_world_size
 
-	var grid_spacing: float = chunk_world_size / float(GRID_RES - 1)
-	var grid_total: int = GRID_RES * GRID_RES
+	var grid_spacing: float = chunk_world_size / float(grid_res - 1)
+	var grid_total: int = grid_res * grid_res
 
 	var grid_verts := PackedVector3Array()
 	var grid_colors := PackedColorArray()
@@ -55,7 +56,7 @@ func generate_vegetation(chunk_pos: Vector2i, lod_level: int) -> Dictionary:
 
 	terrain_gen.get_vertex_data_batch(
 		origin_x, origin_z,
-		GRID_RES, GRID_RES,
+		grid_res, grid_res,
 		grid_spacing,
 		grid_verts, grid_colors
 	)
@@ -69,7 +70,7 @@ func generate_vegetation(chunk_pos: Vector2i, lod_level: int) -> Dictionary:
 	var grid_side: int = ceili(sqrt(float(candidates)))
 	var cell_size: float = chunk_world_size / float(grid_side)
 	var inv_grid_spacing: float = 1.0 / grid_spacing
-	var max_gi: int = GRID_RES - 2
+	var max_gi: int = grid_res - 2
 
 	for gz in range(grid_side):
 		for gx in range(grid_side):
@@ -85,7 +86,7 @@ func generate_vegetation(chunk_pos: Vector2i, lod_level: int) -> Dictionary:
 			# Map to grid coordinates
 			var gi: int = clampi(int(local_x * inv_grid_spacing), 0, max_gi)
 			var gj: int = clampi(int(local_z * inv_grid_spacing), 0, max_gi)
-			var grid_idx: int = gj * GRID_RES + gi
+			var grid_idx: int = gj * grid_res + gi
 
 			# Height from grid
 			var height: float = grid_verts[grid_idx].y
@@ -95,7 +96,7 @@ func generate_vegetation(chunk_pos: Vector2i, lod_level: int) -> Dictionary:
 
 			# Slope from grid neighbors (cheap — no noise calls)
 			var h_right: float = grid_verts[grid_idx + 1].y
-			var h_down: float = grid_verts[grid_idx + GRID_RES].y
+			var h_down: float = grid_verts[grid_idx + grid_res].y
 			var dx: float = (h_right - height) * inv_grid_spacing
 			var dz: float = (h_down - height) * inv_grid_spacing
 			var normal_y: float = 1.0 / sqrt(dx * dx + dz * dz + 1.0)
@@ -142,7 +143,7 @@ func generate_vegetation(chunk_pos: Vector2i, lod_level: int) -> Dictionary:
 			var cd_base: int = count * 4
 			custom_data[cd_base]     = temperature
 			custom_data[cd_base + 1] = moisture
-			custom_data[cd_base + 2] = 0.0
+			custom_data[cd_base + 2] = float(rng.randi() % 2)  # 0.0 or 1.0: silhouette texture variant
 			custom_data[cd_base + 3] = 0.0
 
 			count += 1

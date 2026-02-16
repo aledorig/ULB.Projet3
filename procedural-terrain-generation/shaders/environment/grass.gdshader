@@ -1,8 +1,13 @@
 shader_type spatial;
-render_mode cull_disabled;
+render_mode cull_disabled, depth_prepass_alpha;
 
 uniform sampler2D noise;
 uniform float noiseScale = 20.0;
+uniform sampler2D grass_texture : source_color, filter_linear_mipmap, repeat_disable;
+uniform sampler2D grass_texture_2 : source_color, filter_linear_mipmap, repeat_disable;
+
+uniform sampler2D ground_texture : source_color, filter_linear_mipmap, repeat_enable;
+uniform float ground_texture_scale = 20.0;
 
 uniform vec3 wind_direction = vec3(1.0, 0.0, 0.3);
 uniform float wind_speed : hint_range(0.0, 5.0) = 1.5;
@@ -10,10 +15,21 @@ uniform float wind_strength : hint_range(0.0, 2.0) = 0.4;
 uniform float wind_turbulence : hint_range(0.0, 1.0) = 0.3;
 
 varying vec3 worldPos;
-varying vec3 grass_tint;
+varying float tex_variant;
 
 float hash(vec2 p) {
 	return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+}
+
+float value_noise(vec2 p) {
+	vec2 i = floor(p);
+	vec2 f = fract(p);
+	f = f * f * (3.0 - 2.0 * f);
+	float a = hash(i);
+	float b = hash(i + vec2(1.0, 0.0));
+	float c = hash(i + vec2(0.0, 1.0));
+	float d = hash(i + vec2(1.0, 1.0));
+	return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
 
 void vertex() {
@@ -21,19 +37,7 @@ void vertex() {
 
 	float dist = length(worldPos.xz - CAMERA_POSITION_WORLD.xz);
 
-	float temperature = INSTANCE_CUSTOM.r;
-	float moisture = INSTANCE_CUSTOM.g;
-
-	grass_tint = mix(
-		vec3(0.7, 0.55, 0.15),   // dry/warm: rich golden
-		vec3(0.15, 0.7, 0.05),   // wet: vivid green
-		moisture
-	);
-	grass_tint = mix(
-		vec3(0.35, 0.6, 0.3),    // cold: forest green
-		grass_tint,
-		smoothstep(0.3, 0.6, temperature)
-	);
+	tex_variant = INSTANCE_CUSTOM.b;
 
 	// flatten blades at distance
 	float flatten = smoothstep(80.0, 200.0, dist);
@@ -64,10 +68,26 @@ void vertex() {
 }
 
 void fragment() {
-	vec3 noiseLevel = texture(noise, worldPos.xz / noiseScale).rgb;
-	vec3 base_color = grass_tint * 0.40;
-	vec3 tip_color = grass_tint * 0.50;
-	ALBEDO = mix(base_color, tip_color, 1.0 - UV.y) * mix(vec3(0.8), vec3(0.9), noiseLevel.r);
+	float alpha_1 = texture(grass_texture, UV).a;
+	float alpha_2 = texture(grass_texture_2, UV).a;
+	float grass_alpha = mix(alpha_1, alpha_2, step(0.5, tex_variant));
+	ALPHA = grass_alpha;
+	ALPHA_SCISSOR_THRESHOLD = 0.5;
+
+	vec3 ground_color = texture(ground_texture, worldPos.xz / ground_texture_scale).rgb;
+
+	float blade_gradient = mix(0.35, 0.55, 1.0 - UV.y);
+	vec3 grass_color = ground_color * blade_gradient;
+
+	// noise variation
+	float noise_var = texture(noise, worldPos.xz / noiseScale).r;
+	grass_color *= mix(0.85, 1.05, noise_var);
+
+	// Cloud shadows: large slow-moving dark patches
+	float cloud = value_noise(worldPos.xz * 0.003 + TIME * 0.02);
+	float cloud_factor = mix(0.7, 1.0, cloud);
+
+	ALBEDO = grass_color * cloud_factor;
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.0;
 

@@ -6,7 +6,7 @@ uniform vec3 water_shallow_color : source_color = vec3(0.08, 0.45, 0.65);
 uniform vec3 water_mid_color : source_color = vec3(0.03, 0.2, 0.5);
 uniform vec3 water_deep_color : source_color = vec3(0.01, 0.04, 0.12);
 uniform vec3 foam_color : source_color = vec3(0.85, 0.9, 0.95);
-uniform float roughness : hint_range(0.0, 1.0) = 0.15;
+uniform float roughness : hint_range(0.0, 1.0) = 0.05;
 uniform float metallic : hint_range(0.0, 1.0) = 0.0;
 
 uniform float wave_speed : hint_range(0.0, 2.0) = 0.5;
@@ -102,12 +102,12 @@ void fragment() {
 	float total_foam = min(shore_foam + crest_foam, 0.8);
 
 	vec3 sky_tint = vec3(0.45, 0.65, 0.85);
-	vec3 final_color = mix(depth_color, sky_tint, fresnel * 0.2);
+	vec3 final_color = mix(depth_color, sky_tint, fresnel * 0.35);
 
 	final_color = mix(final_color, foam_color, total_foam);
 
-	float specular_boost = pow(max(dot(reflect(-view_dir, world_normal), normalize(vec3(0.3, 0.8, 0.5))), 0.0), 32.0);
-	final_color += vec3(1.0, 0.97, 0.9) * specular_boost * 0.12;
+	float specular_boost = pow(max(dot(reflect(-view_dir, world_normal), normalize(vec3(0.3, 0.8, 0.5))), 0.0), 64.0);
+	final_color += vec3(1.0, 0.95, 0.85) * specular_boost * 0.3;
 
 	ALBEDO = final_color;
 	ROUGHNESS = mix(roughness, 0.4, total_foam);

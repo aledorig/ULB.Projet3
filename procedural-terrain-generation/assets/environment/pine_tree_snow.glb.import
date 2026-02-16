@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://c325i5dgy2sca"
-path="res://.godot/imported/grass.glb-305e85b70bf2b18a997a18b23280c3e1.scn"
+uid="uid://b3op30m0j1j87"
+path="res://.godot/imported/pine_tree_snow.glb-3182f4b49608c8edeb7f633fffdcb153.scn"
 
 [deps]
 
-source_file="res://assets/environment/grass.glb"
-dest_files=["res://.godot/imported/grass.glb-305e85b70bf2b18a997a18b23280c3e1.scn"]
+source_file="res://assets/environment/pine_tree_snow.glb"
+dest_files=["res://.godot/imported/pine_tree_snow.glb-3182f4b49608c8edeb7f633fffdcb153.scn"]
 
 [params]
 
