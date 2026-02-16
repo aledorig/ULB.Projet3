@@ -39,7 +39,8 @@ var terrain_material: ShaderMaterial
 
 var chunks_generated_this_frame: int = 0
 var last_camera_chunk:           Vector2i = Vector2i.ZERO
-var grass_lod_updates_per_frame: int = 4
+var _grass_lod_dirty: bool = false
+var _grass_lod_queue: Array[Vector2i] = []
 
 
 func _ready() -> void:
@@ -91,7 +92,7 @@ func _process(_delta: float) -> void:
 	chunks_generated_this_frame = 0
 	_process_completed_chunks()
 	update_chunks(false)
-	_update_grass_lod()
+	_process_grass_lod_queue()
 	_process_unload_queue()
 
 	if not _initial_load_done and pending_chunks.is_empty() and not loaded_chunks.is_empty():
@@ -137,6 +138,7 @@ func update_chunks(force_update: bool = false) -> void:
 				thread_pool.submit(request)
 
 	_mark_distant_chunks_for_unload(chunks_to_keep)
+	_rebuild_grass_lod_queue()
 
 
 func _generate_chunk_data(request: ChunkRequest) -> ChunkResult:
@@ -241,14 +243,24 @@ func _cache_mesh(chunk_pos: Vector2i, mesh: ArrayMesh) -> void:
 	cache_access_order.append(chunk_pos)
 
 
-func _update_grass_lod() -> void:
-	if not camera:
-		return
-
-	var updates_done: int = 0
+func _rebuild_grass_lod_queue() -> void:
+	_grass_lod_queue.clear()
 	for chunk_pos: Vector2i in loaded_chunks.keys():
-		if updates_done >= grass_lod_updates_per_frame:
-			break
+		var chunk_instance: ChunkInstance = loaded_chunks[chunk_pos]
+		if chunk_instance.unload_queued:
+			continue
+		var distance: float = (chunk_pos - last_camera_chunk).length()
+		var new_lod: int = _get_grass_lod(distance)
+		if new_lod != chunk_instance.grass_lod:
+			_grass_lod_queue.append(chunk_pos)
+
+
+func _process_grass_lod_queue() -> void:
+	var updates: int = 0
+	while not _grass_lod_queue.is_empty() and updates < 2:
+		var chunk_pos: Vector2i = _grass_lod_queue.pop_front()
+		if not loaded_chunks.has(chunk_pos):
+			continue
 
 		var chunk_instance: ChunkInstance = loaded_chunks[chunk_pos]
 		if chunk_instance.unload_queued:
@@ -256,18 +268,16 @@ func _update_grass_lod() -> void:
 
 		var distance: float = (chunk_pos - last_camera_chunk).length()
 		var new_lod: int = _get_grass_lod(distance)
-
 		if new_lod == chunk_instance.grass_lod:
 			continue
 
-		# Regenerate vegetation at new LOD
 		var terrain_gen := TerrainGenerator.new(GameSettingsAutoload.seed, GameSettingsAutoload.octave)
 		var veg_placer := VegetationPlacer.new(terrain_gen, chunk_size, vertex_spacing, p_seed, chunk_pos)
 		var veg_result: Dictionary = veg_placer.generate_vegetation(chunk_pos, new_lod)
 
 		vegetation_mgr.replace_vegetation(chunk_instance, veg_result.transforms, veg_result.custom_data, veg_result.count)
 		chunk_instance.grass_lod = new_lod
-		updates_done += 1
+		updates += 1
 
 
 func _mark_distant_chunks_for_unload(chunks_to_keep: Dictionary) -> void:

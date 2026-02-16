@@ -5,7 +5,7 @@ extends RefCounted
 ## Pre-computes a height/climate grid via batch noise, then samples from it
 ## avoids thousands of individual noise calls
 
-const LOD_CANDIDATES: Array[int] = [4000, 1500, 400]
+const LOD_CANDIDATES: Array[int] = [2000, 600, 150]
 const GRID_RES: int = 32
 
 const MIN_HEIGHT:    float = 6.5
