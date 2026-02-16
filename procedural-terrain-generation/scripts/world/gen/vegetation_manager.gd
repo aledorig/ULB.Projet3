@@ -4,8 +4,13 @@ extends RefCounted
 ## Handles grass mesh/material caching and vegetation instantiation
 ## from pre-computed data on ChunkResult
 
-var _grass_mesh:     Mesh = null
-var _grass_material: ShaderMaterial = null
+var _grass_mesh:      Mesh = null
+var _grass_material:  ShaderMaterial = null
+var _pine_mesh:       Mesh = null
+var _snow_pine_mesh:  Mesh = null
+var _tree_shader:     Shader = null
+var _pine_material:   ShaderMaterial = null
+var _snow_material:   ShaderMaterial = null
 
 
 func create_vegetation(chunk_node: Node3D, result: ChunkResult) -> MultiMeshInstance3D:
@@ -90,27 +95,32 @@ func _get_grass_mesh() -> Mesh:
 
 
 func _build_grass_quad_mesh() -> ArrayMesh:
-	# 3-quad cross
-	var hw: float = 0.25
-	var h: float = 0.9
+	# 3-quad triangle pattern: each quad is offset to form an equilateral triangle cross-section
+	var hw: float = 0.5
+	var h: float = 1.3
+	var offset: float = 0.15  # perpendicular offset to create triangle shape
 
 	var verts := PackedVector3Array()
 	var uvs := PackedVector2Array()
 	var normals := PackedVector3Array()
 	var indices := PackedInt32Array()
 
-	# 3 quads at 0, 60, 120 degrees
+	# 3 quads at 0, 120, 240 degrees (equilateral triangle edges)
 	for i in range(3):
-		var angle: float = deg_to_rad(i * 60.0)
+		var angle: float = deg_to_rad(i * 120.0)
 		var dx: float = cos(angle) * hw
 		var dz: float = sin(angle) * hw
 
+		# Perpendicular direction for offset (rotate 90 degrees)
+		var perp_x: float = -sin(angle) * offset
+		var perp_z: float = cos(angle) * offset
+
 		var base_idx: int = verts.size()
 
-		verts.append(Vector3(-dx, 0.0, -dz))
-		verts.append(Vector3( dx, 0.0,  dz))
-		verts.append(Vector3( dx, h,    dz))
-		verts.append(Vector3(-dx, h,   -dz))
+		verts.append(Vector3(-dx + perp_x, 0.0, -dz + perp_z))
+		verts.append(Vector3( dx + perp_x, 0.0,  dz + perp_z))
+		verts.append(Vector3( dx + perp_x, h,    dz + perp_z))
+		verts.append(Vector3(-dx + perp_x, h,   -dz + perp_z))
 
 		uvs.append(Vector2(0.0, 1.0))
 		uvs.append(Vector2(1.0, 1.0))
@@ -146,16 +156,6 @@ func _get_grass_material() -> ShaderMaterial:
 		if shader:
 			_grass_material = ShaderMaterial.new()
 			_grass_material.shader = shader
-			_grass_material.set_shader_parameter("noiseScale", 20.0)
-
-			var noise_tex := NoiseTexture2D.new()
-			noise_tex.width = 128
-			noise_tex.height = 128
-
-			var fnl := FastNoiseLite.new()
-			fnl.frequency = 0.05
-			noise_tex.noise = fnl
-			_grass_material.set_shader_parameter("noise", noise_tex)
 
 			var grass_tex_1 = load("res://assets/textures/grass-silhouette.png")
 			var grass_tex_2 = load("res://assets/textures/grass-silhouette-2.png")
@@ -165,3 +165,106 @@ func _get_grass_material() -> ShaderMaterial:
 			var ground_tex = load("res://assets/textures/grass.png")
 			_grass_material.set_shader_parameter("ground_texture", ground_tex)
 	return _grass_material
+
+
+func _get_pine_mesh() -> Mesh:
+	if _pine_mesh == null:
+		var scene: PackedScene = load("res://assets/environment/pine_tree.glb")
+		if scene:
+			var instance: Node3D = scene.instantiate()
+			for child in instance.get_children():
+				if child is MeshInstance3D:
+					_pine_mesh = child.mesh
+					break
+			instance.free()
+	return _pine_mesh
+
+
+func _get_snow_pine_mesh() -> Mesh:
+	if _snow_pine_mesh == null:
+		var scene: PackedScene = load("res://assets/environment/pine_tree_snow.glb")
+		if scene:
+			var instance: Node3D = scene.instantiate()
+			for child in instance.get_children():
+				if child is MeshInstance3D:
+					_snow_pine_mesh = child.mesh
+					break
+			instance.free()
+	return _snow_pine_mesh
+
+
+func _get_tree_shader() -> Shader:
+	if _tree_shader == null:
+		_tree_shader = load("res://shaders/environment/tree.gdshader")
+	return _tree_shader
+
+
+func _get_pine_material() -> ShaderMaterial:
+	if _pine_material == null:
+		_pine_material = _create_tree_material(_get_pine_mesh())
+	return _pine_material
+
+
+func _get_snow_material() -> ShaderMaterial:
+	if _snow_material == null:
+		_snow_material = _create_tree_material(_get_snow_pine_mesh())
+	return _snow_material
+
+
+func _create_tree_material(mesh: Mesh) -> ShaderMaterial:
+	var mat := ShaderMaterial.new()
+	mat.shader = _get_tree_shader()
+	for i in range(mesh.get_surface_count()):
+		var original = mesh.surface_get_material(i)
+		if original is StandardMaterial3D and original.albedo_texture:
+			mat.set_shader_parameter("albedo_texture", original.albedo_texture)
+			break
+	return mat
+
+
+func create_trees(chunk_node: Node3D, pine_data: PackedFloat32Array, pine_count: int, snow_data: PackedFloat32Array, snow_count: int) -> Dictionary:
+	var result: Dictionary = {"pine": null, "snow": null}
+
+	if pine_count > 0:
+		var pine_mm := MultiMeshInstance3D.new()
+		var multimesh := MultiMesh.new()
+		multimesh.transform_format = MultiMesh.TRANSFORM_3D
+		multimesh.mesh = _get_pine_mesh()
+		multimesh.instance_count = pine_count
+
+		for i in range(pine_count):
+			var base: int = i * 12
+			var t := Transform3D()
+			t.basis.x = Vector3(pine_data[base], pine_data[base + 1], pine_data[base + 2])
+			t.basis.y = Vector3(pine_data[base + 3], pine_data[base + 4], pine_data[base + 5])
+			t.basis.z = Vector3(pine_data[base + 6], pine_data[base + 7], pine_data[base + 8])
+			t.origin = Vector3(pine_data[base + 9], pine_data[base + 10], pine_data[base + 11])
+			multimesh.set_instance_transform(i, t)
+
+		pine_mm.multimesh = multimesh
+		pine_mm.material_override = _get_pine_material()
+		chunk_node.add_child(pine_mm)
+		result.pine = pine_mm
+
+	if snow_count > 0:
+		var snow_mm := MultiMeshInstance3D.new()
+		var multimesh := MultiMesh.new()
+		multimesh.transform_format = MultiMesh.TRANSFORM_3D
+		multimesh.mesh = _get_snow_pine_mesh()
+		multimesh.instance_count = snow_count
+
+		for i in range(snow_count):
+			var base: int = i * 12
+			var t := Transform3D()
+			t.basis.x = Vector3(snow_data[base], snow_data[base + 1], snow_data[base + 2])
+			t.basis.y = Vector3(snow_data[base + 3], snow_data[base + 4], snow_data[base + 5])
+			t.basis.z = Vector3(snow_data[base + 6], snow_data[base + 7], snow_data[base + 8])
+			t.origin = Vector3(snow_data[base + 9], snow_data[base + 10], snow_data[base + 11])
+			multimesh.set_instance_transform(i, t)
+
+		snow_mm.multimesh = multimesh
+		snow_mm.material_override = _get_snow_material()
+		chunk_node.add_child(snow_mm)
+		result.snow = snow_mm
+
+	return result

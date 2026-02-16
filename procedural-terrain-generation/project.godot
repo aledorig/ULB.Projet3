@@ -27,7 +27,6 @@ buses/default_bus_layout="uid://8sdaffoy4pc1"
 
 GameSettingsAutoload="*res://scripts/init/game_settings.gd"
 OBJExporter="*uid://cypdhf5ssdtga"
-UIsounds="*uid://dau5oyyksbxa"
 
 [display]
 

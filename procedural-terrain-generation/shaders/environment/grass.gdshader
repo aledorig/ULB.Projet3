@@ -1,8 +1,6 @@
 shader_type spatial;
 render_mode cull_disabled, depth_prepass_alpha;
 
-uniform sampler2D noise;
-uniform float noiseScale = 20.0;
 uniform sampler2D grass_texture : source_color, filter_linear_mipmap, repeat_disable;
 uniform sampler2D grass_texture_2 : source_color, filter_linear_mipmap, repeat_disable;
 
@@ -76,16 +74,16 @@ void fragment() {
 
 	vec3 ground_color = texture(ground_texture, worldPos.xz / ground_texture_scale).rgb;
 
-	float blade_gradient = mix(0.35, 0.55, 1.0 - UV.y);
+	float blade_gradient = mix(0.55, 0.85, 1.0 - UV.y);
 	vec3 grass_color = ground_color * blade_gradient;
 
-	// noise variation
-	float noise_var = texture(noise, worldPos.xz / noiseScale).r;
-	grass_color *= mix(0.85, 1.05, noise_var);
-
-	// Cloud shadows: large slow-moving dark patches
-	float cloud = value_noise(worldPos.xz * 0.003 + TIME * 0.02);
-	float cloud_factor = mix(0.7, 1.0, cloud);
+	// Cloud shadows: multi-octave noise scrolling with wind
+	vec2 cloud_wind = normalize(wind_direction.xz);
+	vec2 cloud_uv = worldPos.xz * 0.002 + cloud_wind * TIME * 0.04;
+	float cloud = value_noise(cloud_uv) * 0.6
+	            + value_noise(cloud_uv * 2.0 + 0.5) * 0.3
+	            + value_noise(cloud_uv * 4.0 + 1.0) * 0.1;
+	float cloud_factor = mix(0.5, 1.0, cloud);
 
 	ALBEDO = grass_color * cloud_factor;
 	ROUGHNESS = 1.0;

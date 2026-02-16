@@ -163,6 +163,13 @@ func _generate_chunk_data(request: ChunkRequest) -> ChunkResult:
 	result.vegetation_custom_data = veg_result.custom_data
 	result.vegetation_count = veg_result.count
 
+	# Tree placement
+	var tree_result: Dictionary = veg_placer.generate_trees(request.chunk_pos)
+	result.pine_tree_data = tree_result.pine_transforms
+	result.pine_tree_count = tree_result.pine_count
+	result.snow_tree_data = tree_result.snow_transforms
+	result.snow_tree_count = tree_result.snow_count
+
 	var elapsed_ms: float = (Time.get_ticks_usec() - start_time) / 1000.0
 	result.generation_time_ms = elapsed_ms
 
@@ -230,6 +237,11 @@ func _instantiate_chunk(result: ChunkResult) -> void:
 	# Add vegetation via manager
 	chunk_instance.grass_instance = vegetation_mgr.create_vegetation(chunk_node, result)
 	chunk_instance.grass_lod = _get_grass_lod((result.chunk_pos - last_camera_chunk).length())
+
+	# Add trees via manager
+	var tree_result = vegetation_mgr.create_trees(chunk_node, result.pine_tree_data, result.pine_tree_count, result.snow_tree_data, result.snow_tree_count)
+	chunk_instance.pine_tree_instance = tree_result.pine
+	chunk_instance.snow_tree_instance = tree_result.snow
 
 	loaded_chunks[result.chunk_pos] = chunk_instance
 

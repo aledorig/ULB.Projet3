@@ -8,6 +8,8 @@ var unload_queued:    bool = false
 var last_access_time: int
 var grass_instance:   MultiMeshInstance3D = null
 var grass_lod:        int = 0
+var pine_tree_instance: MultiMeshInstance3D = null
+var snow_tree_instance: MultiMeshInstance3D = null
 
 func _init(p_node: Node3D, p_mesh_instance: MeshInstance3D, p_chunk_pos: Vector2i) -> void:
 	node = p_node

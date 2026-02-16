@@ -8,11 +8,11 @@ uniform sampler2D snow_texture  : source_color, filter_linear_mipmap, repeat_ena
 uniform float texture_scale : hint_range(1.0, 100.0) = 20.0;
 uniform float texture_strength : hint_range(0.0, 1.0) = 0.65;
 
-uniform float snow_height : hint_range(20.0, 250.0) = 120.0;
-uniform float snow_blend_range : hint_range(5.0, 50.0) = 30.0;
+uniform float snow_height : hint_range(20.0, 400.0) = 180.0;
+uniform float snow_blend_range : hint_range(5.0, 80.0) = 45.0;
 uniform float rock_slope_start : hint_range(0.1, 0.9) = 0.55;
 uniform float rock_slope_end : hint_range(0.1, 0.9) = 0.35;
-uniform float beach_height : hint_range(0.0, 15.0) = 6.0;
+uniform float beach_height : hint_range(0.0, 20.0) = 9.0;
 
 varying vec3 climate_data;
 varying vec3 world_pos;
@@ -61,7 +61,7 @@ void fragment() {
 	snow_w *= smoothstep(0.7, 0.4, slope);
 
 	float slope_rock = smoothstep(rock_slope_end, rock_slope_start, slope);
-	float alt_rock = smoothstep(40.0 + tn, 90.0 + tn, h) * 0.7;
+	float alt_rock = smoothstep(60.0 + tn, 135.0 + tn, h) * 0.7;
 	float rock_w = max(slope_rock, alt_rock) * (1.0 - snow_w);
 
 	// beach near sea level OR hot+dry desert
@@ -108,11 +108,11 @@ void fragment() {
 	vec3 final_color = mix(base_tint, base_tint * tex_blend, 0.5);
 
 	// highlight shore for better contrast with water
-	float shore_glow = smoothstep(6.0, 1.0, h) * smoothstep(-2.0, 1.0, h);
+	float shore_glow = smoothstep(9.0, 1.5, h) * smoothstep(-3.0, 1.5, h);
 	final_color = mix(final_color, vec3(0.85, 0.8, 0.6), shore_glow * 0.4);
 
 	if (h < 0.0) {
-		float depth_factor = clamp(-h / 60.0, 0.0, 0.8);
+		float depth_factor = clamp(-h / 90.0, 0.0, 0.8);
 		vec3 shallow_tint = vec3(0.55, 0.7, 0.5);
 		vec3 deep_tint = vec3(0.05, 0.15, 0.35);
 		vec3 underwater_color = mix(shallow_tint, deep_tint, depth_factor);
