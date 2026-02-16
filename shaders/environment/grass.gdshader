@@ -1,5 +1,5 @@
 shader_type spatial;
-render_mode cull_disabled, depth_prepass_alpha;
+render_mode cull_disabled, depth_draw_opaque;
 
 uniform sampler2D grass_texture : source_color, filter_linear_mipmap, repeat_disable;
 uniform sampler2D grass_texture_2 : source_color, filter_linear_mipmap, repeat_disable;
@@ -17,17 +17,6 @@ varying float tex_variant;
 
 float hash(vec2 p) {
 	return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
-}
-
-float value_noise(vec2 p) {
-	vec2 i = floor(p);
-	vec2 f = fract(p);
-	f = f * f * (3.0 - 2.0 * f);
-	float a = hash(i);
-	float b = hash(i + vec2(1.0, 0.0));
-	float c = hash(i + vec2(0.0, 1.0));
-	float d = hash(i + vec2(1.0, 1.0));
-	return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
 
 void vertex() {
@@ -66,6 +55,10 @@ void vertex() {
 }
 
 void fragment() {
+	// Discard edge-on blades (saves fill rate, barely visible anyway)
+	float facing = abs(dot(normalize(NORMAL), VIEW));
+	if (facing < 0.15) discard;
+
 	float alpha_1 = texture(grass_texture, UV).a;
 	float alpha_2 = texture(grass_texture_2, UV).a;
 	float grass_alpha = mix(alpha_1, alpha_2, step(0.5, tex_variant));
@@ -75,17 +68,7 @@ void fragment() {
 	vec3 ground_color = texture(ground_texture, worldPos.xz / ground_texture_scale).rgb;
 
 	float blade_gradient = mix(0.7, 1.0, 1.0 - UV.y);
-	vec3 grass_color = ground_color * blade_gradient;
-
-	// Cloud shadows: multi-octave noise scrolling with wind
-	vec2 cloud_wind = normalize(wind_direction.xz);
-	vec2 cloud_uv = worldPos.xz * 0.002 + cloud_wind * TIME * 0.04;
-	float cloud = value_noise(cloud_uv) * 0.6
-	            + value_noise(cloud_uv * 2.0 + 0.5) * 0.3
-	            + value_noise(cloud_uv * 4.0 + 1.0) * 0.1;
-	float cloud_factor = mix(0.5, 1.0, cloud);
-
-	ALBEDO = grass_color * cloud_factor;
+	ALBEDO = ground_color * blade_gradient;
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.0;
 

@@ -51,9 +51,14 @@ func _process(delta: float) -> void:
 	var chunk_pos := chunk_manager.world_to_chunk(pos)
 	var chunk_stats := chunk_manager.get_stats()
 
+	var draw_calls: int = int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))
+	var primitives: int = int(Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME))
+	var frame_ms: float = 1000.0 / maxf(Engine.get_frames_per_second(), 1)
+
 	text = ""
 	text += "Boundless Horizons v0.2\n"
-	text += "%d fps (avg %.0f)\n" % [Engine.get_frames_per_second(), avg_fps]
+	text += "%d fps (avg %.0f) %.1fms\n" % [Engine.get_frames_per_second(), avg_fps, frame_ms]
+	text += "Draw: %d  Prims: %dk\n" % [draw_calls, primitives / 1000]
 	text += "\n"
 	text += "XYZ: %.1f / %.1f / %.1f\n" % [pos.x, pos.y, pos.z]
 	text += "Chunk: %d %d, %d L, %d P\n" % [chunk_pos.x, chunk_pos.y, chunk_stats.loaded_chunks, chunk_stats.pending_chunks]

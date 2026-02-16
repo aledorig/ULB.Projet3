@@ -3,7 +3,6 @@
 [ext_resource type="Script" uid="uid://bc843f6ej5jlt" path="res://scripts/world/gen/chunk_manager.gd" id="1_2nvvr"]
 [ext_resource type="Script" uid="uid://b4tbc0qvyfoe3" path="res://scripts/client/gui/gui_overlay_debug.gd" id="4_qld23"]
 [ext_resource type="PackedScene" uid="uid://c4cju08nu26pq" path="res://scenes/ship/executioner.tscn" id="5_4p0at"]
-[ext_resource type="Script" uid="uid://dws2kl6rxbpa3" path="res://scripts/client/gui/gui_minimap.gd" id="5_qvro2"]
 [ext_resource type="Shader" uid="uid://lu66d4khntu0" path="res://shaders/ui/pixelation.gdshader" id="6_htxxt"]
 [ext_resource type="FontFile" uid="uid://udlxsk422qsh" path="res://assets/ui/fonts/Acumin-BdPro.otf" id="7_qs0if"]
 [ext_resource type="Script" uid="uid://8y80lskyu25x" path="res://scripts/client/water_manager.gd" id="7_water"]
@@ -156,10 +155,7 @@ fog_sky_affect = 0.138
 fog_depth_curve = 2.000001
 fog_depth_begin = 0.0
 fog_depth_end = 1131.2
-volumetric_fog_density = 0.0317
-volumetric_fog_length = 552.64
-volumetric_fog_detail_spread = 3.0314324
-volumetric_fog_sky_affect = 0.226
+volumetric_fog_enabled = false
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_nikly"]
 shader = ExtResource("6_htxxt")
@@ -177,7 +173,7 @@ light_energy = 1.2
 shadow_enabled = true
 shadow_bias = 0.05
 directional_shadow_mode = 1
-directional_shadow_max_distance = 200.0
+directional_shadow_max_distance = 120.0
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=875975760]
 environment = SubResource("Environment_4p0at")
@@ -187,14 +183,6 @@ environment = SubResource("Environment_4p0at")
 [node name="DebugInfo" type="Label" parent="CanvasLayer" unique_id=373791141]
 z_index = 2
 script = ExtResource("4_qld23")
-
-[node name="Map" type="Control" parent="CanvasLayer" unique_id=1895625531]
-z_index = 2
-layout_mode = 3
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-script = ExtResource("5_qvro2")
 
 [node name="ColorRect" type="ColorRect" parent="CanvasLayer" unique_id=125111344]
 z_index = 1
