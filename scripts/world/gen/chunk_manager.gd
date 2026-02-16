@@ -254,16 +254,18 @@ func _generate_chunk_data(request: ChunkRequest) -> ChunkResult:
 	result.generation_time_ms = elapsed_ms
 
 	# Debug logging
-	var veg: VegetationData = result.vegetation
-	var foliage_total: int = 0
-	for i in range(veg.foliage_counts.size()):
-		foliage_total += veg.foliage_counts[i]
+	# (skip far chunks with no vegetation detail)
+	if request.foliage_lod < 2 or request.grass_lod < 2:
+		var veg: VegetationData = result.vegetation
+		var foliage_total: int = 0
+		for i in range(veg.foliage_counts.size()):
+			foliage_total += veg.foliage_counts[i]
 
-	print("[CHUNK] %v  %.1fms  grass=%d tree=%d foliage=%d (g_lod=%d f_lod=%d)" % [
-		request.chunk_pos, elapsed_ms,
-		veg.grass_count, veg.tree_count, foliage_total,
-		request.grass_lod, request.foliage_lod
-	])
+		print("[CHUNK] %v  %.1fms  grass=%d tree=%d foliage=%d (g_lod=%d f_lod=%d)" % [
+			request.chunk_pos, elapsed_ms,
+			veg.grass_count, veg.tree_count, foliage_total,
+			request.grass_lod, request.foliage_lod
+		])
 
 	return result
 

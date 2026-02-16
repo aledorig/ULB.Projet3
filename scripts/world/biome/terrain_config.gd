@@ -76,6 +76,25 @@ const VIS_RANGE_GRASS:   float = 400.0
 const VIS_RANGE_TREE:    float = 600.0
 const VIS_RANGE_FOLIAGE: float = 300.0
 
+# Noise frequencies
+const CONTINENT_FREQ:   float = 0.0004
+const PEAKS_FREQ:       float = 0.0012
+const TEMPERATURE_FREQ: float = 0.0015
+const MOISTURE_FREQ:    float = 0.0012
+const HEIGHT_FREQ:      float = 0.0005
+const DEPTH_FREQ:       float = 0.0008
+const SURFACE_FREQ:     float = 0.012
+const ROUGHNESS_FREQ:   float = 0.005
+
+# Terrain material
+const TERRAIN_SHADER_PATH: String = "res://shaders/environment/terrain.gdshader"
+const GRASS_TEXTURE_PATH:  String = "res://assets/textures/grass.png"
+const SAND_TEXTURE_PATH:   String = "res://assets/textures/sand.png"
+const ROCK_TEXTURE_PATH:   String = "res://assets/textures/rock.png"
+const SNOW_TEXTURE_PATH:   String = "res://assets/textures/snow.png"
+const TEXTURE_SCALE:       float  = 20.0
+const TEXTURE_STRENGTH:    float  = 0.65
+
 # Shader-facing
 const SNOW_HEIGHT:      float = 180.0
 const SNOW_BLEND_RANGE: float = 45.0

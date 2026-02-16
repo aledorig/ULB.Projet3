@@ -13,16 +13,6 @@ var roughness_noise:       OctaveNoise
 
 var seed_value: int
 
-# Noise frequencies
-const CONTINENT_FREQ:    float = 0.0004
-const PEAKS_FREQ:        float = 0.0012
-const TEMPERATURE_FREQ:  float = 0.0015
-const MOISTURE_FREQ:     float = 0.0012
-const HEIGHT_FREQ:       float = 0.0005
-const DEPTH_FREQ:        float = 0.0008
-const SURFACE_FREQ:      float = 0.012
-const ROUGHNESS_FREQ:    float = 0.005
-
 
 func _init(p_seed: int = GameSettingsAutoload.seed, p_octaves: int = GameSettingsAutoload.octave) -> void:
 	seed_value = p_seed
@@ -62,29 +52,29 @@ func _compute_amplitude(cont: float, peaks: float) -> float:
 
 
 func get_height(x: float, z: float) -> float:
-	var cont: float = continentalness_noise.get_value(x, z, CONTINENT_FREQ, CONTINENT_FREQ)
-	var peaks: float = peaks_noise.get_value(x, z, PEAKS_FREQ, PEAKS_FREQ)
+	var cont: float = continentalness_noise.get_value(x, z, TerrainConfig.CONTINENT_FREQ, TerrainConfig.CONTINENT_FREQ)
+	var peaks: float = peaks_noise.get_value(x, z, TerrainConfig.PEAKS_FREQ, TerrainConfig.PEAKS_FREQ)
 
 	var base: float = _compute_base(cont)
 	var amplitude: float = _compute_amplitude(cont, peaks)
 
-	var shaped: float = _shape_noise(height_noise.get_value(x, z, HEIGHT_FREQ, HEIGHT_FREQ))
-	var depth_mod: float = depth_noise.get_value(x, z, DEPTH_FREQ, DEPTH_FREQ)
-	var surface_detail: float = surface_noise.get_value(x * SURFACE_FREQ, z * SURFACE_FREQ) * TerrainConfig.SURFACE_AMP / 70.0
+	var shaped: float = _shape_noise(height_noise.get_value(x, z, TerrainConfig.HEIGHT_FREQ, TerrainConfig.HEIGHT_FREQ))
+	var depth_mod: float = depth_noise.get_value(x, z, TerrainConfig.DEPTH_FREQ, TerrainConfig.DEPTH_FREQ)
+	var surface_detail: float = surface_noise.get_value(x * TerrainConfig.SURFACE_FREQ, z * TerrainConfig.SURFACE_FREQ) * TerrainConfig.SURFACE_AMP / 70.0
 
 	var base_h: float = base + (shaped * amplitude * (1.0 + depth_mod * 0.6)) + surface_detail
 
 	# High-frequency roughness at altitude — makes mountain mesh jagged/craggy
 	var altitude_factor: float = _smoothstep(TerrainConfig.ROUGHNESS_ALT_LOW, TerrainConfig.ROUGHNESS_ALT_HIGH, base_h)
-	var rough: float = roughness_noise.get_value(x, z, ROUGHNESS_FREQ, ROUGHNESS_FREQ) * TerrainConfig.ROUGHNESS_AMP * altitude_factor
+	var rough: float = roughness_noise.get_value(x, z, TerrainConfig.ROUGHNESS_FREQ, TerrainConfig.ROUGHNESS_FREQ) * TerrainConfig.ROUGHNESS_AMP * altitude_factor
 
 	return base_h + rough
 
 
 func get_climate_color(x: float, z: float) -> Color:
-	var temp_raw: float = temperature_noise.get_value(x * TEMPERATURE_FREQ, z * TEMPERATURE_FREQ)
-	var moist_raw: float = moisture_noise.get_value(x * MOISTURE_FREQ, z * MOISTURE_FREQ)
-	var cont_raw: float = continentalness_noise.get_value(x, z, CONTINENT_FREQ, CONTINENT_FREQ)
+	var temp_raw: float = temperature_noise.get_value(x * TerrainConfig.TEMPERATURE_FREQ, z * TerrainConfig.TEMPERATURE_FREQ)
+	var moist_raw: float = moisture_noise.get_value(x * TerrainConfig.MOISTURE_FREQ, z * TerrainConfig.MOISTURE_FREQ)
+	var cont_raw: float = continentalness_noise.get_value(x, z, TerrainConfig.CONTINENT_FREQ, TerrainConfig.CONTINENT_FREQ)
 	return Color(
 		clampf(temp_raw * 0.5 + 0.5, 0.0, 1.0),
 		clampf(moist_raw * 0.5 + 0.5, 0.0, 1.0),
@@ -114,7 +104,7 @@ func get_vertex_data_batch(
 		cont_grid,
 		origin_x * inv_spacing, origin_z * inv_spacing,
 		width, height,
-		spacing * CONTINENT_FREQ, spacing * CONTINENT_FREQ
+		spacing * TerrainConfig.CONTINENT_FREQ, spacing * TerrainConfig.CONTINENT_FREQ
 	)
 
 	var peaks_grid: PackedFloat32Array = PackedFloat32Array()
@@ -123,7 +113,7 @@ func get_vertex_data_batch(
 		peaks_grid,
 		origin_x * inv_spacing, origin_z * inv_spacing,
 		width, height,
-		spacing * PEAKS_FREQ, spacing * PEAKS_FREQ
+		spacing * TerrainConfig.PEAKS_FREQ, spacing * TerrainConfig.PEAKS_FREQ
 	)
 
 	var noise_grid: PackedFloat32Array = PackedFloat32Array()
@@ -132,7 +122,7 @@ func get_vertex_data_batch(
 		noise_grid,
 		origin_x * inv_spacing, origin_z * inv_spacing,
 		width, height,
-		spacing * HEIGHT_FREQ, spacing * HEIGHT_FREQ
+		spacing * TerrainConfig.HEIGHT_FREQ, spacing * TerrainConfig.HEIGHT_FREQ
 	)
 
 	var depth_grid: PackedFloat32Array = PackedFloat32Array()
@@ -141,7 +131,7 @@ func get_vertex_data_batch(
 		depth_grid,
 		origin_x * inv_spacing, origin_z * inv_spacing,
 		width, height,
-		spacing * DEPTH_FREQ, spacing * DEPTH_FREQ
+		spacing * TerrainConfig.DEPTH_FREQ, spacing * TerrainConfig.DEPTH_FREQ
 	)
 
 	var surface_grid: PackedFloat32Array = PackedFloat32Array()
@@ -150,7 +140,7 @@ func get_vertex_data_batch(
 		surface_grid,
 		origin_x * inv_spacing, origin_z * inv_spacing,
 		width, height,
-		spacing * SURFACE_FREQ, spacing * SURFACE_FREQ,
+		spacing * TerrainConfig.SURFACE_FREQ, spacing * TerrainConfig.SURFACE_FREQ,
 		TerrainConfig.SURFACE_AMP / 70.0
 	)
 
@@ -160,7 +150,7 @@ func get_vertex_data_batch(
 		roughness_grid,
 		origin_x * inv_spacing, origin_z * inv_spacing,
 		width, height,
-		spacing * ROUGHNESS_FREQ, spacing * ROUGHNESS_FREQ
+		spacing * TerrainConfig.ROUGHNESS_FREQ, spacing * TerrainConfig.ROUGHNESS_FREQ
 	)
 
 	var temp_grid: PackedFloat32Array = PackedFloat32Array()
@@ -169,7 +159,7 @@ func get_vertex_data_batch(
 		temp_grid,
 		origin_x * inv_spacing, origin_z * inv_spacing,
 		width, height,
-		spacing * TEMPERATURE_FREQ, spacing * TEMPERATURE_FREQ,
+		spacing * TerrainConfig.TEMPERATURE_FREQ, spacing * TerrainConfig.TEMPERATURE_FREQ,
 		1.0
 	)
 
@@ -179,7 +169,7 @@ func get_vertex_data_batch(
 		moist_grid,
 		origin_x * inv_spacing, origin_z * inv_spacing,
 		width, height,
-		spacing * MOISTURE_FREQ, spacing * MOISTURE_FREQ,
+		spacing * TerrainConfig.MOISTURE_FREQ, spacing * TerrainConfig.MOISTURE_FREQ,
 		1.0
 	)
 
@@ -216,10 +206,10 @@ func is_underwater(height_val: float) -> bool:
 
 func get_debug_info(x: float, z: float) -> Dictionary:
 	var height_val: float = get_height(x, z)
-	var cont: float = continentalness_noise.get_value(x, z, CONTINENT_FREQ, CONTINENT_FREQ)
-	var peaks: float = peaks_noise.get_value(x, z, PEAKS_FREQ, PEAKS_FREQ)
-	var temp: float = temperature_noise.get_value(x * TEMPERATURE_FREQ, z * TEMPERATURE_FREQ)
-	var moist: float = moisture_noise.get_value(x * MOISTURE_FREQ, z * MOISTURE_FREQ)
+	var cont: float = continentalness_noise.get_value(x, z, TerrainConfig.CONTINENT_FREQ, TerrainConfig.CONTINENT_FREQ)
+	var peaks: float = peaks_noise.get_value(x, z, TerrainConfig.PEAKS_FREQ, TerrainConfig.PEAKS_FREQ)
+	var temp: float = temperature_noise.get_value(x * TerrainConfig.TEMPERATURE_FREQ, z * TerrainConfig.TEMPERATURE_FREQ)
+	var moist: float = moisture_noise.get_value(x * TerrainConfig.MOISTURE_FREQ, z * TerrainConfig.MOISTURE_FREQ)
 
 	return {
 		"zone": _get_zone_name(cont, peaks, temp, moist, height_val),
