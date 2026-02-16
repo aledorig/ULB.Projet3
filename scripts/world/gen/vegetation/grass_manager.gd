@@ -126,7 +126,4 @@ func _get_material() -> ShaderMaterial:
 			var grass_tex_2 = load("res://assets/textures/grass-silhouette-2.png")
 			_grass_material.set_shader_parameter("grass_texture", grass_tex_1)
 			_grass_material.set_shader_parameter("grass_texture_2", grass_tex_2)
-
-			var ground_tex = load("res://assets/textures/grass.png")
-			_grass_material.set_shader_parameter("ground_texture", ground_tex)
 	return _grass_material

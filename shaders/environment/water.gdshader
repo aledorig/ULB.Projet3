@@ -159,10 +159,14 @@ vec3 compute_wave_normal(
 }
 
 // Read the depth buffer and compute how deep the terrain is below the water surface
-float get_water_depth(vec2 screen_uv, float vertex_z) {
+float get_water_depth(
+	vec2 screen_uv,
+	float vertex_z,
+	mat4 inv_proj
+) {
 	float screen_depth = texture(depth_texture, screen_uv).r;
 	vec4 ndc = vec4(screen_uv * 2.0 - 1.0, screen_depth, 1.0);
-	vec4 view_coords = INV_PROJECTION_MATRIX * ndc;
+	vec4 view_coords = inv_proj * ndc;
 	view_coords.xyz /= view_coords.w;
 	return vertex_z - view_coords.z;
 }
@@ -222,7 +226,7 @@ void fragment() {
 	float fresnel = pow(1.0 - max(dot(world_normal, view_dir), 0.0), fresnel_power);
 
 	// Depth-based color
-	float water_depth = get_water_depth(SCREEN_UV, VERTEX.z);
+	float water_depth = get_water_depth(SCREEN_UV, VERTEX.z, INV_PROJECTION_MATRIX);
 	vec3 depth_color = get_depth_color(water_depth);
 
 	// Depth zone factor for foam and alpha
