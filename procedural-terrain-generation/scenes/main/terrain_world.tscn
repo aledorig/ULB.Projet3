@@ -12,8 +12,8 @@
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_htxxt"]
 shader = ExtResource("6_qvro2")
-shader_parameter/skyColor = Color(0.45, 0.72, 0.95, 1)
-shader_parameter/horizonColor = Color(0.75, 0.85, 0.92, 1)
+shader_parameter/skyColor = Color(0.3, 0.6, 0.95, 1)
+shader_parameter/horizonColor = Color(0.65, 0.82, 0.95, 1)
 
 [sub_resource type="Sky" id="Sky_4p0at"]
 sky_material = SubResource("ShaderMaterial_htxxt")
@@ -22,13 +22,23 @@ sky_material = SubResource("ShaderMaterial_htxxt")
 background_mode = 2
 sky = SubResource("Sky_4p0at")
 ambient_light_source = 3
-ambient_light_color = Color(0.8, 0.78, 0.75, 1)
-ambient_light_energy = 0.3
+ambient_light_color = Color(0.85, 0.82, 0.78, 1)
+ambient_light_energy = 10.63
 reflected_light_source = 2
 fog_enabled = true
-fog_light_color = Color(0.8, 0.82, 0.85, 1)
-fog_density = 0.0003
-fog_sky_affect = 0.505
+fog_mode = 1
+fog_light_color = Color(0.90178406, 0.79823834, 0.6959612, 1)
+fog_light_energy = 0.0
+fog_density = 1.0
+fog_aerial_perspective = 0.886
+fog_sky_affect = 0.138
+fog_depth_curve = 2.000001
+fog_depth_begin = 0.0
+fog_depth_end = 1131.2
+volumetric_fog_density = 0.0317
+volumetric_fog_length = 552.64
+volumetric_fog_detail_spread = 3.0314324
+volumetric_fog_sky_affect = 0.226
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_nikly"]
 shader = ExtResource("6_htxxt")
@@ -73,6 +83,7 @@ offset_bottom = 40.0
 script = ExtResource("5_qvro2")
 
 [node name="ColorRect" type="ColorRect" parent="CanvasLayer" unique_id=125111344]
+visible = false
 z_index = 1
 material = SubResource("ShaderMaterial_nikly")
 anchors_preset = 15

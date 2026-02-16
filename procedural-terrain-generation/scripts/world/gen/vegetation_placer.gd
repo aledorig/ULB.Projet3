@@ -1,18 +1,19 @@
 class_name VegetationPlacer
 extends RefCounted
 
-## Thread-safe vegetation placement. Pre-computes a height/climate grid via
-## batch noise, then samples from it — avoids thousands of individual noise calls.
+## Thread-safe vegetation placement
+## Pre-computes a height/climate grid via batch noise, then samples from it
+## avoids thousands of individual noise calls
 
-const LOD_CANDIDATES: Array[int] = [1800, 700, 0]
-const GRID_RES: int = 32  # Resolution of pre-computed lookup grid
+const LOD_CANDIDATES: Array[int] = [4000, 1500, 400]
+const GRID_RES: int = 32
 
-const MIN_HEIGHT:    float = 1.5   # Above sea level
-const MAX_HEIGHT:    float = 110.0 # Below snow line
-const MIN_NORMAL_Y:  float = 0.6   # Not too steep
-const DESERT_TEMP:   float = 0.65  # Temperature threshold
-const DESERT_MOIST:  float = 0.38  # Moisture threshold (dry)
-const SAMPLE_JITTER: float = 0.85  # Random offset within cell (0-1)
+const MIN_HEIGHT:    float = 6.5
+const MAX_HEIGHT:    float = 80.0
+const MIN_NORMAL_Y:  float = 0.7
+const DESERT_TEMP:   float = 0.65
+const DESERT_MOIST:  float = 0.38
+const SAMPLE_JITTER: float = 0.85
 
 var terrain_gen:    TerrainGenerator
 var chunk_size:     int
@@ -25,7 +26,6 @@ func _init(p_terrain_gen: TerrainGenerator, p_chunk_size: int, p_vertex_spacing:
 	chunk_size = p_chunk_size
 	vertex_spacing = p_vertex_spacing
 
-	# Deterministic per-chunk seed
 	rng = RandomNumberGenerator.new()
 	rng.seed = p_seed ^ (p_chunk_pos.x * 73856093) ^ (p_chunk_pos.y * 19349663)
 
@@ -45,7 +45,6 @@ func generate_vegetation(chunk_pos: Vector2i, lod_level: int) -> Dictionary:
 	var origin_x: float = chunk_pos.x * chunk_world_size
 	var origin_z: float = chunk_pos.y * chunk_world_size
 
-	# --- Pre-compute a grid of heights + climate via batch noise ---
 	var grid_spacing: float = chunk_world_size / float(GRID_RES - 1)
 	var grid_total: int = GRID_RES * GRID_RES
 
@@ -61,7 +60,6 @@ func generate_vegetation(chunk_pos: Vector2i, lod_level: int) -> Dictionary:
 		grid_verts, grid_colors
 	)
 
-	# --- Place vegetation using grid lookups ---
 	var transforms := PackedFloat32Array()
 	transforms.resize(candidates * 12)
 	var custom_data := PackedFloat32Array()
@@ -113,12 +111,16 @@ func generate_vegetation(chunk_pos: Vector2i, lod_level: int) -> Dictionary:
 			if temperature > DESERT_TEMP and moisture < DESERT_MOIST:
 				continue
 
-			# Density based on moisture
-			var density_chance: float = clampf(moisture * 1.5, 0.3, 1.0)
+			# Thin out at high altitude (rock zone starts ~40)
+			var alt_factor: float = clampf(1.0 - (height - 40.0) / 40.0, 0.1, 1.0)
+
+			# Density based on moisture and altitude
+			var density_chance: float = clampf(moisture * 1.5, 0.3, 1.0) * alt_factor
 			if rng.randf() > density_chance:
 				continue
 
-			# Build transform — random Y rotation only
+			# Build transform
+			# random Y rotation only
 			var angle: float = rng.randf() * TAU
 			var cos_a: float = cos(angle)
 			var sin_a: float = sin(angle)

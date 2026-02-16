@@ -90,22 +90,22 @@ void fragment() {
 	vec3 tex_blend = grass_s * grass_w + sand_s * sand_w + rock_s * rock_w + snow_s * snow_w;
 
 	vec3 grass_tint = mix(
-		vec3(0.65, 0.55, 0.25),
-		vec3(0.2, 0.65, 0.1),
+		vec3(0.7, 0.55, 0.15),   // dry/warm: rich golden
+		vec3(0.15, 0.7, 0.05),   // wet: vivid green
 		moisture
 	);
 	grass_tint = mix(
-		vec3(0.45, 0.6, 0.35),
+		vec3(0.35, 0.6, 0.3),    // cold: forest green
 		grass_tint,
 		smoothstep(0.3, 0.6, temperature)
 	);
 
 	vec3 base_tint = grass_tint * grass_w
-	               + vec3(0.95, 0.88, 0.55) * sand_w
-	               + vec3(0.55, 0.5, 0.45) * rock_w
+	               + vec3(0.95, 0.85, 0.45) * sand_w
+	               + vec3(0.5, 0.45, 0.4) * rock_w
 	               + vec3(0.95, 0.97, 1.0) * snow_w;
 
-	vec3 final_color = mix(base_tint, base_tint * tex_blend, texture_strength);
+	vec3 final_color = mix(base_tint, base_tint * tex_blend, 0.5);
 
 	// highlight shore for better contrast with water
 	float shore_glow = smoothstep(6.0, 1.0, h) * smoothstep(-2.0, 1.0, h);

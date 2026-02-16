@@ -19,43 +19,48 @@ float hash(vec2 p) {
 void vertex() {
 	worldPos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 
+	float dist = length(worldPos.xz - CAMERA_POSITION_WORLD.xz);
+
 	float temperature = INSTANCE_CUSTOM.r;
 	float moisture = INSTANCE_CUSTOM.g;
 
 	grass_tint = mix(
-		vec3(0.65, 0.55, 0.25),
-		vec3(0.2, 0.65, 0.1),
+		vec3(0.7, 0.55, 0.15),   // dry/warm: rich golden
+		vec3(0.15, 0.7, 0.05),   // wet: vivid green
 		moisture
 	);
 	grass_tint = mix(
-		vec3(0.45, 0.6, 0.35),
+		vec3(0.35, 0.6, 0.3),    // cold: forest green
 		grass_tint,
 		smoothstep(0.3, 0.6, temperature)
 	);
+
+	// flatten blades at distance
+	float flatten = smoothstep(80.0, 200.0, dist);
+	VERTEX.y *= mix(1.0, 0.15, flatten);
 
 	// blade tip moves most, base stays anchored
 	float height_factor = clamp(VERTEX.y * 2.0, 0.0, 1.0);
 	height_factor *= height_factor;
 
-	// Normalized wind direction in XZ
-	vec2 wind_dir = normalize(wind_direction.xz);
+	// skip wind for distant blades
+	float wind_fade = 1.0 - smoothstep(60.0, 120.0, dist);
+	if (wind_fade > 0.01) {
+		vec2 wind_dir = normalize(wind_direction.xz);
 
-	// Main wind wave
-	float phase = dot(worldPos.xz, wind_dir) * 0.15 + TIME * wind_speed;
-	float wind_wave = sin(phase) * 0.5 + 0.5;
+		float phase = dot(worldPos.xz, wind_dir) * 0.15 + TIME * wind_speed;
+		float wind_wave = sin(phase) * 0.5 + 0.5;
 
-	// Per-instance turbulence
-	vec3 instance_origin = MODEL_MATRIX[3].xyz;
-	float turb_phase = hash(instance_origin.xz) * 6.28 + TIME * wind_speed * 1.3;
-	float turbulence = sin(turb_phase) * wind_turbulence;
+		vec3 instance_origin = MODEL_MATRIX[3].xyz;
+		float turb_phase = hash(instance_origin.xz) * 6.28 + TIME * wind_speed * 1.3;
+		float turbulence = sin(turb_phase) * wind_turbulence;
 
-	// Combined displacement
-	float displacement = (wind_wave + turbulence) * wind_strength * height_factor;
+		float displacement = (wind_wave + turbulence) * wind_strength * height_factor * wind_fade;
 
-	// World-space offset with slight droop
-	vec3 world_offset = vec3(wind_dir.x * displacement, -abs(displacement) * 0.15, wind_dir.y * displacement);
-	vec3 model_offset = (inverse(MODEL_MATRIX) * vec4(world_offset, 0.0)).xyz;
-	VERTEX += model_offset;
+		vec3 world_offset = vec3(wind_dir.x * displacement, -abs(displacement) * 0.15, wind_dir.y * displacement);
+		vec3 model_offset = (inverse(MODEL_MATRIX) * vec4(world_offset, 0.0)).xyz;
+		VERTEX += model_offset;
+	}
 }
 
 void fragment() {
