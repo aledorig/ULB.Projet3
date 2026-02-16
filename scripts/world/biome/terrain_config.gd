@@ -63,7 +63,6 @@ const FOLIAGE_Y_OFFSET:        float = -0.8
 
 # Foliage LOD
 const FOLIAGE_LOD_CANDIDATES: Array[int] = [150, 40, 0]
-const FOLIAGE_LOD_GRID_RES:   Array[int] = [8, 6, 4]
 
 # Per-type density
 const FOLIAGE_DENSITIES: Array[float] = [

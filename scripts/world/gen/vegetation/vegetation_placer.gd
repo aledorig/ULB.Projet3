@@ -1,8 +1,9 @@
 class_name VegetationPlacer
 extends RefCounted
 
-## Facade that delegates to GrassPlacer, TreePlacer, FoliagePlacer
-## Each chunk creates one VegetationPlacer with a shared RNG seed
+## Queries ONE shared grid per chunk, passes it to all sub-placers
+## Grid resolution follows the grass LOD level (32/16/8)
+## Trees and foliage use the exact same grid
 
 var _grass:   GrassPlacer
 var _tree:    TreePlacer
@@ -21,31 +22,33 @@ func _init(p_terrain_gen: TerrainGenerator, p_chunk_size: int, p_vertex_spacing:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = p_seed ^ (p_chunk_pos.x * 73856093) ^ (p_chunk_pos.y * 19349663)
 
-	_grass = GrassPlacer.new(terrain_gen, chunk_size, vertex_spacing, rng)
-	_tree = TreePlacer.new(terrain_gen, chunk_size, vertex_spacing, rng)
-	_foliage = FoliagePlacer.new(terrain_gen, chunk_size, vertex_spacing, rng)
+	_grass = GrassPlacer.new(rng)
+	_tree = TreePlacer.new(rng)
+	_foliage = FoliagePlacer.new(rng)
 
 
-func generate_grass(chunk_pos: Vector2i, lod_level: int) -> Dictionary:
-	return _grass.generate(chunk_pos, lod_level)
-
-
-func generate_all_non_grass(chunk_pos: Vector2i, foliage_lod: int = 0) -> Dictionary:
-	var tree_grid: Dictionary = VegetationPlacerUtils.query_grid(terrain_gen, chunk_size, vertex_spacing, chunk_pos, 8)
-
-	var lod_grid_res: Array[int] = TerrainConfig.FOLIAGE_LOD_GRID_RES
-	var foliage_grid_res: int = lod_grid_res[foliage_lod] if foliage_lod < lod_grid_res.size() else 6
-	var foliage_grid: Dictionary
-	if foliage_grid_res == 8:
-		foliage_grid = tree_grid
-	else:
-		foliage_grid = VegetationPlacerUtils.query_grid(terrain_gen, chunk_size, vertex_spacing, chunk_pos, foliage_grid_res)
+func generate_all(chunk_pos: Vector2i, grass_lod: int, foliage_lod: int) -> Dictionary:
+	## One grid query shared by grass, trees, and foliage
+	var lod_grid_res: Array[int] = TerrainConfig.GRASS_LOD_GRID_RES
+	var grid_res: int = lod_grid_res[grass_lod] if grass_lod < lod_grid_res.size() else 8
+	var grid: Dictionary = VegetationPlacerUtils.query_grid(terrain_gen, chunk_size, vertex_spacing, chunk_pos, grid_res)
 
 	return {
-		"trees": _tree.generate(chunk_pos, tree_grid),
-		"foliage": _foliage.generate(chunk_pos, foliage_grid, foliage_lod)
+		"grass": _grass.generate(grid, grass_lod),
+		"trees": _tree.generate(chunk_pos, grid),
+		"foliage": _foliage.generate(chunk_pos, grid, foliage_lod)
 	}
 
 
-func generate_foliage_standalone(chunk_pos: Vector2i, lod_level: int) -> Dictionary:
-	return _foliage.generate_standalone(chunk_pos, lod_level)
+func generate_grass_standalone(chunk_pos: Vector2i, grass_lod: int) -> Dictionary:
+	## For grass-only LOD updates
+	var lod_grid_res: Array[int] = TerrainConfig.GRASS_LOD_GRID_RES
+	var grid_res: int = lod_grid_res[grass_lod] if grass_lod < lod_grid_res.size() else 8
+	var grid: Dictionary = VegetationPlacerUtils.query_grid(terrain_gen, chunk_size, vertex_spacing, chunk_pos, grid_res)
+	return _grass.generate(grid, grass_lod)
+
+
+func generate_foliage_standalone(chunk_pos: Vector2i, foliage_lod: int) -> Dictionary:
+	## For foliage-only LOD updates
+	var grid: Dictionary = VegetationPlacerUtils.query_grid(terrain_gen, chunk_size, vertex_spacing, chunk_pos, 16)
+	return _foliage.generate(chunk_pos, grid, foliage_lod)

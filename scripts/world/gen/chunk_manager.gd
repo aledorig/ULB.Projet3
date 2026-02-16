@@ -124,6 +124,8 @@ func _process(_delta: float) -> void:
 		print("[PROFILE] veg_lod_mgr.process_queue: %.2fms" % [(t1 - t0) / 1000.0])
 		t0 = t1
 
+	_ensure_nearby_collision()
+
 	_process_unload_queue()
 	if profiling:
 		t1 = Time.get_ticks_usec()
@@ -210,7 +212,6 @@ func update_chunks(force_update: bool = false) -> void:
 				thread_pool.submit(request)
 
 	_mark_distant_chunks_for_unload(chunks_to_keep)
-	_ensure_nearby_collision()
 	veg_lod_mgr.rebuild_queue(loaded_chunks, last_camera_chunk)
 
 
@@ -229,21 +230,20 @@ func _generate_chunk_data(request: ChunkRequest) -> ChunkResult:
 
 	result.success = true
 
-	# Grass (thread-safe, no scene tree access)
+	# All vegetation: one shared grid, one call
 	var veg_placer = VegetationPlacer.new(terrain_gen, chunk_size, vertex_spacing, p_seed, request.chunk_pos)
-	var grass_result: Dictionary = veg_placer.generate_grass(request.chunk_pos, request.grass_lod)
-	result.vegetation.grass_buffer = grass_result.buffer
-	result.vegetation.grass_count = grass_result.count
+	var veg_all: Dictionary = veg_placer.generate_all(request.chunk_pos, request.grass_lod, request.foliage_lod)
 
-	# Trees + foliage (shared grid query, foliage uses LOD)
-	var non_grass: Dictionary = veg_placer.generate_all_non_grass(request.chunk_pos, request.foliage_lod)
+	var grass: Dictionary = veg_all.grass
+	result.vegetation.grass_buffer = grass.buffer
+	result.vegetation.grass_count = grass.count
 
-	var trees: Dictionary = non_grass.trees
+	var trees: Dictionary = veg_all.trees
 	result.vegetation.tree_variant_id = trees.variant_id
 	result.vegetation.tree_transforms = trees.transforms
 	result.vegetation.tree_count = trees.count
 
-	var foliage: Dictionary = non_grass.foliage
+	var foliage: Dictionary = veg_all.foliage
 	result.vegetation.foliage_variant_ids = foliage.variant_ids
 	for i in range(foliage.transforms.size()):
 		result.vegetation.foliage_transforms[i] = foliage.transforms[i]
@@ -295,8 +295,7 @@ func _ensure_nearby_collision() -> void:
 		for z in range(-ChunkInstantiator.COLLISION_DISTANCE, ChunkInstantiator.COLLISION_DISTANCE + 1):
 			var chunk_pos: Vector2i = last_camera_chunk + Vector2i(x, z)
 			if loaded_chunks.has(chunk_pos):
-				if instantiator.ensure_collision(loaded_chunks[chunk_pos]):
-					return
+				instantiator.ensure_collision(loaded_chunks[chunk_pos])
 
 
 func _mark_distant_chunks_for_unload(chunks_to_keep: Dictionary) -> void:

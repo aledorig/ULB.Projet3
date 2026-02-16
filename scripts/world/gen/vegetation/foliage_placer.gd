@@ -1,18 +1,13 @@
 class_name FoliagePlacer
 extends RefCounted
 
-## Thread-safe foliage placement with LOD support
+## Foliage placement, receives shared grid from VegetationPlacer
+## Same grid lookup as grass, plus: per-type eligibility + density
 
-var terrain_gen:    TerrainGenerator
-var chunk_size:     int
-var vertex_spacing: float
-var rng:            RandomNumberGenerator
+var rng: RandomNumberGenerator
 
 
-func _init(p_terrain_gen: TerrainGenerator, p_chunk_size: int, p_vertex_spacing: float, p_rng: RandomNumberGenerator) -> void:
-	terrain_gen = p_terrain_gen
-	chunk_size = p_chunk_size
-	vertex_spacing = p_vertex_spacing
+func _init(p_rng: RandomNumberGenerator) -> void:
 	rng = p_rng
 
 
@@ -66,6 +61,7 @@ func generate(chunk_pos: Vector2i, grid: Dictionary, lod_level: int = 0) -> Dict
 			var local_x: float = (float(gx) + jx) * cell_size
 			var local_z: float = (float(gz) + jz) * cell_size
 
+			# Same grid lookup as grass
 			var gi: int = clampi(int(local_x * inv_grid_spacing), 0, max_gi)
 			var gj: int = clampi(int(local_z * inv_grid_spacing), 0, max_gi)
 			var grid_idx: int = gj * grid_res + gi
@@ -89,6 +85,7 @@ func generate(chunk_pos: Vector2i, grid: Dictionary, lod_level: int = 0) -> Dict
 			if temp_01 > TerrainConfig.DESERT_TEMP and moist_01 < TerrainConfig.DESERT_MOIST:
 				continue
 
+			# Per-type eligibility
 			var eligible: PackedInt32Array = PackedInt32Array()
 			for pi in range(n_types):
 				if _is_eligible(picked[pi], temp_01, moist_01):
@@ -103,6 +100,7 @@ func generate(chunk_pos: Vector2i, grid: Dictionary, lod_level: int = 0) -> Dict
 			if rng.randf() > foliage_densities[chosen_type]:
 				continue
 
+			# Foliage extras: moderate scale, no tilt
 			var angle: float = rng.randf() * TAU
 			var foliage_scale: float = rng.randf_range(0.8, 1.5)
 			var c: int = counts[chosen_pi]
@@ -118,14 +116,6 @@ func generate(chunk_pos: Vector2i, grid: Dictionary, lod_level: int = 0) -> Dict
 		"transforms": transforms,
 		"counts": counts
 	}
-
-
-func generate_standalone(chunk_pos: Vector2i, lod_level: int) -> Dictionary:
-	## For LOD updates — queries its own grid
-	var lod_grid_res: Array[int] = TerrainConfig.FOLIAGE_LOD_GRID_RES
-	var grid_res: int = lod_grid_res[lod_level] if lod_level < lod_grid_res.size() else 6
-	var grid: Dictionary = VegetationPlacerUtils.query_grid(terrain_gen, chunk_size, vertex_spacing, chunk_pos, grid_res)
-	return generate(chunk_pos, grid, lod_level)
 
 
 static func _is_eligible(type_id: int, temp_01: float, moist_01: float) -> bool:

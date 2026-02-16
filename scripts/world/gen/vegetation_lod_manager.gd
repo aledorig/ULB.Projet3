@@ -1,9 +1,9 @@
 class_name VegetationLodManager
 extends RefCounted
 
-## Manages LOD transitions for grass and foliage via a single background thread.
+## Manages LOD transitions for grass and foliage via a single background thread
 ## Each tick: picks one chunk from the queue, regenerates whatever changed
-## (grass, foliage, or both), then applies the result on main thread.
+## (grass, foliage, or both), then applies the result on main thread
 
 var _queue: Array[Vector2i] = []
 
@@ -118,7 +118,7 @@ func _generate_lod(gen_seed: int, octave: int,
 	var result := {"chunk_pos": chunk_pos}
 
 	if grass_changed:
-		var grass_result: Dictionary = veg_placer.generate_grass(chunk_pos, new_grass_lod)
+		var grass_result: Dictionary = veg_placer.generate_grass_standalone(chunk_pos, new_grass_lod)
 		result["grass_buffer"] = grass_result.buffer
 		result["grass_count"] = grass_result.count
 		result["new_grass_lod"] = new_grass_lod

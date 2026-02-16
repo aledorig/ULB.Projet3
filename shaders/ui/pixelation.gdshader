@@ -27,7 +27,6 @@ void fragment() {
 
 	vec4 color = texture(screen_texture, snapped_uv);
 
-	// PSX-style ordered dithering + color quantization
 	float levels = float(color_depth);
 	float dither = bayer4(FRAGCOORD.xy / float(pixel_size)) - 0.5;
 	color.rgb += dither * dither_strength / levels;

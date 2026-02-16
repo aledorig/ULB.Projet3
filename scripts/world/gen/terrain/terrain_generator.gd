@@ -24,7 +24,6 @@ const SURFACE_FREQ:      float = 0.012
 const ROUGHNESS_FREQ:    float = 0.005
 
 
-
 func _init(p_seed: int = GameSettingsAutoload.seed, p_octaves: int = GameSettingsAutoload.octave) -> void:
 	seed_value = p_seed
 	var rng := RandomNumberGenerator.new()

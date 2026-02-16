@@ -1,39 +1,29 @@
 class_name GrassPlacer
 extends RefCounted
 
-## Thread-safe grass placement with LOD support
-## Pre-computes a height/climate grid via batch noise, then jitters candidate positions
+## Grass placement, receives shared grid from VegetationPlacer
+## Same grid lookup pattern as trees/foliage
 
-var terrain_gen:    TerrainGenerator
-var chunk_size:     int
-var vertex_spacing: float
-var rng:            RandomNumberGenerator
+var rng: RandomNumberGenerator
 
 
-func _init(p_terrain_gen: TerrainGenerator, p_chunk_size: int, p_vertex_spacing: float, p_rng: RandomNumberGenerator) -> void:
-	terrain_gen = p_terrain_gen
-	chunk_size = p_chunk_size
-	vertex_spacing = p_vertex_spacing
+func _init(p_rng: RandomNumberGenerator) -> void:
 	rng = p_rng
 
 
-func generate(chunk_pos: Vector2i, lod_level: int) -> Dictionary:
+func generate(grid: Dictionary, lod_level: int) -> Dictionary:
 	## Returns {buffer: PackedFloat32Array, count: int}
 	## Buffer is interleaved 16 floats/instance: 12 transform + 4 custom_data
 	var result := {"buffer": PackedFloat32Array(), "count": 0}
 
 	var lod_candidates: Array[int] = TerrainConfig.GRASS_LOD_CANDIDATES
-	var lod_grid_res: Array[int] = TerrainConfig.GRASS_LOD_GRID_RES
-
 	if lod_level >= lod_candidates.size() or lod_candidates[lod_level] == 0:
 		return result
 
 	var candidates: int = lod_candidates[lod_level]
-	var grid_res: int = lod_grid_res[lod_level] if lod_level < lod_grid_res.size() else 8
-	var grid: Dictionary = VegetationPlacerUtils.query_grid(terrain_gen, chunk_size, vertex_spacing, chunk_pos, grid_res)
-
 	var grid_verts: PackedVector3Array = grid["verts"]
 	var grid_colors: PackedColorArray = grid["colors"]
+	var grid_res: int = grid["grid_res"]
 	var grid_spacing: float = grid["grid_spacing"]
 	var chunk_world_size: float = grid["chunk_world_size"]
 
