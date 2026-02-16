@@ -46,12 +46,15 @@ func instantiate(result: ChunkResult, parent: Node3D, camera_chunk: Vector2i, ch
 		_add_collision(chunk_instance)
 
 	# Grass
-	chunk_instance.grass_instance = vegetation_mgr.create_vegetation(chunk_node, result.vegetation)
-	chunk_instance.grass_lod = GrassLodManager.get_lod(distance)
+	chunk_instance.grass_instance = vegetation_mgr.create_grass(chunk_node, result.vegetation)
+	chunk_instance.grass_lod = VegetationLodManager.get_grass_lod(distance)
 
-	# Trees, foliage
+	# Trees
 	chunk_instance.tree_instance = vegetation_mgr.create_tree(chunk_node, result.vegetation)
+
+	# Foliage
 	chunk_instance.foliage_instances = vegetation_mgr.create_foliage(chunk_node, result.vegetation)
+	chunk_instance.foliage_lod = VegetationLodManager.get_foliage_lod(distance)
 
 	return chunk_instance
 

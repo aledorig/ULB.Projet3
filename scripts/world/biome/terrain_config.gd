@@ -6,7 +6,7 @@ const SEA_LEVEL:       float = 0.0
 const ABS_MIN_HEIGHT:  float = -96.0
 const ABS_MAX_HEIGHT:  float = 524.0
 
-# Terrain shaping (TerrainGenerator)
+# Terrain shaping
 const OCEAN_BASE:      float = -75.0
 const LAND_BASE:       float = 12.0
 const MIN_AMPLITUDE:   float = 52.5
@@ -35,12 +35,17 @@ const FOREST_MOIST:  float = 0.1
 const DESERT_TEMP:   float = 0.65
 const DESERT_MOIST:  float = 0.38
 
-# Vegetation height/slope
+# Vegetation shared
 const GRASS_MIN_HEIGHT:     float = 10.0
 const GRASS_MAX_HEIGHT:     float = 120.0
 const MIN_NORMAL_Y:         float = 0.7
+const SAMPLE_JITTER:        float = 0.85
 
-# Trees (Pine_1..5)
+# Grass LOD
+const GRASS_LOD_CANDIDATES: Array[int] = [12000, 2400, 200]
+const GRASS_LOD_GRID_RES:   Array[int] = [32, 16, 8]
+
+# Trees
 const TREE_MIN_TEMP:       float = 0.35
 const TREE_MIN_HEIGHT:     float = 10.0
 const TREE_MAX_HEIGHT:     float = 120.0
@@ -51,17 +56,28 @@ const TREE_SCALE_MIN:      float = 2.0
 const TREE_SCALE_MAX:      float = 3.5
 const TREE_Y_OFFSET:       float = -1.0
 
-# Foliage (Bush, Fern, Mushroom, Flower, Plant_7, Plant_7_Big)
-const FOLIAGE_TOTAL_TYPES:     int   = 6
-const FOLIAGE_TYPES_PER_CHUNK: int  = 2
-const FOLIAGE_CANDIDATES:      int   = 60
+# Foliage
+const FOLIAGE_TOTAL_TYPES:     int   = 14
+const FOLIAGE_TYPES_PER_CHUNK: int   = 4
 const FOLIAGE_Y_OFFSET:        float = -0.8
 
-# Visibility ranges (GPU distance culling)
+# Foliage LOD
+const FOLIAGE_LOD_CANDIDATES: Array[int] = [150, 40, 0]
+const FOLIAGE_LOD_GRID_RES:   Array[int] = [8, 6, 4]
+
+# Per-type density
+const FOLIAGE_DENSITIES: Array[float] = [
+	0.30, 0.25, 0.28, 0.12, 0.08,  # Bush, BushFlowers, Fern, Mushroom, Laetiporus
+	0.22, 0.30, 0.25, 0.30, 0.25,  # Flower3Grp, Flower3Sgl, Flower4Grp, Flower4Sgl, Plant7
+	0.10, 0.20, 0.35, 0.35         # Plant7Big, Plant1, Clover1, Clover2
+]
+
+# Visibility ranges
+const VIS_RANGE_GRASS:   float = 400.0
 const VIS_RANGE_TREE:    float = 600.0
 const VIS_RANGE_FOLIAGE: float = 300.0
 
-# Shader-facing (pushed to terrain.gdshader via TerrainMaterialManager)
+# Shader-facing
 const SNOW_HEIGHT:      float = 180.0
 const SNOW_BLEND_RANGE: float = 45.0
 const BEACH_HEIGHT:     float = 9.0

@@ -1,5 +1,5 @@
 shader_type spatial;
-render_mode cull_disabled, depth_draw_opaque;
+render_mode cull_disabled, depth_draw_never;
 
 uniform sampler2D grass_texture : source_color, filter_linear_mipmap, repeat_disable;
 uniform sampler2D grass_texture_2 : source_color, filter_linear_mipmap, repeat_disable;

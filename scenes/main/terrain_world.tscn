@@ -101,16 +101,16 @@ void sky() {
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_nikly"]
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_qs0if"]
-width = 1024
-height = 1024
+width = 256
+height = 256
 noise = SubResource("FastNoiseLite_nikly")
 seamless = true
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_xrynq"]
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_y0ead"]
-width = 1024
-height = 1024
+width = 256
+height = 256
 noise = SubResource("FastNoiseLite_xrynq")
 seamless = true
 
@@ -137,6 +137,8 @@ shader_parameter/cloud_speed2 = 0.004
 
 [sub_resource type="Sky" id="Sky_xrynq"]
 sky_material = SubResource("ShaderMaterial_qs0if")
+process_mode = 2
+radiance_size = 2
 
 [sub_resource type="Environment" id="Environment_4p0at"]
 background_mode = 2

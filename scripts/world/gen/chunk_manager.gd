@@ -28,7 +28,7 @@ var chunks_queued_for_unload: Dictionary = {}
 var thread_pool:    ChunkThreadPool
 var vegetation_mgr: VegetationManager
 var mesh_cache:     MeshCache
-var grass_lod_mgr:  GrassLodManager
+var veg_lod_mgr:    VegetationLodManager
 var instantiator:   ChunkInstantiator
 
 var camera:           Camera3D
@@ -61,7 +61,7 @@ func _ready() -> void:
 
 	vegetation_mgr = VegetationManager.new()
 	mesh_cache = MeshCache.new(GameSettingsAutoload.cache_max_size)
-	grass_lod_mgr = GrassLodManager.new()
+	veg_lod_mgr = VegetationLodManager.new()
 	instantiator = ChunkInstantiator.new(chunk_size, vertex_spacing, terrain_material, vegetation_mgr)
 
 	GameSettingsAutoload.runtime_settings_changed.connect(_on_settings_changed)
@@ -118,10 +118,10 @@ func _process(_delta: float) -> void:
 		print("[PROFILE] update_chunks: %.2fms" % [(t1 - t0) / 1000.0])
 		t0 = t1
 
-	grass_lod_mgr.process_queue(loaded_chunks, last_camera_chunk, debug_terrain_generator, chunk_size, vertex_spacing, p_seed, vegetation_mgr)
+	veg_lod_mgr.process_queue(loaded_chunks, last_camera_chunk, debug_terrain_generator, chunk_size, vertex_spacing, p_seed, vegetation_mgr)
 	if profiling:
 		t1 = Time.get_ticks_usec()
-		print("[PROFILE] grass_lod_mgr.process_queue: %.2fms" % [(t1 - t0) / 1000.0])
+		print("[PROFILE] veg_lod_mgr.process_queue: %.2fms" % [(t1 - t0) / 1000.0])
 		t0 = t1
 
 	_process_unload_queue()
@@ -203,13 +203,15 @@ func update_chunks(force_update: bool = false) -> void:
 			chunks_to_keep[chunk_pos] = true
 
 			if not is_chunk_loaded(chunk_pos) and not is_chunk_pending(chunk_pos):
-				var request = ChunkRequest.new(chunk_pos, distance, GrassLodManager.get_lod(distance))
+				var grass_lod: int = VegetationLodManager.get_grass_lod(distance)
+				var foliage_lod: int = VegetationLodManager.get_foliage_lod(distance)
+				var request = ChunkRequest.new(chunk_pos, distance, grass_lod, foliage_lod)
 				pending_chunks[chunk_pos] = request
 				thread_pool.submit(request)
 
 	_mark_distant_chunks_for_unload(chunks_to_keep)
 	_ensure_nearby_collision()
-	grass_lod_mgr.rebuild_queue(loaded_chunks, last_camera_chunk)
+	veg_lod_mgr.rebuild_queue(loaded_chunks, last_camera_chunk)
 
 
 func _generate_chunk_data(request: ChunkRequest) -> ChunkResult:
@@ -227,14 +229,14 @@ func _generate_chunk_data(request: ChunkRequest) -> ChunkResult:
 
 	result.success = true
 
-	# Vegetation (thread-safe, no scene tree access)
+	# Grass (thread-safe, no scene tree access)
 	var veg_placer = VegetationPlacer.new(terrain_gen, chunk_size, vertex_spacing, p_seed, request.chunk_pos)
-	var veg_result: Dictionary = veg_placer.generate_vegetation(request.chunk_pos, request.grass_lod)
-	result.vegetation.grass_buffer = veg_result.buffer
-	result.vegetation.grass_count = veg_result.count
+	var grass_result: Dictionary = veg_placer.generate_grass(request.chunk_pos, request.grass_lod)
+	result.vegetation.grass_buffer = grass_result.buffer
+	result.vegetation.grass_count = grass_result.count
 
-	# Trees, foliage (shared grid query)
-	var non_grass: Dictionary = veg_placer.generate_all_non_grass(request.chunk_pos)
+	# Trees + foliage (shared grid query, foliage uses LOD)
+	var non_grass: Dictionary = veg_placer.generate_all_non_grass(request.chunk_pos, request.foliage_lod)
 
 	var trees: Dictionary = non_grass.trees
 	result.vegetation.tree_variant_id = trees.variant_id
@@ -251,16 +253,16 @@ func _generate_chunk_data(request: ChunkRequest) -> ChunkResult:
 	var elapsed_ms: float = (Time.get_ticks_usec() - start_time) / 1000.0
 	result.generation_time_ms = elapsed_ms
 
-	# Debug logging: vegetation counts per chunk
+	# Debug logging
 	var veg: VegetationData = result.vegetation
 	var foliage_total: int = 0
 	for i in range(veg.foliage_counts.size()):
 		foliage_total += veg.foliage_counts[i]
 
-	print("[CHUNK] %v  %.1fms  grass=%d tree=%d foliage=%d (lod=%d)" % [
+	print("[CHUNK] %v  %.1fms  grass=%d tree=%d foliage=%d (g_lod=%d f_lod=%d)" % [
 		request.chunk_pos, elapsed_ms,
 		veg.grass_count, veg.tree_count, foliage_total,
-		request.grass_lod
+		request.grass_lod, request.foliage_lod
 	])
 
 	return result
@@ -289,13 +291,12 @@ func _process_completed_chunks() -> void:
 
 
 func _ensure_nearby_collision() -> void:
-	# Limit to 1 collision creation per call (create_trimesh_shape is ~44ms each)
 	for x in range(-ChunkInstantiator.COLLISION_DISTANCE, ChunkInstantiator.COLLISION_DISTANCE + 1):
 		for z in range(-ChunkInstantiator.COLLISION_DISTANCE, ChunkInstantiator.COLLISION_DISTANCE + 1):
 			var chunk_pos: Vector2i = last_camera_chunk + Vector2i(x, z)
 			if loaded_chunks.has(chunk_pos):
 				if instantiator.ensure_collision(loaded_chunks[chunk_pos]):
-					return  # max 1 per frame
+					return
 
 
 func _mark_distant_chunks_for_unload(chunks_to_keep: Dictionary) -> void:
@@ -425,8 +426,8 @@ func _on_settings_changed() -> void:
 
 
 func _exit_tree() -> void:
-	if grass_lod_mgr:
-		grass_lod_mgr.shutdown()
+	if veg_lod_mgr:
+		veg_lod_mgr.shutdown()
 	if thread_pool:
 		thread_pool.shutdown()
 	_clear_all_chunks()

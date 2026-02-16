@@ -33,6 +33,11 @@ OBJExporter="*uid://cypdhf5ssdtga"
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
+[rendering]
+
+scaling_3d/mode=0
+scaling_3d/scale=0.6
+
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/obj_exporter/plugin.cfg")
