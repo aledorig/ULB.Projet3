@@ -2,9 +2,9 @@ class_name TerrainConfig
 extends RefCounted
 
 # Absolute bounds
-const SEA_LEVEL:       float = 0.0
-const ABS_MIN_HEIGHT:  float = -96.0
-const ABS_MAX_HEIGHT:  float = 524.0
+const SEA_LEVEL:      float = 0.0
+const ABS_MIN_HEIGHT: float = -96.0
+const ABS_MAX_HEIGHT: float = 524.0
 
 # Terrain shaping
 const OCEAN_BASE:      float = -75.0
@@ -25,36 +25,36 @@ const MOUNTAINS_MIN:     float = 180.0
 const HIGH_PEAKS_MIN:    float = 300.0
 
 # Climate thresholds (raw noise values -1..1)
-const TUNDRA_TEMP:   float = -0.2
-const COLD_TEMP:     float = -0.3
-const HOT_TEMP:      float = 0.4
-const JUNGLE_MOIST:  float = -0.1
-const FOREST_MOIST:  float = 0.1
+const TUNDRA_TEMP:  float = -0.2
+const COLD_TEMP:    float = -0.3
+const HOT_TEMP:     float = 0.4
+const JUNGLE_MOIST: float = -0.1
+const FOREST_MOIST: float = 0.1
 
 # Climate thresholds (0..1 normalized)
-const DESERT_TEMP:   float = 0.65
-const DESERT_MOIST:  float = 0.38
+const DESERT_TEMP:  float = 0.65
+const DESERT_MOIST: float = 0.38
 
 # Vegetation shared
-const GRASS_MIN_HEIGHT:     float = 10.0
-const GRASS_MAX_HEIGHT:     float = 120.0
-const MIN_NORMAL_Y:         float = 0.7
-const SAMPLE_JITTER:        float = 0.85
+const GRASS_MIN_HEIGHT: float = 10.0
+const GRASS_MAX_HEIGHT: float = 120.0
+const MIN_NORMAL_Y:     float = 0.7
+const SAMPLE_JITTER:    float = 0.85
 
 # Grass LOD
 const GRASS_LOD_CANDIDATES: Array[int] = [12000, 2400, 200]
 const GRASS_LOD_GRID_RES:   Array[int] = [32, 16, 8]
 
 # Trees
-const TREE_MIN_TEMP:       float = 0.35
-const TREE_MIN_HEIGHT:     float = 10.0
-const TREE_MAX_HEIGHT:     float = 120.0
-const TREE_CANDIDATES:     int   = 25
-const TREE_DENSITY:        float = 0.4
-const TREE_VARIANTS:       int   = 5
-const TREE_SCALE_MIN:      float = 2.0
-const TREE_SCALE_MAX:      float = 3.5
-const TREE_Y_OFFSET:       float = -1.0
+const TREE_MIN_TEMP:   float = 0.35
+const TREE_MIN_HEIGHT: float = 10.0
+const TREE_MAX_HEIGHT: float = 120.0
+const TREE_CANDIDATES: int   = 25
+const TREE_DENSITY:    float = 0.4
+const TREE_VARIANTS:   int   = 5
+const TREE_SCALE_MIN:  float = 2.0
+const TREE_SCALE_MAX:  float = 3.5
+const TREE_Y_OFFSET:   float = -1.0
 
 # Foliage
 const FOLIAGE_TOTAL_TYPES:     int   = 14
