@@ -72,6 +72,7 @@ func _ready() -> void:
 	GameSettingsAutoload.runtime_settings_changed.connect(_on_settings_changed)
 	update_chunks(true)
 	initial_chunks_ready.connect(_on_initial_chunks_ready)
+	initial_chunks_ready.connect(_on_initial_chunks_ready)
 
 
 func _initialize_systems() -> void:
@@ -434,13 +435,7 @@ func _print_frame_stats() -> void:
 
 func _on_initial_chunks_ready() -> void:
 	river_generator = RiverGenerator.new(debug_terrain_generator)
-	river_generator.load_grid(Vector2.ZERO, 2048)
-	
-	var coasts_c = river_generator.get_coast_cells(Vector2.ZERO)
-	var flats_c  = river_generator.get_flat_cells(Vector2.ZERO)
-	var groups   = river_generator.build_groups_bfs(Vector2.ZERO)
-	
-	var candidates := river_generator.find_source(Vector2.ZERO, 2500.0)
+	var candidates := river_generator.find_source(Vector2.ZERO, 5000.0)
 	print("[RIVER] Found %d candidates" % candidates.size())
 
 	river_visualizer = RiverVisualizer.new()
@@ -454,8 +449,6 @@ func _on_initial_chunks_ready() -> void:
 	
 	river_visualizer.draw_candidates(candidates)
 	river_visualizer.draw_rivers(paths)
-	river_visualizer.draw_flat_cells(groups)
-	river_visualizer.draw_coast_cells(flats_c)
 
 func _on_settings_changed() -> void:
 	var old_distance := render_distance
