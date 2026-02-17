@@ -70,6 +70,27 @@ func get_height(x: float, z: float) -> float:
 
 	return base_h + rough
 
+func get_gradient(x: float, z: float) -> Vector2:
+	# compute partial derivative for x and z
+	# https://fr.wikipedia.org/wiki/Diff%C3%A9rence_finie
+	var h := 1.0
+
+	# note: p for + and m for - 
+	var f_xph := get_height(x+h, z)
+	var f_xmh := get_height(x-h, z)
+	var f_zph := get_height(x, z+h)
+	var f_zmh := get_height(x, z-h)
+	
+	var d_x := (f_xph - f_xmh) / h*2.0
+	var d_z := (f_zph - f_zmh) / h*2.0
+	
+	return Vector2(d_x, d_z)
+	
+func get_steepest_slope_dir(x:float, z:float) -> Vector2:
+	var gradient := get_gradient(x, z)
+	var slope := -gradient
+	# fix if slope get close to 0...
+	return slope.normalized() if slope.length() > 1e-8 else Vector2.ZERO
 
 func get_climate_color(x: float, z: float) -> Color:
 	var temp_raw: float = temperature_noise.get_value(x * TerrainConfig.TEMPERATURE_FREQ, z * TerrainConfig.TEMPERATURE_FREQ)

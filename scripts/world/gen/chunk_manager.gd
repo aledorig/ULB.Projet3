@@ -32,6 +32,9 @@ var veg_lod_mgr:      VegetationLodManager
 var terrain_lod_mgr:  TerrainLodManager
 var instantiator:     ChunkInstantiator
 
+var river_generator:  RiverGenerator
+var river_visualizer: RiverVisualizer
+
 var camera:           Camera3D
 var material_manager: TerrainMaterialManager
 var terrain_material: ShaderMaterial
@@ -68,6 +71,7 @@ func _ready() -> void:
 
 	GameSettingsAutoload.runtime_settings_changed.connect(_on_settings_changed)
 	update_chunks(true)
+	initial_chunks_ready.connect(_on_initial_chunks_ready)
 
 
 func _initialize_systems() -> void:
@@ -428,6 +432,22 @@ func _print_frame_stats() -> void:
 		loaded_chunks.size(), total_mmi, total_grass, total_trees, total_foliage
 	])
 
+func _on_initial_chunks_ready() -> void:
+	river_generator = RiverGenerator.new(debug_terrain_generator)
+	var candidates := river_generator.find_source(Vector2.ZERO, 5000.0)
+	print("[RIVER] Found %d candidates" % candidates.size())
+
+	river_visualizer = RiverVisualizer.new()
+	add_child(river_visualizer)
+	
+	var paths: Array[PackedVector3Array] = []
+	for source in candidates:
+		print(source)
+		var path = river_generator.build_river_controls_points(source)
+		paths.append(path)
+	
+	river_visualizer.draw_candidates(candidates)
+	river_visualizer.draw_rivers(paths)
 
 func _on_settings_changed() -> void:
 	var old_distance := render_distance
