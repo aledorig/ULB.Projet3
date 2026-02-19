@@ -435,7 +435,7 @@ func _print_frame_stats() -> void:
 
 func _on_initial_chunks_ready() -> void:
 	river_generator = RiverGenerator.new(debug_terrain_generator)
-	var candidates := river_generator.find_source(Vector2.ZERO, 5000.0)
+	var candidates := river_generator.find_source(Vector2.ZERO, 2500.0)
 	print("[RIVER] Found %d candidates" % candidates.size())
 
 	river_visualizer = RiverVisualizer.new()
