@@ -13,12 +13,13 @@ func is_best_among_neighboors(candidate: Vector3, sources_candidates : Array[Vec
 	#	 - highest point among them... 
 
 	# check if is in neighboors
-	var neighboors_radius := 300.0
+	var neighboors_radius := 150.0
 	
 	for source in sources_candidates:
 		# checking if near the candidate
 		if candidate.distance_to(source) <= neighboors_radius:
-			if -terrain.get_gradient(candidate.x, candidate.z) <-terrain.get_gradient(source.x, source.z):
+			if -terrain.get_gradient(candidate.x, candidate.z) < \
+			   -terrain.get_gradient(source.x, source.z):
 				return false
 	return true
 	
@@ -35,7 +36,7 @@ func find_source(center: Vector2, area_size: float) -> Array[Vector3]:
 			var x := center.x - half + gx * step
 			var z := center.y - half + gz * step
 			var h := terrain.get_height(x, z)
-			if h >= 180.0:
+			if h >= 130.0:
 				sources_candidates.append(Vector3(x, h, z))
 	
 	# selecting randomly sources
@@ -49,7 +50,7 @@ func find_source(center: Vector2, area_size: float) -> Array[Vector3]:
 func build_river_controls_points(source:Vector3) -> PackedVector3Array:
 	var pos := Vector2(source.x, source.z)
 	var max_steps := 500
-	var step_dist := 25.0
+	var step_dist := 10.0
 	
 	var path : PackedVector3Array = []
 	
@@ -60,7 +61,7 @@ func build_river_controls_points(source:Vector3) -> PackedVector3Array:
 		var slope := -gradient
 		var slope_dir := slope.normalized()
 		
-		if slope.length() <= 0.01:
+		if slope.length() <= 1e-5:
 			break
 		
 		pos += slope_dir * step_dist

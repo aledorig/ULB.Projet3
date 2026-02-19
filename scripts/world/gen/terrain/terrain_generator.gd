@@ -81,8 +81,8 @@ func get_gradient(x: float, z: float) -> Vector2:
 	var f_zph := get_height(x, z+h)
 	var f_zmh := get_height(x, z-h)
 	
-	var d_x := (f_xph - f_xmh) / h*2.0
-	var d_z := (f_zph - f_zmh) / h*2.0
+	var d_x := (f_xph - f_xmh) / (h*2.0)
+	var d_z := (f_zph - f_zmh) / (h*2.0)
 	
 	return Vector2(d_x, d_z)
 	
