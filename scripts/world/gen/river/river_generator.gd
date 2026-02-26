@@ -55,8 +55,8 @@ func find_source(center: Vector2, area_size: float) -> Array[Vector3]:
 	
 func build_river_controls_points(source:Vector3) -> PackedVector3Array:
 	var pos := Vector2(source.x, source.z)
-	var max_steps := 500
-	var step_dist := 10.0
+	var max_steps := 200
+	var step_dist := 16.0
 	
 	var path : PackedVector3Array = []
 	
@@ -79,7 +79,7 @@ func _cached_cell(pos: Vector2) -> Vector2:
 	if terrain_cache.has(pos):
 		return terrain_cache[pos]
 	
-	# Cache miss, ohh come on :-(
+	# Cache miss :-(
 	var height := terrain.get_height(pos.x, pos.y)
 	var grad := -terrain.get_gradient(pos.x, pos.y)
 	var slope_mag := grad.length() 
@@ -89,13 +89,18 @@ func _cached_cell(pos: Vector2) -> Vector2:
 	return sample
 
 func load_grid(center: Vector2, area_size: int) -> void:
+	# Init a low res terrain grid, step is 1/3 of a chunk.
+	# Detect flat cell and coast cell and store fetched value
+	# in a cache. Each flat cells are set with union-find to detect
+	# if cell are connected to a coast cell.
+	
 	var step := 64.0
 	var sea_level = 0.0
 	var mountains_level = 130.0
 	
 	# TODO check the tresholds values...
-	var slope_threshold := 40.0  
-	var delta_height_threshold := 40.0 
+	var slope_threshold := step/8.0
+	var delta_height_threshold := step/2.0
 
 	var half := float(area_size) * 0.5
 	var origin := center - Vector2(half, half)
@@ -156,9 +161,65 @@ func load_grid(center: Vector2, area_size: int) -> void:
 	coast_cells_cache[center] = coast_cells
 	flat_cells_cache[center] = flat_cells
 	
+func build_groups_bfs(center: Vector2) -> Array[Dictionary]:
+	var step := 64.0
+	var flat_cells := flat_cells_cache[center]
+	var coast_cells := coast_cells_cache[center]
+
+	# Set for more perfomance fetching...
+	var flat_set: Dictionary = {}
+	for cell in flat_cells:
+		flat_set[cell] = true
+
+	var coast_set: Dictionary = {}
+	for cell in coast_cells:
+		coast_set[cell] = true
+
+	var visited: Dictionary = {}
+	var groups: Array[Dictionary] = []
+	var cell_to_group: Dictionary = {}
+
+	# 4-connected positions
+	var connected_pos := [
+		Vector2(step, 0), Vector2(-step, 0),
+		Vector2(0, step), Vector2(0, -step),
+	]
+
+	for cell in flat_cells:
+		if visited.has(cell):
+			continue
+
+		var group_id := groups.size()
+		var group := {
+			"cells": PackedVector2Array(),
+			"is_coast_connect": false,
+		}
+
+		var queue: Array[Vector2] = [cell]
+		visited[cell] = true
+
+		while queue.size() > 0:
+			var current := queue.pop_front() as Vector2
+
+			group["cells"].append(current)
+			cell_to_group[current] = group_id
+
+			if coast_set.has(current):
+				group["is_coast_connected"] = true
+
+			for cp in connected_pos:
+				var neighbour: Vector2 = current + cp
+				if flat_set.has(neighbour) and not visited.has(neighbour):
+					visited[neighbour] = true
+					queue.push_back(neighbour)
+
+		groups.append(group)
+
+	return groups
+
 func get_flat_cells(center: Vector2) -> PackedVector2Array:
 	return flat_cells_cache[center]
-	
+
 func get_coast_cells(center: Vector2) -> PackedVector2Array:
 	return coast_cells_cache[center]
 	

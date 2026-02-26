@@ -42,11 +42,13 @@ func _ready() -> void:
 	coast_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	coast_material.albedo_color = Color(0.857, 0.338, 0.194, 1.0)
 	coast_material.no_depth_test = true
-
+	coast.surface_set_material(0, coast_material)
+	
 	flat_material = StandardMaterial3D.new()
 	flat_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	flat_material.albedo_color = Color(0.337, 0.91, 0.333, 1.0)
 	flat_material.no_depth_test = true
+	flat_material.albedo_color = Color.WHITE
+	flat_material.vertex_color_use_as_albedo = true
 
 func draw_candidates(candidates: Array[Vector3]) -> void:
 	mesh.clear_surfaces()
@@ -83,22 +85,42 @@ func _build_square(imesh: ImmediateMesh, center: Vector2, y: float, size: float)
 	imesh.surface_add_vertex(ul)
 	imesh.surface_add_vertex(ul)
 	imesh.surface_add_vertex(bl)
+	
+func _build_filled_square(imesh: ImmediateMesh, center: Vector2, y: float, size: float) -> void:
+	var half := size * 0.5
 
-func draw_flat_cells(flats: PackedVector2Array) -> void:
+	var bl := Vector3(center.x - half, y, center.y - half)
+	var br := Vector3(center.x + half, y, center.y - half)
+	var ur := Vector3(center.x + half, y, center.y + half)
+	var ul := Vector3(center.x - half, y, center.y + half)
+	
+	imesh.surface_add_vertex(bl)
+	imesh.surface_add_vertex(br)
+	imesh.surface_add_vertex(ur)
+
+	imesh.surface_add_vertex(bl)
+	imesh.surface_add_vertex(ur) 
+	imesh.surface_add_vertex(ul) 
+
+func draw_flat_cells(flats: Array[Dictionary]) -> void:
 	flat.clear_surfaces()
 
 	if flats.is_empty():
+		flat_instance.mesh = flat
 		return
 
 	# Wireframe squares (same dimension as CELL_SIZE)
-	flat.surface_begin(Mesh.PRIMITIVE_LINES, flat_material)
-	for c in flats:
-		_build_square(flat, c, CELL_Y_OFFSET, CELL_SIZE)
-	flat.surface_end()
+	for group in flats:
+		flat.surface_begin(Mesh.PRIMITIVE_LINES, flat_material)
+		var color_grp := Color(randf(), randf(), randf())
+		flat.surface_set_color(color_grp)
+
+		for cell in group["cells"]:
+			_build_square(flat, cell, CELL_Y_OFFSET, CELL_SIZE)
+		flat.surface_end()
 
 	flat_instance.mesh = flat
 	print("[RIVER] Drawing %d flat cells" % flats.size())
-
 
 func draw_coast_cells(coasts: PackedVector2Array) -> void:
 	coast.clear_surfaces()
@@ -106,11 +128,16 @@ func draw_coast_cells(coasts: PackedVector2Array) -> void:
 	if coasts.is_empty():
 		return
 
-	coast.surface_begin(Mesh.PRIMITIVE_LINES, coast_material)
-	for c in coasts:
-		_build_square(coast, c, CELL_Y_OFFSET + 0.2, CELL_SIZE)
-	coast.surface_end()
+	#coast.surface_begin(Mesh.PRIMITIVE_LINES, coast_material)
+	#for c in coasts:
+	#	_build_filled_square(coast, c, CELL_Y_OFFSET + 0.2, CELL_SIZE)
+	#coast.surface_end()
 
+	coast.surface_begin(Mesh.PRIMITIVE_TRIANGLES, null)
+	for c in coasts:
+		_build_filled_square(coast, c, CELL_Y_OFFSET + 0.2, CELL_SIZE)
+	coast.surface_end()
+	
 	coast_instance.mesh = coast
 	print("[RIVER] Drawing %d coast cells" % coasts.size())
 

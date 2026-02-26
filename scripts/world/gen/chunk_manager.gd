@@ -437,7 +437,8 @@ func _on_initial_chunks_ready() -> void:
 	river_generator.load_grid(Vector2.ZERO, 2048)
 	
 	var coasts_c = river_generator.get_coast_cells(Vector2.ZERO)
-	var flats_c = river_generator.get_flat_cells(Vector2.ZERO)
+	var flats_c  = river_generator.get_flat_cells(Vector2.ZERO)
+	var groups   = river_generator.build_groups_bfs(Vector2.ZERO)
 	
 	var candidates := river_generator.find_source(Vector2.ZERO, 2500.0)
 	print("[RIVER] Found %d candidates" % candidates.size())
@@ -453,8 +454,8 @@ func _on_initial_chunks_ready() -> void:
 	
 	river_visualizer.draw_candidates(candidates)
 	river_visualizer.draw_rivers(paths)
-	river_visualizer.draw_flat_cells(flats_c)
-	river_visualizer.draw_coast_cells(coasts_c)
+	river_visualizer.draw_flat_cells(groups)
+	river_visualizer.draw_coast_cells(flats_c)
 
 func _on_settings_changed() -> void:
 	var old_distance := render_distance
