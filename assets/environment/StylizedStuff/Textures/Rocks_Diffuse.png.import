@@ -2,16 +2,12 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bdosyb0ah3ft5"
-path="res://.godot/imported/Rocks_Diffuse.png-c82bc49c9096bbe3d8f5cfc8db1cae09.ctex"
-metadata={
-"vram_texture": false
-}
+uid="uid://cnq3s3fnqp0q3"
+valid=false
 
 [deps]
 
 source_file="res://assets/environment/StylizedStuff/Textures/Rocks_Diffuse.png"
-dest_files=["res://.godot/imported/Rocks_Diffuse.png-c82bc49c9096bbe3d8f5cfc8db1cae09.ctex"]
 
 [params]
 

@@ -3,13 +3,12 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://c588l4yskov23"
-path="res://.godot/imported/Fern_1.gltf-49072db6f314100584440adaffe2288b.scn"
+uid="uid://csb4b4s7ygrai"
+valid=false
 
 [deps]
 
 source_file="res://assets/environment/StylizedStuff/glTF/Fern_1.gltf"
-dest_files=["res://.godot/imported/Fern_1.gltf-49072db6f314100584440adaffe2288b.scn"]
 
 [params]
 

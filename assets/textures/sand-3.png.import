@@ -2,16 +2,12 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dd1wasyr56ley"
-path="res://.godot/imported/sand-3.png-4226697770cb7d355ab81bf7f7d9d273.ctex"
-metadata={
-"vram_texture": false
-}
+uid="uid://c84wubjry2ink"
+valid=false
 
 [deps]
 
 source_file="res://assets/textures/sand-3.png"
-dest_files=["res://.godot/imported/sand-3.png-4226697770cb7d355ab81bf7f7d9d273.ctex"]
 
 [params]
 

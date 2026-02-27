@@ -3,13 +3,12 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://ddptvl208ng6s"
-path="res://.godot/imported/DeadTree_3.gltf-0b186a2708a86d72224bbf9dafae52dd.scn"
+uid="uid://csn0kaykrecaq"
+valid=false
 
 [deps]
 
 source_file="res://assets/environment/StylizedStuff/glTF/DeadTree_3.gltf"
-dest_files=["res://.godot/imported/DeadTree_3.gltf-0b186a2708a86d72224bbf9dafae52dd.scn"]
 
 [params]
 

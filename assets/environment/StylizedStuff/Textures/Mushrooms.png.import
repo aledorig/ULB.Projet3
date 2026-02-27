@@ -2,16 +2,12 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://denhgv8qq7m0t"
-path="res://.godot/imported/Mushrooms.png-d8f89f44a569dcca239c44a30920efad.ctex"
-metadata={
-"vram_texture": false
-}
+uid="uid://uwnpwccny8m4"
+valid=false
 
 [deps]
 
 source_file="res://assets/environment/StylizedStuff/Textures/Mushrooms.png"
-dest_files=["res://.godot/imported/Mushrooms.png-d8f89f44a569dcca239c44a30920efad.ctex"]
 
 [params]
 

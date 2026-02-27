@@ -2,16 +2,12 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://djxmtoxxyqn2v"
-path="res://.godot/imported/stone-dark-2.png-e096e22b30e7fef69d949e5b10c8b3d4.ctex"
-metadata={
-"vram_texture": false
-}
+uid="uid://dne8k4pd0g6dj"
+valid=false
 
 [deps]
 
 source_file="res://assets/textures/stone-dark-2.png"
-dest_files=["res://.godot/imported/stone-dark-2.png-e096e22b30e7fef69d949e5b10c8b3d4.ctex"]
 
 [params]
 

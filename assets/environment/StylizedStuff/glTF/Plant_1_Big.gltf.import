@@ -3,13 +3,12 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://gabtcvey58d1"
-path="res://.godot/imported/Plant_1_Big.gltf-3907dcee188e18ac548f9cfb374a3683.scn"
+uid="uid://bq2r0imdxyhtj"
+valid=false
 
 [deps]
 
 source_file="res://assets/environment/StylizedStuff/glTF/Plant_1_Big.gltf"
-dest_files=["res://.godot/imported/Plant_1_Big.gltf-3907dcee188e18ac548f9cfb374a3683.scn"]
 
 [params]
 

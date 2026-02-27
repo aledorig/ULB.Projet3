@@ -1,14 +1,11 @@
 [gd_scene format=3 uid="uid://duuwuggm2xpq3"]
 
 [ext_resource type="Script" uid="uid://y4hdrrphklbr" path="res://scripts/client/gui/gui_main_menu.gd" id="1_5vafy"]
-[ext_resource type="Texture2D" uid="uid://b6okiwbkufpou" path="res://assets/ui/images/background.jpg" id="1_l6cm7"]
-[ext_resource type="FontFile" uid="uid://udlxsk422qsh" path="res://assets/ui/fonts/Acumin-BdPro.otf" id="3_37rv8"]
-[ext_resource type="FontFile" uid="uid://bu52qvomamn1b" path="res://assets/ui/fonts/Absolut Pro Ultra Condensed Light.otf" id="3_m0c35"]
-[ext_resource type="Texture2D" uid="uid://mmprnk0no1tb" path="res://assets/ui/images/line_divider.png" id="4_37rv8"]
-[ext_resource type="FontFile" uid="uid://y54qebkp5sac" path="res://assets/ui/fonts/Absolut Pro Ultra Condensed Light.ttf" id="5_6maj5"]
+[ext_resource type="FontFile" uid="uid://cmvs2f5p3htpu" path="res://assets/ui/fonts/Acumin-BdPro.otf" id="3_37rv8"]
+[ext_resource type="FontFile" uid="uid://bxxdwktyb30ni" path="res://assets/ui/fonts/Absolut Pro Ultra Condensed Light.otf" id="3_m0c35"]
+[ext_resource type="FontFile" uid="uid://fdyc3s3kcjq2" path="res://assets/ui/fonts/Absolut Pro Ultra Condensed Light.ttf" id="5_6maj5"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ekxnf"]
-texture = ExtResource("1_l6cm7")
 modulate_color = Color(0.54504406, 0.61625, 0.53928685, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn"]
@@ -77,7 +74,6 @@ horizontal_alignment = 1
 
 [node name="LineDivider" type="TextureRect" parent="CenterContainer/VBoxContainer/VBoxContainer" unique_id=2066556258]
 layout_mode = 2
-texture = ExtResource("4_37rv8")
 expand_mode = 5
 stretch_mode = 4
 

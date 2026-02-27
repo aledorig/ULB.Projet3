@@ -2,16 +2,12 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cfdbg1f35463p"
-path="res://.godot/imported/Bark_DeadTree.png-ede45cb8085423be0f3f1636ead08845.ctex"
-metadata={
-"vram_texture": false
-}
+uid="uid://bpftttkylgabo"
+valid=false
 
 [deps]
 
 source_file="res://assets/environment/StylizedStuff/Textures/Bark_DeadTree.png"
-dest_files=["res://.godot/imported/Bark_DeadTree.png-ede45cb8085423be0f3f1636ead08845.ctex"]
 
 [params]
 

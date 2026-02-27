@@ -3,13 +3,12 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://c2mlvhextr2ov"
-path="res://.godot/imported/Petal_2.gltf-b22de3d9fab351ef31a9a26023708dc8.scn"
+uid="uid://cg11felc8m7kh"
+valid=false
 
 [deps]
 
 source_file="res://assets/environment/StylizedStuff/glTF/Petal_2.gltf"
-dest_files=["res://.godot/imported/Petal_2.gltf-b22de3d9fab351ef31a9a26023708dc8.scn"]
 
 [params]
 

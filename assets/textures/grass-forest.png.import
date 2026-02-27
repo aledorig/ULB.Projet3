@@ -2,21 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://beyrnm7p6ppq1"
-path.s3tc="res://.godot/imported/grass-forest.png-c8da0b8c05a697bac40e29f3127dc594.s3tc.ctex"
-metadata={
-"imported_formats": ["s3tc_bptc"],
-"vram_texture": true
-}
+uid="uid://be5qgkywimqny"
+valid=false
 
 [deps]
 
 source_file="res://assets/textures/grass-forest.png"
-dest_files=["res://.godot/imported/grass-forest.png-c8da0b8c05a697bac40e29f3127dc594.s3tc.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -24,7 +19,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=true
+mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""

@@ -3,13 +3,12 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://iwbr32dti5t6"
-path="res://.godot/imported/Pebble_Round_5.gltf-a289ad8f38e3c7ec8dd1389c94b5086b.scn"
+uid="uid://roek0vt2ycka"
+valid=false
 
 [deps]
 
 source_file="res://assets/environment/StylizedStuff/glTF/Pebble_Round_5.gltf"
-dest_files=["res://.godot/imported/Pebble_Round_5.gltf-a289ad8f38e3c7ec8dd1389c94b5086b.scn"]
 
 [params]
 

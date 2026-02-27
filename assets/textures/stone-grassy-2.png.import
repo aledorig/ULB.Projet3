@@ -2,16 +2,12 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://chcp7b2pjlbba"
-path="res://.godot/imported/stone-grassy-2.png-b7cc9097be14c98a27bb5f84d52772e6.ctex"
-metadata={
-"vram_texture": false
-}
+uid="uid://bkxn6awoy6ymh"
+valid=false
 
 [deps]
 
 source_file="res://assets/textures/stone-grassy-2.png"
-dest_files=["res://.godot/imported/stone-grassy-2.png-b7cc9097be14c98a27bb5f84d52772e6.ctex"]
 
 [params]
 

@@ -2,21 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d3ur3xu2yyiq8"
-path.s3tc="res://.godot/imported/grass-dirt-1.png-dbbef19dfd6c2e9e6bc22a431765d816.s3tc.ctex"
-metadata={
-"imported_formats": ["s3tc_bptc"],
-"vram_texture": true
-}
+uid="uid://duglrdgk8h7rl"
+valid=false
 
 [deps]
 
 source_file="res://assets/textures/grass-dirt-1.png"
-dest_files=["res://.godot/imported/grass-dirt-1.png-dbbef19dfd6c2e9e6bc22a431765d816.s3tc.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -24,7 +19,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=true
+mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""

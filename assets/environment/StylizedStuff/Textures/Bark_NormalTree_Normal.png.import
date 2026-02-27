@@ -2,16 +2,12 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://s56yf8w22dhm"
-path="res://.godot/imported/Bark_NormalTree_Normal.png-2b7136c20dacfa94de7b77a079482ce3.ctex"
-metadata={
-"vram_texture": false
-}
+uid="uid://bklfxt5q6nt4f"
+valid=false
 
 [deps]
 
 source_file="res://assets/environment/StylizedStuff/Textures/Bark_NormalTree_Normal.png"
-dest_files=["res://.godot/imported/Bark_NormalTree_Normal.png-2b7136c20dacfa94de7b77a079482ce3.ctex"]
 
 [params]
 

@@ -2,16 +2,12 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dde8q7p0qruey"
-path="res://.godot/imported/Leaf_Pine_C.png-a5458e140578319099df550b846283cd.ctex"
-metadata={
-"vram_texture": false
-}
+uid="uid://bs0jdnpqeu0oc"
+valid=false
 
 [deps]
 
 source_file="res://assets/environment/StylizedStuff/Textures/Leaf_Pine_C.png"
-dest_files=["res://.godot/imported/Leaf_Pine_C.png-a5458e140578319099df550b846283cd.ctex"]
 
 [params]
 
