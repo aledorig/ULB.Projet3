@@ -1,8 +1,6 @@
 # LLMs
 .claude/
 
-# Godot
-.godot/
 
 # Addons
 addons/gdscript-linter/

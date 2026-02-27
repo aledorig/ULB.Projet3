@@ -2,16 +2,12 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c0t4goxlbembe"
-path="res://.godot/imported/Flowers.png-a60918f6280b0247374ad0351210d6db.ctex"
-metadata={
-"vram_texture": false
-}
+uid="uid://deowa82y706do"
+valid=false
 
 [deps]
 
 source_file="res://assets/environment/StylizedStuff/Textures/Flowers.png"
-dest_files=["res://.godot/imported/Flowers.png-a60918f6280b0247374ad0351210d6db.ctex"]
 
 [params]
 

@@ -3,13 +3,12 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://cua2ixbl1eo0l"
-path="res://.godot/imported/RockPath_Square_Small_1.gltf-803c891c483bce29b3036392df6ba694.scn"
+uid="uid://ccny04xrkvque"
+valid=false
 
 [deps]
 
 source_file="res://assets/environment/StylizedStuff/glTF/RockPath_Square_Small_1.gltf"
-dest_files=["res://.godot/imported/RockPath_Square_Small_1.gltf-803c891c483bce29b3036392df6ba694.scn"]
 
 [params]
 

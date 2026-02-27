@@ -2,16 +2,12 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://hhdr0svajf3p"
-path="res://.godot/imported/ice-2.png-d38b9501913c86cb7c5c5c30b4bcd336.ctex"
-metadata={
-"vram_texture": false
-}
+uid="uid://jleais6up28n"
+valid=false
 
 [deps]
 
 source_file="res://assets/textures/ice-2.png"
-dest_files=["res://.godot/imported/ice-2.png-d38b9501913c86cb7c5c5c30b4bcd336.ctex"]
 
 [params]
 

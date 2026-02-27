@@ -3,7 +3,7 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://cya35hcpwk7n5"
+uid="uid://dm0a1cxnvjbpr"
 path="res://.godot/imported/Executioner.gltf-180a9611284d8e38ad1ca37d6a2c9bce.scn"
 
 [deps]
@@ -13,7 +13,7 @@ dest_files=["res://.godot/imported/Executioner.gltf-180a9611284d8e38ad1ca37d6a2c
 
 [params]
 
-nodes/root_type="CharacterBody3D"
+nodes/root_type=""
 nodes/root_name=""
 nodes/root_script=null
 nodes/apply_root_scale=true
@@ -37,14 +37,6 @@ import_script/path=""
 materials/extract=0
 materials/extract_format=0
 materials/extract_path=""
-_subresources={
-"materials": {
-"Texture": {
-"use_external/enabled": false,
-"use_external/fallback_path": "res://assets/ship/Texture.tres",
-"use_external/path": "uid://du7m7sdn8iugo"
-}
-}
-}
+_subresources={}
 gltf/naming_version=2
 gltf/embedded_image_handling=1

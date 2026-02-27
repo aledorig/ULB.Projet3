@@ -2,16 +2,12 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://oilskx28af3x"
-path="res://.godot/imported/grass-rocky.png-72dd8975c5c5093727809ad95e5a078f.ctex"
-metadata={
-"vram_texture": false
-}
+uid="uid://cxm4ewofig38x"
+valid=false
 
 [deps]
 
 source_file="res://assets/textures/grass-rocky.png"
-dest_files=["res://.godot/imported/grass-rocky.png-72dd8975c5c5093727809ad95e5a078f.ctex"]
 
 [params]
 

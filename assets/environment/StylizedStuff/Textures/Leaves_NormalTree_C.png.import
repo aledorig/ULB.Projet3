@@ -2,16 +2,12 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://lqw53p6q53lu"
-path="res://.godot/imported/Leaves_NormalTree_C.png-58ce759c175329c0ec77dd02156ce118.ctex"
-metadata={
-"vram_texture": false
-}
+uid="uid://cifny88dgdo61"
+valid=false
 
 [deps]
 
 source_file="res://assets/environment/StylizedStuff/Textures/Leaves_NormalTree_C.png"
-dest_files=["res://.godot/imported/Leaves_NormalTree_C.png-58ce759c175329c0ec77dd02156ce118.ctex"]
 
 [params]
 
