@@ -2,12 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ln8b8v65uh4n"
-valid=false
+uid="uid://d4j773xkbell0"
+path="res://.godot/imported/grass-smooth.png-83b5f8d4d026ce1e783f332503e1df68.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
 source_file="res://assets/textures/grass-smooth.png"
+dest_files=["res://.godot/imported/grass-smooth.png-83b5f8d4d026ce1e783f332503e1df68.ctex"]
 
 [params]
 

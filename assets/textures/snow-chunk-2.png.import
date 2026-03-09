@@ -2,12 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://csiqcofuhwtm3"
-valid=false
+uid="uid://b7y2d5div4v6h"
+path="res://.godot/imported/snow-chunk-2.png-f307c8493915903616f5ccb0b6cb0be6.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
 source_file="res://assets/textures/snow-chunk-2.png"
+dest_files=["res://.godot/imported/snow-chunk-2.png-f307c8493915903616f5ccb0b6cb0be6.ctex"]
 
 [params]
 

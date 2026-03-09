@@ -2,12 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dfm6piaae2ey7"
-valid=false
+uid="uid://b44jluxbuh5q1"
+path="res://.godot/imported/sand-dune.png-928fb5f52ca3c0e645dcc2383eb02307.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
 source_file="res://assets/textures/sand-dune.png"
+dest_files=["res://.godot/imported/sand-dune.png-928fb5f52ca3c0e645dcc2383eb02307.ctex"]
 
 [params]
 

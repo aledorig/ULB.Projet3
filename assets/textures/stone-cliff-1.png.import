@@ -2,12 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://coe1fj7suu2xu"
-valid=false
+uid="uid://blphfu3p4q5b3"
+path="res://.godot/imported/stone-cliff-1.png-28a7e0ba8563d1d5d5a9dcd06eca8a22.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
 source_file="res://assets/textures/stone-cliff-1.png"
+dest_files=["res://.godot/imported/stone-cliff-1.png-28a7e0ba8563d1d5d5a9dcd06eca8a22.ctex"]
 
 [params]
 
