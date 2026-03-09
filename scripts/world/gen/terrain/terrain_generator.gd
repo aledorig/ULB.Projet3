@@ -51,46 +51,23 @@ func _compute_amplitude(cont: float, peaks: float) -> float:
 	return lerpf(TerrainConfig.MIN_AMPLITUDE, TerrainConfig.MAX_AMPLITUDE, _smoothstep(-0.8, 0.2, peaks)) * lerpf(0.3, 1.0, land_factor)
 
 
-func get_height(x: float, z: float) -> float:
+func get_height(x: float, z: float, height_freq: float = TerrainConfig.HEIGHT_FREQ) -> float:
 	var cont: float = continentalness_noise.get_value(x, z, TerrainConfig.CONTINENT_FREQ, TerrainConfig.CONTINENT_FREQ)
 	var peaks: float = peaks_noise.get_value(x, z, TerrainConfig.PEAKS_FREQ, TerrainConfig.PEAKS_FREQ)
 
 	var base: float = _compute_base(cont)
 	var amplitude: float = _compute_amplitude(cont, peaks)
 
-	var shaped: float = _shape_noise(height_noise.get_value(x, z, TerrainConfig.HEIGHT_FREQ, TerrainConfig.HEIGHT_FREQ))
+	var shaped: float = _shape_noise(height_noise.get_value(x, z, height_freq, height_freq))
 	var depth_mod: float = depth_noise.get_value(x, z, TerrainConfig.DEPTH_FREQ, TerrainConfig.DEPTH_FREQ)
 	var surface_detail: float = surface_noise.get_value(x * TerrainConfig.SURFACE_FREQ, z * TerrainConfig.SURFACE_FREQ) * TerrainConfig.SURFACE_AMP / 70.0
 
 	var base_h: float = base + (shaped * amplitude * (1.0 + depth_mod * 0.6)) + surface_detail
 
-	# High-frequency roughness at altitude — makes mountain mesh jagged/craggy
 	var altitude_factor: float = _smoothstep(TerrainConfig.ROUGHNESS_ALT_LOW, TerrainConfig.ROUGHNESS_ALT_HIGH, base_h)
 	var rough: float = roughness_noise.get_value(x, z, TerrainConfig.ROUGHNESS_FREQ, TerrainConfig.ROUGHNESS_FREQ) * TerrainConfig.ROUGHNESS_AMP * altitude_factor
 
 	return base_h + rough
-
-func get_gradient(x: float, z: float) -> Vector2:
-	# compute partial derivative for x and z
-	# https://fr.wikipedia.org/wiki/Diff%C3%A9rence_finie
-	var h := 1.0
-
-	# note: p for + and m for - 
-	var f_xph := get_height(x+h, z)
-	var f_xmh := get_height(x-h, z)
-	var f_zph := get_height(x, z+h)
-	var f_zmh := get_height(x, z-h)
-	
-	var d_x := (f_xph - f_xmh) / (h*2.0)
-	var d_z := (f_zph - f_zmh) / (h*2.0)
-	
-	return Vector2(d_x, d_z)
-	
-func get_steepest_slope_dir(x:float, z:float) -> Vector2:
-	var gradient := get_gradient(x, z)
-	var slope := -gradient
-	# fix if slope get close to 0...
-	return slope.normalized() if slope.length() > 1e-8 else Vector2.ZERO
 
 func get_climate_color(x: float, z: float) -> Color:
 	var temp_raw: float = temperature_noise.get_value(x * TerrainConfig.TEMPERATURE_FREQ, z * TerrainConfig.TEMPERATURE_FREQ)
@@ -115,7 +92,8 @@ func get_vertex_data_batch(
 	spacing: float,
 	out_vertices: PackedVector3Array,
 	out_colors: PackedColorArray,
-	max_octaves: int = -1
+	max_octaves: int = -1,
+	height_freq: float = TerrainConfig.HEIGHT_FREQ
 ) -> void:
 	var total_verts: int = width * height
 	var inv_spacing: float = 1.0 / spacing
@@ -146,7 +124,7 @@ func get_vertex_data_batch(
 		noise_grid,
 		origin_x * inv_spacing, origin_z * inv_spacing,
 		width, height,
-		spacing * TerrainConfig.HEIGHT_FREQ, spacing * TerrainConfig.HEIGHT_FREQ,
+		spacing * height_freq, spacing * height_freq,
 		max_octaves
 	)
 

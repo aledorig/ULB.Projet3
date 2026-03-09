@@ -2,12 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d2hi1mrww2dt5"
-valid=false
+uid="uid://dlh3k3ko68q5m"
+path="res://.godot/imported/line_divider.png-d34d49117c890951b2e97e35a2b190c4.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
 source_file="res://assets/ui/images/line_divider.png"
+dest_files=["res://.godot/imported/line_divider.png-d34d49117c890951b2e97e35a2b190c4.ctex"]
 
 [params]
 

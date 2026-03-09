@@ -2,12 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ce1h4rbqe0vvi"
-valid=false
+uid="uid://mgvu8h0dg3ck"
+path="res://.godot/imported/refresh.png-fabf54dcf3168632da20b1da3a396160.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
 source_file="res://assets/ui/images/refresh.png"
+dest_files=["res://.godot/imported/refresh.png-fabf54dcf3168632da20b1da3a396160.ctex"]
 
 [params]
 
