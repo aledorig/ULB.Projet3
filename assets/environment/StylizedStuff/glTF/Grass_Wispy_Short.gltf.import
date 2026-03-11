@@ -4,11 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://bkjtuey7bp2v8"
-valid=false
+path="res://.godot/imported/Grass_Wispy_Short.gltf-becd2e6aefd69a9725184d96af0b8251.scn"
 
 [deps]
 
 source_file="res://assets/environment/StylizedStuff/glTF/Grass_Wispy_Short.gltf"
+dest_files=["res://.godot/imported/Grass_Wispy_Short.gltf-becd2e6aefd69a9725184d96af0b8251.scn"]
 
 [params]
 

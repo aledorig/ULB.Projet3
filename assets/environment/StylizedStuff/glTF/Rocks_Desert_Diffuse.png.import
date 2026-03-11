@@ -3,11 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cb40wwf7bfebs"
-valid=false
+path="res://.godot/imported/Rocks_Desert_Diffuse.png-512d1e3dcef83cedd49fd1eb7991e10b.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
 source_file="res://assets/environment/StylizedStuff/glTF/Rocks_Desert_Diffuse.png"
+dest_files=["res://.godot/imported/Rocks_Desert_Diffuse.png-512d1e3dcef83cedd49fd1eb7991e10b.ctex"]
 
 [params]
 

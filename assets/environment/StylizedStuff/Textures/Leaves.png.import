@@ -3,11 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://0y1sdcybqisu"
-valid=false
+path="res://.godot/imported/Leaves.png-e34017d8c4056cedbf7c61872e0805eb.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
 source_file="res://assets/environment/StylizedStuff/Textures/Leaves.png"
+dest_files=["res://.godot/imported/Leaves.png-e34017d8c4056cedbf7c61872e0805eb.ctex"]
 
 [params]
 

@@ -4,11 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://ejdr0k42hi58"
-valid=false
+path="res://.godot/imported/Grass_Wispy_Tall.gltf-e823e792db210721eba42f01b5e477e9.scn"
 
 [deps]
 
 source_file="res://assets/environment/StylizedStuff/glTF/Grass_Wispy_Tall.gltf"
+dest_files=["res://.godot/imported/Grass_Wispy_Tall.gltf-e823e792db210721eba42f01b5e477e9.scn"]
 
 [params]
 

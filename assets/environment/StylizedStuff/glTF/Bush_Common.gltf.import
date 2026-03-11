@@ -4,11 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://l3xhycphc0mo"
-valid=false
+path="res://.godot/imported/Bush_Common.gltf-2912d12b8078deff4d1b824ee406f093.scn"
 
 [deps]
 
 source_file="res://assets/environment/StylizedStuff/glTF/Bush_Common.gltf"
+dest_files=["res://.godot/imported/Bush_Common.gltf-2912d12b8078deff4d1b824ee406f093.scn"]
 
 [params]
 

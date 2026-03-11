@@ -3,11 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dbq5ixg00dj30"
-valid=false
+path="res://.godot/imported/Leaves_TwistedTree.png-6552d3c24e2fa24f7f53f331937971cc.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
 source_file="res://assets/environment/StylizedStuff/glTF/Leaves_TwistedTree.png"
+dest_files=["res://.godot/imported/Leaves_TwistedTree.png-6552d3c24e2fa24f7f53f331937971cc.ctex"]
 
 [params]
 

@@ -4,11 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://dri24xkp8ra2w"
-valid=false
+path="res://.godot/imported/Petal_1.gltf-80b53aeb16c8950d1d258772287c93dd.scn"
 
 [deps]
 
 source_file="res://assets/environment/StylizedStuff/glTF/Petal_1.gltf"
+dest_files=["res://.godot/imported/Petal_1.gltf-80b53aeb16c8950d1d258772287c93dd.scn"]
 
 [params]
 
