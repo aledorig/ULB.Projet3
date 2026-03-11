@@ -1,0 +1,194 @@
+[gd_scene format=3 uid="uid://ct0w54psfcdmm"]
+
+[ext_resource type="Script" uid="uid://cwnmdvwiuee7w" path="res://scenes/main/perlin_debug_panel.gd" id="1_kgxmv"]
+[ext_resource type="Script" uid="uid://bmbapn32ww1i6" path="res://scenes/main/vector_field_preview.gd" id="2_5c4de"]
+[ext_resource type="Script" uid="uid://dmyexbaoqec34" path="res://scenes/main/preview_scroll_controller.gd" id="2_exg03"]
+[ext_resource type="FontFile" uid="uid://cmvs2f5p3htpu" path="res://assets/ui/fonts/Acumin-BdPro.otf" id="2_kgxmv"]
+[ext_resource type="Script" uid="uid://d0o1hri7tkb0u" path="res://scenes/main/perlin_settings_panel.gd" id="2_o05ww"]
+[ext_resource type="Script" uid="uid://dvtuiymerups7" path="res://scenes/main/terrain_preview_3d.gd" id="3_mn0bg"]
+[ext_resource type="Script" uid="uid://cnbeqby0vefp" path="res://scenes/main/preview_3d.gd" id="5_mn0bg"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kgxmv"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.7783342, 0.92758363, 0.9512269, 0.6)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mexpt"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.05490196, 0.15686275, 0.13725491, 0.96862745)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+
+[node name="Control" type="Control" unique_id=437194405]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_kgxmv")
+
+[node name="Background" type="Panel" parent="." unique_id=52988460]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_kgxmv")
+
+[node name="VP3D" type="SubViewport" parent="." unique_id=1038575409]
+own_world_3d = true
+size = Vector2i(500, 500)
+render_target_update_mode = 4
+script = ExtResource("3_mn0bg")
+
+[node name="Root3D" type="Node3D" parent="VP3D" unique_id=2136903762]
+
+[node name="Camera3D" type="Camera3D" parent="VP3D/Root3D" unique_id=1014737556]
+current = true
+
+[node name="ChunkMesh" type="MeshInstance3D" parent="VP3D/Root3D" unique_id=1863952415]
+skeleton = NodePath("../../..")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="VP3D/Root3D" unique_id=1027592570]
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1272456298]
+layout_mode = 0
+offset_left = 8.0
+offset_right = 1153.0
+offset_bottom = 642.0
+theme_override_constants/margin_left = 50
+theme_override_constants/margin_top = 120
+theme_override_constants/margin_right = 50
+theme_override_constants/margin_bottom = 120
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=2122544336]
+layout_mode = 2
+theme_override_constants/separation = 100
+
+[node name="Scroll" type="ScrollContainer" parent="MarginContainer/VBoxContainer" unique_id=956687721]
+custom_minimum_size = Vector2(0, 400)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/Scroll" unique_id=825623361]
+layout_mode = 2
+theme_override_constants/separation = 50
+alignment = 1
+
+[node name="VectorPreview" type="TextureRect" parent="MarginContainer/VBoxContainer/Scroll/HBoxContainer" unique_id=479085569]
+texture_filter = 1
+custom_minimum_size = Vector2(500, 500)
+layout_mode = 2
+size_flags_horizontal = 3
+expand_mode = 5
+stretch_mode = 4
+script = ExtResource("2_5c4de")
+
+[node name="Preview" type="TextureRect" parent="MarginContainer/VBoxContainer/Scroll/HBoxContainer" unique_id=366173080]
+texture_filter = 2
+custom_minimum_size = Vector2(400, 300)
+layout_mode = 2
+size_flags_horizontal = 3
+expand_mode = 1
+stretch_mode = 4
+script = ExtResource("2_exg03")
+
+[node name="Preview3D" type="TextureRect" parent="MarginContainer/VBoxContainer/Scroll/HBoxContainer" unique_id=713447245]
+custom_minimum_size = Vector2(415, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+stretch_mode = 4
+script = ExtResource("5_mn0bg")
+
+[node name="PreviewScroll" type="HSlider" parent="MarginContainer/VBoxContainer" unique_id=1008883817]
+layout_mode = 2
+
+[node name="SettingsPanel" type="Panel" parent="." unique_id=281385373]
+custom_minimum_size = Vector2(375, 0)
+layout_mode = 0
+offset_left = -1.0
+offset_top = -2.0
+offset_right = 374.0
+offset_bottom = 258.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_mexpt")
+script = ExtResource("2_o05ww")
+
+[node name="ToggleButton" type="CheckButton" parent="SettingsPanel" unique_id=1575540499]
+layout_mode = 0
+offset_left = 380.0
+offset_top = -29.0
+offset_right = 593.0
+offset_bottom = 94.0
+text = "Ouvrir/fermé options"
+
+[node name="Sliders" type="VBoxContainer" parent="SettingsPanel" unique_id=22968168]
+layout_mode = 0
+offset_left = 2.0
+offset_top = 3.0
+offset_right = 361.0
+offset_bottom = 253.0
+theme_override_constants/separation = 4
+
+[node name="SeedRow" type="HBoxContainer" parent="SettingsPanel/Sliders" unique_id=1169721396]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SeedLabel" type="Label" parent="SettingsPanel/Sliders/SeedRow" unique_id=313402389]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("2_kgxmv")
+text = "Seed:"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Seed" type="SpinBox" parent="SettingsPanel/Sliders/SeedRow" unique_id=286612400]
+custom_minimum_size = Vector2(200, 50)
+layout_mode = 2
+max_value = 732647346203746.0
+
+[node name="OctavesRow" type="HBoxContainer" parent="SettingsPanel/Sliders" unique_id=14986741]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 1
+
+[node name="OctavesLabel" type="Label" parent="SettingsPanel/Sliders/OctavesRow" unique_id=624759393]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("2_kgxmv")
+text = "Octaves"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Octaves" type="HSlider" parent="SettingsPanel/Sliders/OctavesRow" unique_id=229185062]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+min_value = 1.0
+max_value = 8.0
+value = 1.0
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=1251701616]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[connection signal="value_changed" from="MarginContainer/VBoxContainer/PreviewScroll" to="." method="_on_preview_scroll_value_changed"]
+[connection signal="pressed" from="SettingsPanel/ToggleButton" to="." method="_on_toggle_button_pressed"]
+[connection signal="value_changed" from="SettingsPanel/Sliders/SeedRow/Seed" to="." method="_on_seed_value_changed"]
+[connection signal="value_changed" from="SettingsPanel/Sliders/OctavesRow/Octaves" to="." method="_on_octaves_value_changed"]

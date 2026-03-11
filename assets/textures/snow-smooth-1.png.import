@@ -2,12 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b5aq00i2gfvgm"
-valid=false
+uid="uid://b4viujln85udg"
+path="res://.godot/imported/snow-smooth-1.png-747c9f1c4fe11144e9f106903087edc2.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
 source_file="res://assets/textures/snow-smooth-1.png"
+dest_files=["res://.godot/imported/snow-smooth-1.png-747c9f1c4fe11144e9f106903087edc2.ctex"]
 
 [params]
 

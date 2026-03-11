@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://b4tbc0qvyfoe3" path="res://scripts/client/gui/gui_overlay_debug.gd" id="4_qld23"]
 [ext_resource type="PackedScene" uid="uid://c4cju08nu26pq" path="res://scenes/ship/executioner.tscn" id="5_4p0at"]
 [ext_resource type="Shader" uid="uid://lu66d4khntu0" path="res://shaders/ui/pixelation.gdshader" id="6_htxxt"]
-[ext_resource type="FontFile" uid="uid://udlxsk422qsh" path="res://assets/ui/fonts/Acumin-BdPro.otf" id="7_qs0if"]
+[ext_resource type="FontFile" uid="uid://cmvs2f5p3htpu" path="res://assets/ui/fonts/Acumin-BdPro.otf" id="7_qs0if"]
 [ext_resource type="Script" uid="uid://8y80lskyu25x" path="res://scripts/client/water_manager.gd" id="7_water"]
 [ext_resource type="Script" uid="uid://hidl70vd7ntt" path="res://scripts/client/gui/gui_ingame_menu.gd" id="8_menu"]
 [ext_resource type="Shader" uid="uid://cawelrhpylh3m" path="res://shaders/environment/sky.gdshader" id="9_sky"]
@@ -228,10 +228,10 @@ layout_mode = 2
 theme_override_fonts/font = ExtResource("7_qs0if")
 text = "Quit to Title"
 
-[node name="Executioner" parent="." unique_id=1342995080 instance=ExtResource("5_4p0at")]
-
 [node name="Water" type="MeshInstance3D" parent="." unique_id=1474375278]
 script = ExtResource("7_water")
+
+[node name="Executioner" parent="." unique_id=1311638414 instance=ExtResource("5_4p0at")]
 
 [connection signal="pressed" from="CanvasLayer/IngameMenu/CenterContainer/VBox/BackToGame" to="CanvasLayer/IngameMenu" method="_on_back_to_game_pressed"]
 [connection signal="pressed" from="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsBtn" to="CanvasLayer/IngameMenu" method="_on_settings_pressed"]

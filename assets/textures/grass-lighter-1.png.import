@@ -2,12 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cccwb04t73dh5"
-valid=false
+uid="uid://dex37nn6e67d3"
+path="res://.godot/imported/grass-lighter-1.png-c44b9c425ffcb745d82f19c8435c8975.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
 source_file="res://assets/textures/grass-lighter-1.png"
+dest_files=["res://.godot/imported/grass-lighter-1.png-c44b9c425ffcb745d82f19c8435c8975.ctex"]
 
 [params]
 

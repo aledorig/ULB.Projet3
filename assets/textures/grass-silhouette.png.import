@@ -2,12 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://0capay4o6oxp"
-valid=false
+uid="uid://ctux7uclaxydt"
+path="res://.godot/imported/grass-silhouette.png-f88a00e5f459a1a91997a94ea6dc3c9c.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
 source_file="res://assets/textures/grass-silhouette.png"
+dest_files=["res://.godot/imported/grass-silhouette.png-f88a00e5f459a1a91997a94ea6dc3c9c.ctex"]
 
 [params]
 
