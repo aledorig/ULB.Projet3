@@ -1,6 +1,11 @@
 # LLMs
 .claude/
 
+# Godot
+.godot/
+.import/
+export.cfg
+export_presets.cfg
 
 # Addons
 addons/gdscript-linter/

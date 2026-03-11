@@ -3,11 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://gjno0xntyhp8"
-valid=false
+path="res://.godot/imported/Leaves_GiantPine_C.png-3721cc32e4f983a4fa7c91b99b20c400.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
 source_file="res://assets/environment/StylizedStuff/Textures/Leaves_GiantPine_C.png"
+dest_files=["res://.godot/imported/Leaves_GiantPine_C.png-3721cc32e4f983a4fa7c91b99b20c400.ctex"]
 
 [params]
 

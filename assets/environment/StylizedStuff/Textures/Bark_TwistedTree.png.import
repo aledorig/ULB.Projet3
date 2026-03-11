@@ -3,11 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dlo1lckh35cjm"
-valid=false
+path="res://.godot/imported/Bark_TwistedTree.png-a10255ea5601250dfd3d5ee5b1e3e235.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
 source_file="res://assets/environment/StylizedStuff/Textures/Bark_TwistedTree.png"
+dest_files=["res://.godot/imported/Bark_TwistedTree.png-a10255ea5601250dfd3d5ee5b1e3e235.ctex"]
 
 [params]
 
