@@ -434,21 +434,33 @@ func _print_frame_stats() -> void:
 	])
 
 func _on_initial_chunks_ready() -> void:
-	river_generator = RiverGenerator.new(debug_terrain_generator)
-	var candidates := river_generator.find_source(Vector2.ZERO, 2500.0)
-	print("[RIVER] Found %d candidates" % candidates.size())
+	river_generator = RiverGenerator.new(debug_terrain_generator, p_seed)
 
-	river_visualizer = RiverVisualizer.new()
-	add_child(river_visualizer)
-	
+	# Pre process ... 
+	river_generator.load_grid(Vector2.ZERO, 2500)
+	var groups := river_generator.build_groups_bfs(Vector2.ZERO)
+	var coast_cells: PackedVector2Array = river_generator.grid.coast_cache[Vector2.ZERO]
+	var flat_set: Dictionary = river_generator.grid.build_flat_set(Vector2.ZERO)
+	print("[RIVER] %d flat groups, %d coast cells" % [groups.size(), coast_cells.size()])
+
+	var candidates := river_generator.find_source(Vector2.ZERO, 2500.0)
+	print("[RIVER] Found %d source candidates" % candidates.size())
+
 	var paths: Array[PackedVector3Array] = []
 	for source in candidates:
-		print(source)
-		var path = river_generator.build_river_controls_points(source)
-		paths.append(path)
-	
+		var path := river_generator.build_river_path(source, groups, coast_cells, flat_set)
+		if path.size() >= 2:
+			paths.append(path)
+	print("[RIVER] Built %d river paths" % paths.size())
+
+	# Visualize
+	river_visualizer = RiverVisualizer.new()
+	add_child(river_visualizer)
+
 	river_visualizer.draw_candidates(candidates)
 	river_visualizer.draw_rivers(paths)
+	river_visualizer.draw_flat_cells(groups)
+	river_visualizer.draw_coast_cells(coast_cells)
 
 func _on_settings_changed() -> void:
 	var old_distance := render_distance

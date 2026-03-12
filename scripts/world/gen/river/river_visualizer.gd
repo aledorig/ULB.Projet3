@@ -2,29 +2,38 @@ class_name RiverVisualizer
 extends Node3D
 
 const CELL_SIZE := 64.0
-const CELL_Y_OFFSET := 1.5 # slightly above terrain to avoid z-fighting
+const CELL_Y_OFF := 1.5
 
-var mesh: ImmediateMesh
-var mesh_instance: MeshInstance3D
-var material: StandardMaterial3D
+var r_mesh: ImmediateMesh
+var r_instance: MeshInstance3D
+var r_mat: StandardMaterial3D
 
-var coast: ImmediateMesh
+var cand_mesh: ImmediateMesh
+var cand_instance: MeshInstance3D
+var cand_mat: StandardMaterial3D
+
+var coast_mesh: ImmediateMesh
 var coast_instance: MeshInstance3D
-var coast_material: StandardMaterial3D
+var coast_mat: StandardMaterial3D
 
-var flat: ImmediateMesh
+var flat_mesh: ImmediateMesh
 var flat_instance: MeshInstance3D
-var flat_material: StandardMaterial3D
+var flat_mat: StandardMaterial3D
 
 func _ready() -> void:
-	mesh = ImmediateMesh.new()
-	coast = ImmediateMesh.new()
-	flat = ImmediateMesh.new()
-	
-	mesh_instance = MeshInstance3D.new()
-	mesh_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	add_child(mesh_instance)
-	
+	r_mesh = ImmediateMesh.new()
+	cand_mesh = ImmediateMesh.new()
+	coast_mesh = ImmediateMesh.new()
+	flat_mesh = ImmediateMesh.new()
+
+	r_instance = MeshInstance3D.new()
+	r_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(r_instance)
+
+	cand_instance = MeshInstance3D.new()
+	cand_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(cand_instance)
+
 	coast_instance = MeshInstance3D.new()
 	coast_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(coast_instance)
@@ -33,128 +42,103 @@ func _ready() -> void:
 	flat_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(flat_instance)
 
-	material = StandardMaterial3D.new()
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	material.albedo_color = Color(0.2, 0.5, 1.0)
-	material.no_depth_test = true
+	r_mat = StandardMaterial3D.new()
+	r_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	r_mat.albedo_color = Color(0.2, 0.5, 1.0)
+	r_mat.no_depth_test = true
 
-	coast_material = StandardMaterial3D.new()
-	coast_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	coast_material.albedo_color = Color(0.857, 0.338, 0.194, 1.0)
-	coast_material.no_depth_test = true
-	coast.surface_set_material(0, coast_material)
-	
-	flat_material = StandardMaterial3D.new()
-	flat_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	flat_material.no_depth_test = true
-	flat_material.albedo_color = Color.WHITE
-	flat_material.vertex_color_use_as_albedo = true
+	cand_mat = StandardMaterial3D.new()
+	cand_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	cand_mat.albedo_color = Color.YELLOW
+	cand_mat.no_depth_test = true
+
+	coast_mat = StandardMaterial3D.new()
+	coast_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	coast_mat.albedo_color = Color(0.85, 0.33, 0.19)
+	coast_mat.no_depth_test = true
+
+	flat_mat = StandardMaterial3D.new()
+	flat_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	flat_mat.no_depth_test = true
+	flat_mat.albedo_color = Color.WHITE
+	flat_mat.vertex_color_use_as_albedo = true
+
 
 func draw_candidates(candidates: Array[Vector3]) -> void:
-	mesh.clear_surfaces()
+	cand_mesh.clear_surfaces()
+	var sz := 10.0
+	cand_mesh.surface_begin(Mesh.PRIMITIVE_LINES, cand_mat)
+	for p in candidates:
+		var v := Vector3(p.x, p.y + 2.0, p.z)
+		cand_mesh.surface_add_vertex(v + Vector3(-sz, 0, 0))
+		cand_mesh.surface_add_vertex(v + Vector3(sz, 0, 0))
+		cand_mesh.surface_add_vertex(v + Vector3(0, 0, -sz))
+		cand_mesh.surface_add_vertex(v + Vector3(0, 0, sz))
+	cand_mesh.surface_end()
+	cand_instance.mesh = cand_mesh
 
-	var cross_size := 10.0
-	mesh.surface_begin(Mesh.PRIMITIVE_LINES, material)
-	for point in candidates:
-		var p := Vector3(point.x, point.y + 2.0, point.z)
-		
-		mesh.surface_add_vertex(p + Vector3(-cross_size, 0, 0))
-		mesh.surface_add_vertex(p + Vector3(cross_size, 0, 0))
-		mesh.surface_add_vertex(p + Vector3(0, 0, -cross_size))
-		mesh.surface_add_vertex(p + Vector3(0, 0, cross_size))
-		mesh.surface_add_vertex(p + Vector3(0, -cross_size, 0))
-		mesh.surface_add_vertex(p + Vector3(0, cross_size, 0))
-	mesh.surface_end()
 
-	mesh_instance.mesh = mesh
-	print("[RIVER] Drawing %d candidates" % candidates.size())
+func _draw_sq(m: ImmediateMesh, center: Vector2, y: float, size: float) -> void:
+	var h := size * 0.5
+	var bl := Vector3(center.x - h, y, center.y - h)
+	var br := Vector3(center.x + h, y, center.y - h)
+	var ur := Vector3(center.x + h, y, center.y + h)
+	var ul := Vector3(center.x - h, y, center.y + h)
 
-func _build_square(imesh: ImmediateMesh, center: Vector2, y: float, size: float) -> void:
-	var half := size * 0.5
+	m.surface_add_vertex(bl); m.surface_add_vertex(br)
+	m.surface_add_vertex(br); m.surface_add_vertex(ur)
+	m.surface_add_vertex(ur); m.surface_add_vertex(ul)
+	m.surface_add_vertex(ul); m.surface_add_vertex(bl)
 
-	var bl := Vector3(center.x - half, y, center.y - half)
-	var br := Vector3(center.x + half, y, center.y - half)
-	var ur := Vector3(center.x + half, y, center.y + half)
-	var ul := Vector3(center.x - half, y, center.y + half)
 
-	imesh.surface_add_vertex(bl)
-	imesh.surface_add_vertex(br)
-	imesh.surface_add_vertex(br)
-	imesh.surface_add_vertex(ur)
-	imesh.surface_add_vertex(ur)
-	imesh.surface_add_vertex(ul)
-	imesh.surface_add_vertex(ul)
-	imesh.surface_add_vertex(bl)
+func _draw_filled_sq(m: ImmediateMesh, center: Vector2, y: float, size: float) -> void:
+	var h := size * 0.5
+	var bl := Vector3(center.x - h, y, center.y - h)
+	var br := Vector3(center.x + h, y, center.y - h)
+	var ur := Vector3(center.x + h, y, center.y + h)
+	var ul := Vector3(center.x - h, y, center.y + h)
 	
-func _build_filled_square(imesh: ImmediateMesh, center: Vector2, y: float, size: float) -> void:
-	var half := size * 0.5
+	m.surface_add_vertex(bl); m.surface_add_vertex(br); m.surface_add_vertex(ur)
+	m.surface_add_vertex(bl); m.surface_add_vertex(ur); m.surface_add_vertex(ul)
 
-	var bl := Vector3(center.x - half, y, center.y - half)
-	var br := Vector3(center.x + half, y, center.y - half)
-	var ur := Vector3(center.x + half, y, center.y + half)
-	var ul := Vector3(center.x - half, y, center.y + half)
-	
-	imesh.surface_add_vertex(bl)
-	imesh.surface_add_vertex(br)
-	imesh.surface_add_vertex(ur)
 
-	imesh.surface_add_vertex(bl)
-	imesh.surface_add_vertex(ur) 
-	imesh.surface_add_vertex(ul) 
+func draw_flat_cells(groups: Array[Dictionary]) -> void:
+	flat_mesh.clear_surfaces()
+	if groups.is_empty(): return
 
-func draw_flat_cells(flats: Array[Dictionary]) -> void:
-	flat.clear_surfaces()
+	for grp in groups:
+		flat_mesh.surface_begin(Mesh.PRIMITIVE_LINES, flat_mat)
+		var c := Color(randf(), randf(), randf())
+		flat_mesh.surface_set_color(c)
+		for cell in grp["cells"]:
+			_draw_sq(flat_mesh, cell, CELL_Y_OFF, CELL_SIZE)
+		flat_mesh.surface_end()
+	flat_instance.mesh = flat_mesh
 
-	if flats.is_empty():
-		flat_instance.mesh = flat
-		return
-
-	# Wireframe squares (same dimension as CELL_SIZE)
-	for group in flats:
-		flat.surface_begin(Mesh.PRIMITIVE_LINES, flat_material)
-		var color_grp := Color(randf(), randf(), randf())
-		flat.surface_set_color(color_grp)
-
-		for cell in group["cells"]:
-			_build_square(flat, cell, CELL_Y_OFFSET, CELL_SIZE)
-		flat.surface_end()
-
-	flat_instance.mesh = flat
-	print("[RIVER] Drawing %d flat cells" % flats.size())
 
 func draw_coast_cells(coasts: PackedVector2Array) -> void:
-	coast.clear_surfaces()
+	coast_mesh.clear_surfaces()
+	if coasts.is_empty(): return
 
-	if coasts.is_empty():
-		return
-
-	#coast.surface_begin(Mesh.PRIMITIVE_LINES, coast_material)
-	#for c in coasts:
-	#	_build_filled_square(coast, c, CELL_Y_OFFSET + 0.2, CELL_SIZE)
-	#coast.surface_end()
-
-	coast.surface_begin(Mesh.PRIMITIVE_TRIANGLES, null)
+	coast_mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, coast_mat)
 	for c in coasts:
-		_build_filled_square(coast, c, CELL_Y_OFFSET + 0.2, CELL_SIZE)
-	coast.surface_end()
-	
-	coast_instance.mesh = coast
-	print("[RIVER] Drawing %d coast cells" % coasts.size())
+		_draw_filled_sq(coast_mesh, c, CELL_Y_OFF + 0.2, CELL_SIZE)
+	coast_mesh.surface_end()
+	coast_instance.mesh = coast_mesh
+
 
 func draw_rivers(rivers: Array[PackedVector3Array]) -> void:
-	# using bezier curve to build the path...
-	
-	mesh.clear_surfaces()
-
+	r_mesh.clear_surfaces()
 	for path in rivers:
-		if path.size() < 2:
-			continue
-		mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP, material)
-		for point in path:
-			mesh.surface_add_vertex(Vector3(point.x, point.y + 2.0, point.z))
-		mesh.surface_end()
-
-	mesh_instance.mesh = mesh
+		if path.size() < 2: continue
+		r_mesh.surface_begin(Mesh.PRIMITIVE_LINE_STRIP, r_mat)
+		for p in path:
+			r_mesh.surface_add_vertex(Vector3(p.x, p.y + 2.0, p.z))
+		r_mesh.surface_end()
+	r_instance.mesh = r_mesh
 
 func clear() -> void:
-	mesh.clear_surfaces()
+	r_mesh.clear_surfaces()
+	cand_mesh.clear_surfaces()
+	coast_mesh.clear_surfaces()
+	flat_mesh.clear_surfaces()
