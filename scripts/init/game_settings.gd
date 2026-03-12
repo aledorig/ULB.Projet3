@@ -21,12 +21,12 @@ var render_distance: int = 8:
 		render_distance = value
 		runtime_settings_changed.emit()
 
-var max_speed: float = 50.0:
+var max_speed: float = 500.0:
 	set(value):
 		max_speed = value
 		runtime_settings_changed.emit()
 
-var acceleration: float = 0.6:
+var acceleration: float = 0.3:
 	set(value):
 		acceleration = value
 		runtime_settings_changed.emit()
