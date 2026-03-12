@@ -567,6 +567,25 @@ def main():
 
 	print("Saving images…")
 
+	# 0. FBM comparison: single octave (plain Perlin) vs full FBM
+	x_off   = 0.0
+	z_off   = 0.0
+	freq    = TC.HEIGHT_FREQ
+	x_scale = spacing * freq
+	z_scale = spacing * freq
+	no_fbm = gen.height_noise.generate(x_off, z_off, SIZE, SIZE, x_scale, z_scale, max_octaves=1).reshape(SIZE, SIZE)
+	fbm    = grids["height_noise"]	# already generated with all octaves
+	panel  = np.concatenate([no_fbm, fbm], axis=1)
+	img    = Image.fromarray((_norm01(panel) * 255).astype(np.uint8), mode="L")
+	# label each half
+	from PIL import ImageDraw
+	draw = ImageDraw.Draw(img)
+	draw.text((8, 8),            "Perlin (no FBM)", fill=200)
+	draw.text((SIZE + 8, 8),     f"FBM ({args.octaves} octaves)", fill=200)
+	comp_path = os.path.join(out_dir, "00_perlin_fbm_comparison.png")
+	img.save(comp_path)
+	print(f"  {comp_path}")
+
 	# 1. raw noise layers (grayscale)
 	save_grayscale(cont,   os.path.join(out_dir, "01_continentalness.png"))
 	save_grayscale(peaks,  os.path.join(out_dir, "02_peaks.png"))
