@@ -18,7 +18,12 @@ var _seed: int
 var _octave: int
 
 
-func start(num_threads: int, generate_func: Callable, p_seed: int, p_octave: int) -> void:
+func start(
+		num_threads: int,
+		generate_func: Callable,
+		p_seed: int,
+		p_octave: int,
+) -> void:
 	_generate_func = generate_func
 	_seed = p_seed
 	_octave = p_octave

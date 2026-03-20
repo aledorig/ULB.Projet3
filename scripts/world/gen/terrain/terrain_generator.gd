@@ -263,7 +263,11 @@ func get_vertex_data_batch(
 			var base_h: float = base + (shaped_noise * amplitude * (1.0 + depth_grid[idx] * 0.6)) + surface_grid[idx]
 
 			# Roughness at altitude
-			var altitude_factor: float = _smoothstep(TerrainConfig.ROUGHNESS_ALT_LOW, TerrainConfig.ROUGHNESS_ALT_HIGH, base_h)
+			var altitude_factor: float = _smoothstep(
+				TerrainConfig.ROUGHNESS_ALT_LOW,
+				TerrainConfig.ROUGHNESS_ALT_HIGH,
+				base_h,
+			)
 			var h: float = base_h + roughness_grid[idx] * TerrainConfig.ROUGHNESS_AMP * altitude_factor
 
 			var temp_01: float = clampf(temp_grid[idx] * 0.5 + 0.5, 0.0, 1.0)
@@ -283,10 +287,26 @@ func is_underwater(height_val: float) -> bool:
 
 func get_debug_info(x: float, z: float) -> Dictionary:
 	var height_val: float = get_height(x, z)
-	var cont: float = continentalness_noise.get_value(x, z, TerrainConfig.CONTINENT_FREQ, TerrainConfig.CONTINENT_FREQ)
-	var peaks: float = peaks_noise.get_value(x, z, TerrainConfig.PEAKS_FREQ, TerrainConfig.PEAKS_FREQ)
-	var temp: float = temperature_noise.get_value(x * TerrainConfig.TEMPERATURE_FREQ, z * TerrainConfig.TEMPERATURE_FREQ)
-	var moist: float = moisture_noise.get_value(x * TerrainConfig.MOISTURE_FREQ, z * TerrainConfig.MOISTURE_FREQ)
+	var cont: float = continentalness_noise.get_value(
+		x,
+		z,
+		TerrainConfig.CONTINENT_FREQ,
+		TerrainConfig.CONTINENT_FREQ,
+	)
+	var peaks: float = peaks_noise.get_value(
+		x,
+		z,
+		TerrainConfig.PEAKS_FREQ,
+		TerrainConfig.PEAKS_FREQ,
+	)
+	var temp: float = temperature_noise.get_value(
+		x * TerrainConfig.TEMPERATURE_FREQ,
+		z * TerrainConfig.TEMPERATURE_FREQ,
+	)
+	var moist: float = moisture_noise.get_value(
+		x * TerrainConfig.MOISTURE_FREQ,
+		z * TerrainConfig.MOISTURE_FREQ,
+	)
 
 	return {
 		"zone": _get_zone_name(cont, peaks, temp, moist, height_val),
@@ -299,7 +319,13 @@ func get_debug_info(x: float, z: float) -> Dictionary:
 	}
 
 
-func _get_zone_name(_cont: float, _peaks: float, temp: float, moist: float, h: float) -> String:
+func _get_zone_name(
+		_cont: float,
+		_peaks: float,
+		temp: float,
+		moist: float,
+		h: float,
+) -> String:
 	if h < TerrainConfig.SEA_LEVEL - TerrainConfig.DEEP_OCEAN_OFFSET:
 		return "Deep Ocean"
 	if h < TerrainConfig.SEA_LEVEL:

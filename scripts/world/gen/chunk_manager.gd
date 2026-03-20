@@ -112,17 +112,42 @@ func _process(_delta: float) -> void:
 	_process_completed_chunks()
 	if profiling:
 		t1 = Time.get_ticks_usec()
-		print("[PROFILE] _process_completed_chunks: %.2fms (%d instantiated)" % [(t1 - t0) / 1000.0, chunks_generated_this_frame])
+		print(
+			"[PROFILE] _process_completed_chunks: %.2fms (%d instantiated)" % [
+				(t1 - t0) / 1000.0,
+				chunks_generated_this_frame,
+			],
+		)
 		t0 = t1
 
 	update_chunks(false)
 	if profiling:
 		t1 = Time.get_ticks_usec()
-		print("[PROFILE] update_chunks: %.2fms" % [(t1 - t0) / 1000.0])
+		print(
+			"[PROFILE] update_chunks: %.2fms" % [
+				(t1 - t0) / 1000.0,
+			],
+		)
 		t0 = t1
 
-	veg_lod_mgr.process_queue(loaded_chunks, last_camera_chunk, debug_terrain_generator, chunk_size, vertex_spacing, p_seed, vegetation_mgr)
-	terrain_lod_mgr.process_queue(loaded_chunks, last_camera_chunk, chunk_size, vertex_spacing, terrain_material)
+	veg_lod_mgr.process_queue(
+		loaded_chunks,
+		last_camera_chunk,
+		debug_terrain_generator,
+		chunk_size,
+		vertex_spacing,
+		p_seed,
+		vegetation_mgr,
+	)
+
+	terrain_lod_mgr.process_queue(
+		loaded_chunks,
+		last_camera_chunk,
+		chunk_size,
+		vertex_spacing,
+		terrain_material,
+	)
+
 	if profiling:
 		t1 = Time.get_ticks_usec()
 		print("[PROFILE] lod_mgr.process_queue: %.2fms" % [(t1 - t0) / 1000.0])
