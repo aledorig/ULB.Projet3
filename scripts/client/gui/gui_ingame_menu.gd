@@ -9,6 +9,7 @@ extends Control
 
 var settings_visible: bool = false
 
+
 func _ready() -> void:
 	visible = false
 	settings_panel.visible = false
@@ -68,6 +69,7 @@ func _on_quit_to_title_pressed() -> void:
 func _on_render_distance_changed(value: float) -> void:
 	render_distance_label.text = str(int(value))
 	GameSettingsAutoload.render_distance = int(value)
+
 
 func _on_max_speed_changed(value: float) -> void:
 	max_speed_label.text = str(int(value))

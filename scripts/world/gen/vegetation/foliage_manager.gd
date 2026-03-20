@@ -1,20 +1,27 @@
 class_name FoliageManager
 extends RefCounted
-
 ## Loads foliage GLTF meshes and creates/replaces foliage MMIs from VegetationData
 
 const GLTF_BASE: String = "res://assets/environment/StylizedStuff/glTF/"
 
-var _foliage_meshes: Array = []  # [14] Mesh
+var _foliage_meshes: Array = [] # [14] Mesh
 var _loaded: bool = false
 
 const FOLIAGE_NAMES: Array[String] = [
-	"Bush_Common", "Bush_Common_Flowers", "Fern_1",
-	"Mushroom_Common", "Mushroom_Laetiporus",
-	"Flower_3_Group", "Flower_3_Single",
-	"Flower_4_Group", "Flower_4_Single",
-	"Plant_7", "Plant_7_Big", "Plant_1",
-	"Clover_1", "Clover_2"
+	"Bush_Common",
+	"Bush_Common_Flowers",
+	"Fern_1",
+	"Mushroom_Common",
+	"Mushroom_Laetiporus",
+	"Flower_3_Group",
+	"Flower_3_Single",
+	"Flower_4_Group",
+	"Flower_4_Single",
+	"Plant_7",
+	"Plant_7_Big",
+	"Plant_1",
+	"Clover_1",
+	"Clover_2",
 ]
 
 
@@ -25,8 +32,10 @@ func create(chunk_node: Node3D, veg: VegetationData) -> Array:
 	for i in range(TerrainConfig.FOLIAGE_TYPES_PER_CHUNK):
 		var type_id: int = veg.foliage_variant_ids[i]
 		result[i] = _create_mmi(
-			chunk_node, _foliage_meshes[type_id],
-			veg.foliage_transforms[i], veg.foliage_counts[i]
+			chunk_node,
+			_foliage_meshes[type_id],
+			veg.foliage_transforms[i],
+			veg.foliage_counts[i],
 		)
 	return result
 
@@ -47,8 +56,10 @@ func replace(chunk_instance: ChunkInstance, foliage_data: Dictionary) -> void:
 	for i in range(variant_ids.size()):
 		var type_id: int = variant_ids[i]
 		chunk_instance.foliage_instances[i] = _create_mmi(
-			chunk_instance.node, _foliage_meshes[type_id],
-			transforms[i], counts[i]
+			chunk_instance.node,
+			_foliage_meshes[type_id],
+			transforms[i],
+			counts[i],
 		)
 
 
@@ -61,8 +72,12 @@ func _ensure_loaded() -> void:
 		_foliage_meshes[i] = _load_mesh_from_gltf(GLTF_BASE + FOLIAGE_NAMES[i] + ".gltf")
 
 
-func _create_mmi(parent: Node3D, mesh: Mesh,
-		transforms: PackedFloat32Array, count: int) -> MultiMeshInstance3D:
+func _create_mmi(
+		parent: Node3D,
+		mesh: Mesh,
+		transforms: PackedFloat32Array,
+		count: int,
+) -> MultiMeshInstance3D:
 	if count == 0 or mesh == null:
 		return null
 

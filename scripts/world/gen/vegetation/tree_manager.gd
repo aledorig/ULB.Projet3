@@ -1,11 +1,10 @@
 class_name TreeManager
 extends RefCounted
-
 ## Loads Pine GLTF meshes and creates tree MMIs from VegetationData
 
 const GLTF_BASE: String = "res://assets/environment/StylizedStuff/glTF/"
 
-var _pine_meshes: Array = []  # [5] Mesh, Pine_1..5
+var _pine_meshes: Array = [] # [5] Mesh, Pine_1..5
 var _loaded: bool = false
 
 
@@ -14,8 +13,10 @@ func create(chunk_node: Node3D, veg: VegetationData) -> MultiMeshInstance3D:
 	if veg.tree_count == 0:
 		return null
 	return _create_mmi(
-		chunk_node, _pine_meshes[veg.tree_variant_id],
-		veg.tree_transforms, veg.tree_count
+		chunk_node,
+		_pine_meshes[veg.tree_variant_id],
+		veg.tree_transforms,
+		veg.tree_count,
 	)
 
 
@@ -28,8 +29,12 @@ func _ensure_loaded() -> void:
 		_pine_meshes[i] = _load_mesh_from_gltf(GLTF_BASE + "Pine_%d.gltf" % (i + 1))
 
 
-func _create_mmi(parent: Node3D, mesh: Mesh,
-		transforms: PackedFloat32Array, count: int) -> MultiMeshInstance3D:
+func _create_mmi(
+		parent: Node3D,
+		mesh: Mesh,
+		transforms: PackedFloat32Array,
+		count: int,
+) -> MultiMeshInstance3D:
 	if count == 0 or mesh == null:
 		return null
 

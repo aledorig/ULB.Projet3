@@ -5,8 +5,8 @@ const GRAD_X: PackedFloat64Array = [1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 
 const GRAD_Z: PackedFloat64Array = [1.0, 1.0, -1.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0, -1.0, 1.0, -1.0]
 
 const SQRT_3: float = 1.7320508075688772
-const F2: float = 0.5 * (SQRT_3 - 1.0)    # skew factor
-const G2: float = (3.0 - SQRT_3) / 6.0    # unskew factor
+const F2: float = 0.5 * (SQRT_3 - 1.0) # skew factor
+const G2: float = (3.0 - SQRT_3) / 6.0 # unskew factor
 
 var perm: PackedInt32Array
 var x_offset: float
@@ -16,7 +16,7 @@ var z_offset: float
 func _init(rng: RandomNumberGenerator) -> void:
 	x_offset = rng.randf() * 256.0
 	z_offset = rng.randf() * 256.0
-	var _unused: float = rng.randf() * 256.0  # advance rng
+	var _unused: float = rng.randf() * 256.0 # advance rng
 
 	perm = PackedInt32Array()
 	perm.resize(512)
@@ -49,9 +49,11 @@ func get_value(x: float, z: float) -> float:
 	var j1: int
 
 	if x0 > z0:
-		i1 = 1; j1 = 0
+		i1 = 1
+		j1 = 0
 	else:
-		i1 = 0; j1 = 1
+		i1 = 0
+		j1 = 1
 
 	var x1: float = x0 - float(i1) + G2
 	var z1: float = z0 - float(j1) + G2
@@ -94,9 +96,16 @@ func get_value(x: float, z: float) -> float:
 	return 70.0 * (n0 + n1 + n2)
 
 
-func add(out: PackedFloat32Array, x_off: float, z_off: float,
-		x_size: int, z_size: int, x_scale: float, z_scale: float,
-		amplitude: float) -> void:
+func add(
+		out: PackedFloat32Array,
+		x_off: float,
+		z_off: float,
+		x_size: int,
+		z_size: int,
+		x_scale: float,
+		z_scale: float,
+		amplitude: float,
+) -> void:
 	var idx: int = 0
 
 	for gz in range(z_size):
@@ -117,9 +126,11 @@ func add(out: PackedFloat32Array, x_off: float, z_off: float,
 			var j1: int
 
 			if x0 > z0:
-				i1 = 1; j1 = 0
+				i1 = 1
+				j1 = 0
 			else:
-				i1 = 0; j1 = 1
+				i1 = 0
+				j1 = 1
 
 			var x1: float = x0 - float(i1) + G2
 			var z1: float = z0 - float(j1) + G2

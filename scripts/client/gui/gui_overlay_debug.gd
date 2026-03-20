@@ -9,6 +9,7 @@ const MAX_FPS_SAMPLES: int = 60
 var fps_samples: Array[float] = []
 var avg_fps: float = 0.0
 
+
 func _ready() -> void:
 	if ship == null:
 		push_error("GuiOverlayDebug: Ship not found!")
@@ -19,6 +20,7 @@ func _ready() -> void:
 		return
 
 	_setup_label_style()
+
 
 func _setup_label_style() -> void:
 	var settings := LabelSettings.new()
@@ -32,12 +34,14 @@ func _setup_label_style() -> void:
 	label_settings = settings
 	position = Vector2(8, 8)
 
+
 func _unhandled_input(_event: InputEvent) -> void:
 	if Input.is_action_just_pressed("toggle_debug"):
 		visible = not visible
 
 	if Input.is_physical_key_pressed(KEY_P) and Input.is_key_pressed(KEY_SHIFT):
 		_print_performance_report()
+
 
 func _process(delta: float) -> void:
 	if ship == null or not visible:
@@ -69,6 +73,7 @@ func _process(delta: float) -> void:
 	text += "Cont: %.2f  Peaks: %.2f\n" % [debug_data.continentalness, debug_data.peaks]
 	text += "Temp: %.2f  Moist: %.2f\n" % [debug_data.temperature, debug_data.moisture]
 
+
 func _update_fps(delta: float) -> void:
 	fps_samples.append(1.0 / delta)
 	if fps_samples.size() > MAX_FPS_SAMPLES:
@@ -84,16 +89,25 @@ func _print_performance_report() -> void:
 	print("\n========== PERFORMANCE REPORT ==========")
 
 	var stats := chunk_manager.get_stats()
-	print("[CHUNKS] loaded=%d pending=%d cached=%d unload_queue=%d" % [
-		stats.loaded_chunks, stats.pending_chunks, stats.cached_meshes, stats.queued_for_unload
-	])
+	print(
+		"[CHUNKS] loaded=%d pending=%d cached=%d unload_queue=%d" % [
+			stats.loaded_chunks,
+			stats.pending_chunks,
+			stats.cached_meshes,
+			stats.queued_for_unload,
+		],
+	)
 
 	var mem_static := Performance.get_monitor(Performance.MEMORY_STATIC)
 	var mem_peak := Performance.get_monitor(Performance.MEMORY_STATIC_MAX)
 	var obj_count := Performance.get_monitor(Performance.OBJECT_COUNT)
-	print("[MEMORY] static=%.1f MB peak=%.1f MB objects=%d" % [
-		mem_static / 1048576.0, mem_peak / 1048576.0, obj_count
-	])
+	print(
+		"[MEMORY] static=%.1f MB peak=%.1f MB objects=%d" % [
+			mem_static / 1048576.0,
+			mem_peak / 1048576.0,
+			obj_count,
+		],
+	)
 
 	var draw_calls := Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
 	var vertices := Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME)

@@ -7,9 +7,10 @@ const TERRAIN_SCENE_PATH := "res://scenes/main/terrain_world.tscn"
 @onready var status_label: Label = %StatusLabel
 @onready var hint_label: Label = %Hint
 
-enum Phase {LOADING_RESOURCE, BUILDING_TERRAIN}
+enum Phase { LOADING_RESOURCE, BUILDING_TERRAIN }
 var phase: Phase = Phase.LOADING_RESOURCE
 var chunk_manager: ChunkManager = null
+
 
 func _ready() -> void:
 	layer = 100

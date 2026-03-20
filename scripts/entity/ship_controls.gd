@@ -2,10 +2,11 @@ class_name ShipController
 extends CharacterBody3D
 
 var input_response: float = 8.0
-var forward_speed:  float = 0.0
-var pitch_input:    float = 0.0
-var roll_input:     float = 0.0
-var yaw_input:      float = 0.0
+var forward_speed: float = 0.0
+var pitch_input: float = 0.0
+var roll_input: float = 0.0
+var yaw_input: float = 0.0
+
 
 func _ready() -> void:
 	var chunk_manager: ChunkManager = get_node("/root/TerrainWorld")
@@ -18,8 +19,10 @@ func _ready() -> void:
 
 	GameSettingsAutoload.runtime_settings_changed.connect(_on_settings_changed)
 
+
 func _on_settings_changed() -> void:
 	pass
+
 
 func _get_input(delta: float) -> void:
 	var max_speed := GameSettingsAutoload.max_speed
@@ -33,6 +36,7 @@ func _get_input(delta: float) -> void:
 	pitch_input = lerp(pitch_input, Input.get_axis("pitch_up", "pitch_down"), input_response * delta)
 	roll_input = lerp(roll_input, Input.get_axis("roll_left", "roll_right"), input_response * delta)
 	yaw_input = lerp(yaw_input, Input.get_axis("yaw_left", "yaw_right"), input_response * delta)
+
 
 func _physics_process(delta: float) -> void:
 	_get_input(delta)

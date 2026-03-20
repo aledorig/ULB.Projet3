@@ -1,9 +1,9 @@
 class_name MeshCache
 extends RefCounted
 
-var _cache:        Dictionary = {}
+var _cache: Dictionary = { }
 var _access_order: Array[Vector2i] = []
-var _max_size:     int
+var _max_size: int
 
 
 func _init(max_size: int) -> void:

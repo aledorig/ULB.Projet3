@@ -1,14 +1,15 @@
 class_name PerformanceMonitor
 extends RefCounted
 
-static var logging_enabled:  bool = true
+static var logging_enabled: bool = true
 static var log_threshold_ms: float = 1.0
-static var history_size:     int = 100
+static var history_size: int = 100
 
-static var _active_timers:      Dictionary = {}
-static var _timing_history:     Dictionary = {}
-static var _call_counts:        Dictionary = {}
-static var _frame_accumulators: Dictionary = {}
+static var _active_timers: Dictionary = { }
+static var _timing_history: Dictionary = { }
+static var _call_counts: Dictionary = { }
+static var _frame_accumulators: Dictionary = { }
+
 
 static func start(name: String) -> void:
 	_active_timers[name] = Time.get_ticks_usec()
@@ -68,13 +69,14 @@ static func stop_silent(name: String) -> float:
 
 	return elapsed_ms
 
+
 static func get_stats(name: String) -> Dictionary:
 	if not _timing_history.has(name):
-		return {"avg": 0.0, "min": 0.0, "max": 0.0, "count": 0, "total": 0.0}
+		return { "avg": 0.0, "min": 0.0, "max": 0.0, "count": 0, "total": 0.0 }
 
 	var history: Array = _timing_history[name]
 	if history.is_empty():
-		return {"avg": 0.0, "min": 0.0, "max": 0.0, "count": 0, "total": 0.0}
+		return { "avg": 0.0, "min": 0.0, "max": 0.0, "count": 0, "total": 0.0 }
 
 	var total: float = 0.0
 	var min_val: float = history[0]
@@ -96,10 +98,11 @@ static func get_stats(name: String) -> Dictionary:
 
 
 static func get_all_stats() -> Dictionary:
-	var result: Dictionary = {}
+	var result: Dictionary = { }
 	for name in _timing_history.keys():
 		result[name] = get_stats(name)
 	return result
+
 
 ## Call at end of frame to reset accumulators
 static func end_frame() -> void:
@@ -108,6 +111,7 @@ static func end_frame() -> void:
 
 static func get_frame_total(name: String) -> float:
 	return _frame_accumulators.get(name, 0.0)
+
 
 static func print_report() -> void:
 	print("\n========== PERFORMANCE REPORT ==========")
@@ -118,9 +122,15 @@ static func print_report() -> void:
 
 	for name in sorted_names:
 		var s: Dictionary = all_stats[name]
-		print("%-30s avg: %6.2f ms  min: %6.2f  max: %6.2f  calls: %d" % [
-			name, s.avg, s.min, s.max, s.count
-		])
+		print(
+			"%-30s avg: %6.2f ms  min: %6.2f  max: %6.2f  calls: %d" % [
+				name,
+				s.avg,
+				s.min,
+				s.max,
+				s.count,
+			],
+		)
 
 	print("=========================================\n")
 
@@ -137,6 +147,7 @@ static func print_summary() -> void:
 
 	if not summary_items.is_empty():
 		print("[PERF SUMMARY] " + ", ".join(summary_items))
+
 
 static func reset() -> void:
 	_active_timers.clear()

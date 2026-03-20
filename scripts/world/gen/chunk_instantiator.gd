@@ -1,23 +1,32 @@
 class_name ChunkInstantiator
 extends RefCounted
 
-var chunk_size:       int
-var vertex_spacing:   float
+var chunk_size: int
+var vertex_spacing: float
 var terrain_material: ShaderMaterial
-var vegetation_mgr:   VegetationManager
-
+var vegetation_mgr: VegetationManager
 
 const COLLISION_DISTANCE: int = 3
 
 
-func _init(p_chunk_size: int, p_vertex_spacing: float, p_terrain_material: ShaderMaterial, p_vegetation_mgr: VegetationManager) -> void:
+func _init(
+		p_chunk_size: int,
+		p_vertex_spacing: float,
+		p_terrain_material: ShaderMaterial,
+		p_vegetation_mgr: VegetationManager,
+) -> void:
 	chunk_size = p_chunk_size
 	vertex_spacing = p_vertex_spacing
 	terrain_material = p_terrain_material
 	vegetation_mgr = p_vegetation_mgr
 
 
-func instantiate(result: ChunkResult, parent: Node3D, camera_chunk: Vector2i, chunk_scene: PackedScene) -> ChunkInstance:
+func instantiate(
+		result: ChunkResult,
+		parent: Node3D,
+		camera_chunk: Vector2i,
+		chunk_scene: PackedScene,
+) -> ChunkInstance:
 	var chunk_node: Node3D
 	if chunk_scene:
 		chunk_node = chunk_scene.instantiate()
@@ -35,7 +44,7 @@ func instantiate(result: ChunkResult, parent: Node3D, camera_chunk: Vector2i, ch
 	chunk_node.position = Vector3(
 		result.chunk_pos.x * chunk_world_size,
 		0,
-		result.chunk_pos.y * chunk_world_size
+		result.chunk_pos.y * chunk_world_size,
 	)
 
 	var chunk_instance = ChunkInstance.new(chunk_node, mesh_instance, result.chunk_pos)

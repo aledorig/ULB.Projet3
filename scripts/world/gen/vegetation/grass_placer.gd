@@ -1,6 +1,5 @@
 class_name GrassPlacer
 extends RefCounted
-
 ## Grass placement, receives shared grid from VegetationPlacer
 ## Same grid lookup pattern as trees/foliage
 
@@ -14,7 +13,7 @@ func _init(p_rng: RandomNumberGenerator) -> void:
 func generate(grid: Dictionary, lod_level: int) -> Dictionary:
 	## Returns {buffer: PackedFloat32Array, count: int}
 	## Buffer is interleaved 16 floats/instance: 12 transform + 4 custom_data
-	var result := {"buffer": PackedFloat32Array(), "count": 0}
+	var result := { "buffer": PackedFloat32Array(), "count": 0 }
 
 	var lod_candidates: Array[int] = TerrainConfig.GRASS_LOD_CANDIDATES
 	if lod_level >= lod_candidates.size() or lod_candidates[lod_level] == 0:
@@ -80,16 +79,16 @@ func generate(grid: Dictionary, lod_level: int) -> Dictionary:
 			var sin_a: float = sin(angle)
 
 			var b: int = count * 16
-			buf[b]      = cos_a
-			buf[b + 1]  = 0.0
-			buf[b + 2]  = -sin_a
-			buf[b + 3]  = local_x
-			buf[b + 4]  = 0.0
-			buf[b + 5]  = 1.0
-			buf[b + 6]  = 0.0
-			buf[b + 7]  = height - 0.3
-			buf[b + 8]  = sin_a
-			buf[b + 9]  = 0.0
+			buf[b] = cos_a
+			buf[b + 1] = 0.0
+			buf[b + 2] = -sin_a
+			buf[b + 3] = local_x
+			buf[b + 4] = 0.0
+			buf[b + 5] = 1.0
+			buf[b + 6] = 0.0
+			buf[b + 7] = height - 0.3
+			buf[b + 8] = sin_a
+			buf[b + 9] = 0.0
 			buf[b + 10] = cos_a
 			buf[b + 11] = local_z
 			buf[b + 12] = temperature

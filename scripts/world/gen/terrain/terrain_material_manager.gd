@@ -1,7 +1,6 @@
 class_name TerrainMaterialManager
 extends RefCounted
 
-
 func create_terrain_material() -> ShaderMaterial:
 	var mat := ShaderMaterial.new()
 	mat.shader = load(TerrainConfig.TERRAIN_SHADER_PATH)

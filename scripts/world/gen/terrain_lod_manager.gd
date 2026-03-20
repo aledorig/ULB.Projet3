@@ -1,6 +1,5 @@
 class_name TerrainLodManager
 extends RefCounted
-
 ## Manages terrain mesh LOD transitions via a single background thread
 ## Same pattern as VegetationLodManager: queue → background regen → atomic swap
 ## Old mesh stays visible until new one is ready
@@ -9,16 +8,15 @@ var _queue: Array[Vector2i] = []
 
 var _lod_thread: Thread = null
 var _lod_result_ready: bool = false
-var _lod_pending_result: Dictionary = {}
+var _lod_pending_result: Dictionary = { }
 
 
 static func get_mesh_lod(distance: float) -> int:
 	if distance <= 3.0:
 		return 0
-	elif distance <= 6.0:
+	if distance <= 6.0:
 		return 1
-	else:
-		return 2
+	return 2
 
 
 static func get_mesh_size(mesh_lod: int) -> int:
@@ -42,8 +40,11 @@ func rebuild_queue(loaded_chunks: Dictionary, camera_chunk: Vector2i) -> void:
 
 
 func process_queue(
-	loaded_chunks: Dictionary, camera_chunk: Vector2i,
-	chunk_size: int, vertex_spacing: float, terrain_material: ShaderMaterial
+		loaded_chunks: Dictionary,
+		camera_chunk: Vector2i,
+		chunk_size: int,
+		vertex_spacing: float,
+		terrain_material: ShaderMaterial,
 ) -> void:
 	# 1. Apply completed result from background thread
 	if _lod_result_ready and _lod_thread != null:
@@ -51,7 +52,7 @@ func process_queue(
 		_lod_thread = null
 
 		var result: Dictionary = _lod_pending_result
-		_lod_pending_result = {}
+		_lod_pending_result = { }
 		_lod_result_ready = false
 
 		if not result.is_empty():
@@ -73,7 +74,7 @@ func process_queue(
 
 	# 2. Submit new work if thread is idle
 	if _lod_thread != null:
-		return  # still busy
+		return # still busy
 
 	while not _queue.is_empty():
 		var chunk_pos: Vector2i = _queue.pop_front()
@@ -92,16 +93,27 @@ func process_queue(
 
 		# Start background thread
 		_lod_thread = Thread.new()
-		_lod_thread.start(_regenerate_mesh.bind(
-			GameSettingsAutoload.seed, GameSettingsAutoload.octave,
-			chunk_size, vertex_spacing, chunk_pos, new_mesh_lod
-		))
+		_lod_thread.start(
+			_regenerate_mesh.bind(
+				GameSettingsAutoload.seed,
+				GameSettingsAutoload.octave,
+				chunk_size,
+				vertex_spacing,
+				chunk_pos,
+				new_mesh_lod,
+			),
+		)
 		break
 
 
-func _regenerate_mesh(gen_seed: int, octave: int,
-		chunk_size: int, vertex_spacing: float,
-		chunk_pos: Vector2i, new_mesh_lod: int) -> void:
+func _regenerate_mesh(
+		gen_seed: int,
+		octave: int,
+		chunk_size: int,
+		vertex_spacing: float,
+		chunk_pos: Vector2i,
+		new_mesh_lod: int,
+) -> void:
 	# Runs on background thread — own TerrainGenerator, no shared state
 	var terrain_gen := TerrainGenerator.new(gen_seed, octave)
 	var lod_mesh_size: int = get_mesh_size(new_mesh_lod)
@@ -111,7 +123,7 @@ func _regenerate_mesh(gen_seed: int, octave: int,
 	_lod_pending_result = {
 		"chunk_pos": chunk_pos,
 		"mesh_data": mesh,
-		"new_mesh_lod": new_mesh_lod
+		"new_mesh_lod": new_mesh_lod,
 	}
 	_lod_result_ready = true
 

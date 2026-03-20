@@ -1,17 +1,16 @@
 class_name ChunkThreadPool
 extends RefCounted
-
 ## Thread pool for chunk generation
 ## Manages worker threads, work queue, and results queue
 ## Accepts a generation Callable for thread-safe execution
 
-var worker_threads:        Array[Thread] = []
+var worker_threads: Array[Thread] = []
 var thread_pool_semaphore: Semaphore
-var work_queue_mutex:      Mutex
-var work_queue:            Array[ChunkRequest] = []
-var results_queue_mutex:   Mutex
-var results_queue:         Array[ChunkResult] = []
-var shutdown_flag:         bool = false
+var work_queue_mutex: Mutex
+var work_queue: Array[ChunkRequest] = []
+var results_queue_mutex: Mutex
+var results_queue: Array[ChunkResult] = []
+var shutdown_flag: bool = false
 var generation_timeout_ms: int = 30000
 
 var _generate_func: Callable

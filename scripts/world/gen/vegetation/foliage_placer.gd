@@ -1,6 +1,5 @@
 class_name FoliagePlacer
 extends RefCounted
-
 ## Foliage placement, receives shared grid from VegetationPlacer
 ## Same grid lookup as grass, plus: per-type eligibility + density
 
@@ -13,7 +12,12 @@ func _init(p_rng: RandomNumberGenerator) -> void:
 
 func generate(chunk_pos: Vector2i, grid: Dictionary, lod_level: int = 0) -> Dictionary:
 	var n_types: int = TerrainConfig.FOLIAGE_TYPES_PER_CHUNK
-	var picked: PackedInt32Array = VegetationPlacerUtils.pick_variant_set(chunk_pos, TerrainConfig.FOLIAGE_TOTAL_TYPES, n_types, 3)
+	var picked: PackedInt32Array = VegetationPlacerUtils.pick_variant_set(
+		chunk_pos,
+		TerrainConfig.FOLIAGE_TOTAL_TYPES,
+		n_types,
+		3,
+	)
 
 	var lod_candidates: Array[int] = TerrainConfig.FOLIAGE_LOD_CANDIDATES
 	if lod_level >= lod_candidates.size() or lod_candidates[lod_level] == 0:
@@ -24,7 +28,7 @@ func generate(chunk_pos: Vector2i, grid: Dictionary, lod_level: int = 0) -> Dict
 		for i in range(n_types):
 			empty_transforms[i] = PackedFloat32Array()
 			empty_counts[i] = 0
-		return {"variant_ids": picked, "transforms": empty_transforms, "counts": empty_counts}
+		return { "variant_ids": picked, "transforms": empty_transforms, "counts": empty_counts }
 
 	var candidates: int = lod_candidates[lod_level]
 
@@ -104,7 +108,16 @@ func generate(chunk_pos: Vector2i, grid: Dictionary, lod_level: int = 0) -> Dict
 			var angle: float = rng.randf() * TAU
 			var foliage_scale: float = rng.randf_range(0.8, 1.5)
 			var c: int = counts[chosen_pi]
-			VegetationPlacerUtils.write_transform(transforms[chosen_pi], c, local_x, height, local_z, foliage_scale, angle, TerrainConfig.FOLIAGE_Y_OFFSET)
+			VegetationPlacerUtils.write_transform(
+				transforms[chosen_pi],
+				c,
+				local_x,
+				height,
+				local_z,
+				foliage_scale,
+				angle,
+				TerrainConfig.FOLIAGE_Y_OFFSET,
+			)
 			counts[chosen_pi] = c + 1
 			total_count += 1
 
@@ -114,24 +127,38 @@ func generate(chunk_pos: Vector2i, grid: Dictionary, lod_level: int = 0) -> Dict
 	return {
 		"variant_ids": picked,
 		"transforms": transforms,
-		"counts": counts
+		"counts": counts,
 	}
 
 
 static func _is_eligible(type_id: int, temp_01: float, moist_01: float) -> bool:
 	match type_id:
-		0:  return true                                                  # Bush_Common
-		1:  return moist_01 > 0.45                                       # Bush_Common_Flowers
-		2:  return moist_01 > 0.5                                        # Fern_1
-		3:  return moist_01 > 0.55 and temp_01 >= 0.35 and temp_01 <= 0.7  # Mushroom_Common
-		4:  return moist_01 > 0.55 and temp_01 >= 0.35 and temp_01 <= 0.7  # Mushroom_Laetiporus
-		5:  return moist_01 > 0.3                                        # Flower_3_Group
-		6:  return true                                                  # Flower_3_Single
-		7:  return moist_01 > 0.35                                       # Flower_4_Group
-		8:  return true                                                  # Flower_4_Single
-		9:  return true                                                  # Plant_7
-		10: return true                                                  # Plant_7_Big
-		11: return true                                                  # Plant_1
-		12: return moist_01 > 0.4                                        # Clover_1
-		13: return moist_01 > 0.4                                        # Clover_2
+		0:
+			return true # Bush_Common
+		1:
+			return moist_01 > 0.45 # Bush_Common_Flowers
+		2:
+			return moist_01 > 0.5 # Fern_1
+		3:
+			return moist_01 > 0.55 and temp_01 >= 0.35 and temp_01 <= 0.7 # Mushroom_Common
+		4:
+			return moist_01 > 0.55 and temp_01 >= 0.35 and temp_01 <= 0.7 # Mushroom_Laetiporus
+		5:
+			return moist_01 > 0.3 # Flower_3_Group
+		6:
+			return true # Flower_3_Single
+		7:
+			return moist_01 > 0.35 # Flower_4_Group
+		8:
+			return true # Flower_4_Single
+		9:
+			return true # Plant_7
+		10:
+			return true # Plant_7_Big
+		11:
+			return true # Plant_1
+		12:
+			return moist_01 > 0.4 # Clover_1
+		13:
+			return moist_01 > 0.4 # Clover_2
 	return false

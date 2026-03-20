@@ -1,4 +1,5 @@
 extends Node
+
 class_name GameSettings
 
 signal runtime_settings_changed
@@ -6,14 +7,14 @@ signal runtime_settings_changed
 const DEFAULT_SEED := 732647346203746
 
 # Pre-game settings (set before world loads)
-var seed:                int = DEFAULT_SEED
-var octave:              int = 4
-var chunk_size:          int = 40
-var vertex_spacing:      float = 3.0
-var max_worker_threads:  int = 4
-var chunks_per_frame:    int = 2
+var seed: int = DEFAULT_SEED
+var octave: int = 4
+var chunk_size: int = 40
+var vertex_spacing: float = 3.0
+var max_worker_threads: int = 4
+var chunks_per_frame: int = 2
 var enable_mesh_caching: bool = true
-var cache_max_size:      int = 256
+var cache_max_size: int = 256
 
 # Runtime settings (changeable in-game, emit signal)
 var render_distance: int = 8:

@@ -9,6 +9,7 @@ var x_offset: float
 var z_offset: float
 var _perm_table: PackedInt32Array
 
+
 func _init(rng: RandomNumberGenerator) -> void:
 	x_offset = rng.randf() * 256.0
 	z_offset = rng.randf() * 256.0
@@ -20,11 +21,14 @@ func get_value(x: float, z: float) -> float:
 
 
 func populate_noise_array(
-	out: PackedFloat32Array,
-	x_offset_param: float, z_offset_param: float,
-	x_size: int, z_size: int,
-	x_scale: float, z_scale: float,
-	noise_scale: float
+		out: PackedFloat32Array,
+		x_offset_param: float,
+		z_offset_param: float,
+		x_size: int,
+		z_size: int,
+		x_scale: float,
+		z_scale: float,
+		noise_scale: float,
 ) -> void:
 	var inv_scale: float = 1.0 / noise_scale
 	var perm := _perm_table

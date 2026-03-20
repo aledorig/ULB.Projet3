@@ -1,16 +1,16 @@
 class_name VegetationData
 extends RefCounted
 
-var grass_buffer: PackedFloat32Array = PackedFloat32Array()  # 16 floats/instance (interleaved transform+custom)
-var grass_count:  int = 0
+var grass_buffer: PackedFloat32Array = PackedFloat32Array() # 16 floats/instance (interleaved transform+custom)
+var grass_count: int = 0
 
 var tree_variant_id: int = 0
-var tree_transforms:  PackedFloat32Array = PackedFloat32Array()
-var tree_count:       int = 0
+var tree_transforms: PackedFloat32Array = PackedFloat32Array()
+var tree_count: int = 0
 
 var foliage_variant_ids: PackedInt32Array = PackedInt32Array()
-var foliage_transforms:  Array[PackedFloat32Array] = []
-var foliage_counts:      PackedInt32Array = PackedInt32Array()
+var foliage_transforms: Array[PackedFloat32Array] = []
+var foliage_counts: PackedInt32Array = PackedInt32Array()
 
 
 func _init() -> void:

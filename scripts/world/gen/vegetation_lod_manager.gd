@@ -1,6 +1,5 @@
 class_name VegetationLodManager
 extends RefCounted
-
 ## Manages LOD transitions for grass and foliage via a single background thread
 ## Each tick: picks one chunk from the queue, regenerates whatever changed
 ## (grass, foliage, or both), then applies the result on main thread
@@ -9,25 +8,23 @@ var _queue: Array[Vector2i] = []
 
 var _lod_thread: Thread = null
 var _lod_result_ready: bool = false
-var _lod_pending_result: Dictionary = {}
+var _lod_pending_result: Dictionary = { }
 
 
 static func get_grass_lod(distance: float) -> int:
 	if distance <= 4.0:
 		return 0
-	elif distance <= 10.0:
+	if distance <= 10.0:
 		return 1
-	else:
-		return 2
+	return 2
 
 
 static func get_foliage_lod(distance: float) -> int:
 	if distance <= 2.0:
 		return 0
-	elif distance <= 4.0:
+	if distance <= 4.0:
 		return 1
-	else:
-		return 2
+	return 2
 
 
 func rebuild_queue(loaded_chunks: Dictionary, camera_chunk: Vector2i) -> void:
@@ -44,9 +41,14 @@ func rebuild_queue(loaded_chunks: Dictionary, camera_chunk: Vector2i) -> void:
 
 
 func process_queue(
-	loaded_chunks: Dictionary, camera_chunk: Vector2i,
-	_terrain_gen: TerrainGenerator, chunk_size: int, vertex_spacing: float,
-	p_seed: int, vegetation_mgr: VegetationManager, _max_updates: int = 1
+		loaded_chunks: Dictionary,
+		camera_chunk: Vector2i,
+		_terrain_gen: TerrainGenerator,
+		chunk_size: int,
+		vertex_spacing: float,
+		p_seed: int,
+		vegetation_mgr: VegetationManager,
+		_max_updates: int = 1,
 ) -> void:
 	# 1. Apply completed result from background thread
 	if _lod_result_ready and _lod_thread != null:
@@ -54,7 +56,7 @@ func process_queue(
 		_lod_thread = null
 
 		var result: Dictionary = _lod_pending_result
-		_lod_pending_result = {}
+		_lod_pending_result = { }
 		_lod_result_ready = false
 
 		if not result.is_empty():
@@ -74,7 +76,7 @@ func process_queue(
 
 	# 2. Submit new work if thread is idle
 	if _lod_thread != null:
-		return  # still busy
+		return # still busy
 
 	while not _queue.is_empty():
 		var chunk_pos: Vector2i = _queue.pop_front()
@@ -97,25 +99,44 @@ func process_queue(
 
 		# Start background thread
 		_lod_thread = Thread.new()
-		_lod_thread.start(_generate_lod.bind(
-			GameSettingsAutoload.seed, GameSettingsAutoload.octave,
-			chunk_size, vertex_spacing, p_seed, chunk_pos,
-			new_grass_lod, chunk_instance.grass_lod, grass_changed,
-			new_foliage_lod, chunk_instance.foliage_lod, foliage_changed
-		))
+		_lod_thread.start(
+			_generate_lod.bind(
+				GameSettingsAutoload.seed,
+				GameSettingsAutoload.octave,
+				chunk_size,
+				vertex_spacing,
+				p_seed,
+				chunk_pos,
+				new_grass_lod,
+				chunk_instance.grass_lod,
+				grass_changed,
+				new_foliage_lod,
+				chunk_instance.foliage_lod,
+				foliage_changed,
+			),
+		)
 		break
 
 
-func _generate_lod(gen_seed: int, octave: int,
-		chunk_size: int, vertex_spacing: float,
-		p_seed: int, chunk_pos: Vector2i,
-		new_grass_lod: int, _old_grass_lod: int, grass_changed: bool,
-		new_foliage_lod: int, _old_foliage_lod: int, foliage_changed: bool) -> void:
+func _generate_lod(
+		gen_seed: int,
+		octave: int,
+		chunk_size: int,
+		vertex_spacing: float,
+		p_seed: int,
+		chunk_pos: Vector2i,
+		new_grass_lod: int,
+		_old_grass_lod: int,
+		grass_changed: bool,
+		new_foliage_lod: int,
+		_old_foliage_lod: int,
+		foliage_changed: bool,
+) -> void:
 	# Runs on background thread — own TerrainGenerator, no shared state
 	var terrain_gen := TerrainGenerator.new(gen_seed, octave)
 	var veg_placer := VegetationPlacer.new(terrain_gen, chunk_size, vertex_spacing, p_seed, chunk_pos)
 
-	var result := {"chunk_pos": chunk_pos}
+	var result := { "chunk_pos": chunk_pos }
 
 	if grass_changed:
 		var grass_result: Dictionary = veg_placer.generate_grass_standalone(chunk_pos, new_grass_lod)

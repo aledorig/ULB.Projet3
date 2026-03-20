@@ -3,18 +3,19 @@ extends RefCounted
 
 const OVERLAP: int = 1
 
-var chunk_size:     int
+var chunk_size: int
 var vertex_spacing: float
-var terrain_gen:    TerrainGenerator
-var mesh_size:      int
-var lod_spacing:    float
-var max_octaves:    int
-var height_freq:    float
+var terrain_gen: TerrainGenerator
+var mesh_size: int
+var lod_spacing: float
+var max_octaves: int
+var height_freq: float
 
 # Index buffer computed once per mesh size and shared
-static var _index_cache: Dictionary = {}
+static var _index_cache: Dictionary = { }
 
-static func _get_or_build_index_buffer(p_mesh_size: int, p_overlap: int) -> PackedInt32Array:
+
+static func get_or_build_index_buffer(p_mesh_size: int, p_overlap: int) -> PackedInt32Array:
 	if _index_cache.has(p_mesh_size):
 		return _index_cache[p_mesh_size]
 
@@ -42,13 +43,14 @@ static func _get_or_build_index_buffer(p_mesh_size: int, p_overlap: int) -> Pack
 	_index_cache[p_mesh_size] = indices
 	return indices
 
+
 func _init(
-	p_chunk_size: int,
-	p_vertex_spacing: float,
-	p_terrain_gen: TerrainGenerator,
-	p_mesh_size: int = -1,
-	p_max_octaves: int = -1,
-	p_height_freq: float = TerrainConfig.HEIGHT_FREQ
+		p_chunk_size: int,
+		p_vertex_spacing: float,
+		p_terrain_gen: TerrainGenerator,
+		p_mesh_size: int = -1,
+		p_max_octaves: int = -1,
+		p_height_freq: float = TerrainConfig.HEIGHT_FREQ,
 ) -> void:
 	chunk_size = p_chunk_size
 	vertex_spacing = p_vertex_spacing
@@ -59,13 +61,15 @@ func _init(
 
 	var chunk_world_size: float = (chunk_size - 1) * vertex_spacing
 	lod_spacing = chunk_world_size / (mesh_size - 1) if mesh_size > 1 else vertex_spacing
-	
+
+
 func build_chunk_mesh(chunk_position: Vector2) -> ArrayMesh:
 	var vertex_data: Dictionary = _generate_vertex_data(chunk_position)
 	var vertices: PackedVector3Array = vertex_data.vertices
 	var colors: PackedColorArray = vertex_data.colors
 	var normals: PackedVector3Array = _calculate_normals_from_heights(vertices)
 	return _build_mesh(vertices, colors, normals)
+
 
 func _generate_vertex_data(chunk_position: Vector2) -> Dictionary:
 	var extended_size: int = mesh_size + 2 * OVERLAP
@@ -81,12 +85,15 @@ func _generate_vertex_data(chunk_position: Vector2) -> Dictionary:
 	var origin_z: float = chunk_position.y * chunk_world_size - OVERLAP * lod_spacing
 
 	terrain_gen.get_vertex_data_batch(
-		origin_x, origin_z,
-		extended_size, extended_size,
+		origin_x,
+		origin_z,
+		extended_size,
+		extended_size,
 		lod_spacing,
-		vertices, colors,
+		vertices,
+		colors,
 		max_octaves,
-		height_freq
+		height_freq,
 	)
 
 	# Offset vertices so first rendered vertex is at local (0,0)
@@ -99,8 +106,9 @@ func _generate_vertex_data(chunk_position: Vector2) -> Dictionary:
 
 	return {
 		"vertices": vertices,
-		"colors": colors
+		"colors": colors,
 	}
+
 
 func _calculate_normals_from_heights(vertices: PackedVector3Array) -> PackedVector3Array:
 	var extended_size: int = mesh_size + 2 * OVERLAP
@@ -134,15 +142,19 @@ func _calculate_normals_from_heights(vertices: PackedVector3Array) -> PackedVect
 	return normals
 
 
-func _build_mesh(vertices: PackedVector3Array, colors: PackedColorArray, normals: PackedVector3Array) -> ArrayMesh:
-	var indices: PackedInt32Array = _get_or_build_index_buffer(mesh_size, OVERLAP)
+func _build_mesh(
+		vertices: PackedVector3Array,
+		colors: PackedColorArray,
+		normals: PackedVector3Array,
+) -> ArrayMesh:
+	var indices: PackedInt32Array = get_or_build_index_buffer(mesh_size, OVERLAP)
 
 	var arrays: Array = []
 	arrays.resize(Mesh.ARRAY_MAX)
 	arrays[Mesh.ARRAY_VERTEX] = vertices
 	arrays[Mesh.ARRAY_NORMAL] = normals
-	arrays[Mesh.ARRAY_COLOR]  = colors
-	arrays[Mesh.ARRAY_INDEX]  = indices
+	arrays[Mesh.ARRAY_COLOR] = colors
+	arrays[Mesh.ARRAY_INDEX] = indices
 
 	var mesh := ArrayMesh.new()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)

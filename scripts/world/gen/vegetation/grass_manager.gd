@@ -1,9 +1,8 @@
 class_name GrassManager
 extends RefCounted
-
 ## Handles grass mesh construction, material caching, and MMI creation/replacement
 
-var _grass_mesh:     Mesh = null
+var _grass_mesh: Mesh = null
 var _grass_material: ShaderMaterial = null
 
 
@@ -29,7 +28,11 @@ func create(chunk_node: Node3D, veg: VegetationData) -> MultiMeshInstance3D:
 	return grass_mm
 
 
-func replace(chunk_instance: ChunkInstance, grass_buffer: PackedFloat32Array, veg_count: int) -> void:
+func replace(
+		chunk_instance: ChunkInstance,
+		grass_buffer: PackedFloat32Array,
+		veg_count: int,
+) -> void:
 	if chunk_instance.grass_instance:
 		chunk_instance.grass_instance.queue_free()
 		chunk_instance.grass_instance = null
@@ -83,9 +86,9 @@ func _build_quad_mesh() -> ArrayMesh:
 		var base_idx: int = verts.size()
 
 		verts.append(Vector3(-dx + perp_x, 0.0, -dz + perp_z))
-		verts.append(Vector3( dx + perp_x, 0.0,  dz + perp_z))
-		verts.append(Vector3( dx + perp_x, h,    dz + perp_z))
-		verts.append(Vector3(-dx + perp_x, h,   -dz + perp_z))
+		verts.append(Vector3(dx + perp_x, 0.0, dz + perp_z))
+		verts.append(Vector3(dx + perp_x, h, dz + perp_z))
+		verts.append(Vector3(-dx + perp_x, h, -dz + perp_z))
 
 		uvs.append(Vector2(0.0, 1.0))
 		uvs.append(Vector2(1.0, 1.0))
@@ -93,7 +96,7 @@ func _build_quad_mesh() -> ArrayMesh:
 		uvs.append(Vector2(0.0, 0.0))
 
 		var n := Vector3(-dz, 0.0, dx).normalized()
-		for _j in range(4):
+		for j in range(4):
 			normals.append(n)
 
 		indices.append(base_idx)

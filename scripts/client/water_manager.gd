@@ -1,7 +1,7 @@
 class_name WaterManager
 extends MeshInstance3D
 
-@export var water_size:    float = 2000.0
+@export var water_size: float = 2000.0
 @export var follow_camera: bool = true
 
 const SUBDIVISIONS: int = 96
@@ -9,6 +9,7 @@ const SUBDIVISIONS: int = 96
 var camera: Camera3D
 var water_material: ShaderMaterial
 var snap_step: float
+
 
 func _ready() -> void:
 	snap_step = water_size / float(SUBDIVISIONS)

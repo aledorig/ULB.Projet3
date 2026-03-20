@@ -1,6 +1,5 @@
 class_name TreePlacer
 extends RefCounted
-
 ## Tree placement, receives shared grid from VegetationPlacer
 ## Same grid lookup as grass, plus: scale, tilt, forest biome rules
 
@@ -12,7 +11,11 @@ func _init(p_rng: RandomNumberGenerator) -> void:
 
 
 func generate(chunk_pos: Vector2i, grid: Dictionary) -> Dictionary:
-	var variant_id: int = VegetationPlacerUtils.pick_variant(chunk_pos, TerrainConfig.TREE_VARIANTS, 1)
+	var variant_id: int = VegetationPlacerUtils.pick_variant(
+		chunk_pos,
+		TerrainConfig.TREE_VARIANTS,
+		1,
+	)
 	var candidates: int = TerrainConfig.TREE_CANDIDATES
 
 	var grid_verts: PackedVector3Array = grid["verts"]
@@ -82,10 +85,30 @@ func generate(chunk_pos: Vector2i, grid: Dictionary) -> Dictionary:
 
 			# Tree extras: scale + slight tilt
 			var angle: float = rng.randf() * TAU
-			var tree_scale: float = rng.randf_range(TerrainConfig.TREE_SCALE_MIN, TerrainConfig.TREE_SCALE_MAX)
-			var tilt_x: float = rng.randf_range(-0.06, 0.06)
-			var tilt_z: float = rng.randf_range(-0.06, 0.06)
-			VegetationPlacerUtils.write_transform(transforms, count, local_x, height, local_z, tree_scale, angle, TerrainConfig.TREE_Y_OFFSET, tilt_x, tilt_z)
+			var tree_scale: float = rng.randf_range(
+				TerrainConfig.TREE_SCALE_MIN,
+				TerrainConfig.TREE_SCALE_MAX,
+			)
+			var tilt_x: float = rng.randf_range(
+				-0.06,
+				0.06,
+			)
+			var tilt_z: float = rng.randf_range(
+				-0.06,
+				0.06,
+			)
+			VegetationPlacerUtils.write_transform(
+				transforms,
+				count,
+				local_x,
+				height,
+				local_z,
+				tree_scale,
+				angle,
+				TerrainConfig.TREE_Y_OFFSET,
+				tilt_x,
+				tilt_z,
+			)
 			count += 1
 
 	transforms.resize(count * 12)
@@ -93,5 +116,5 @@ func generate(chunk_pos: Vector2i, grid: Dictionary) -> Dictionary:
 	return {
 		"variant_id": variant_id,
 		"transforms": transforms,
-		"count": count
+		"count": count,
 	}
