@@ -37,7 +37,7 @@ static func load_obj_from_buffer(obj_data: String, materials: Dictionary) -> Mes
 # Create materials
 static func load_mtl_from_buffer(mtl_data: String, textures: Dictionary) -> Dictionary:
 	return _create_mtl(mtl_data,textures)
-	
+
 # Get data from file path
 static func _read_file_str(path: String) -> String:
 	if (path == ""):
@@ -62,7 +62,7 @@ static func _get_mtl_tex_paths(mtl_path: String) -> Array[String]:
 	var file: FileAccess = FileAccess.open(mtl_path, FileAccess.READ)
 	if (file == null):
 		return []
-	
+
 	var paths: Array[String] = []
 	var lines: PackedStringArray = file.get_as_text().split("\n", false)
 	for line in lines:
@@ -127,7 +127,7 @@ static func _get_image(mtl_filepath: String, tex_filename: String) -> Image:
 	var file_type: String = tex_filepath.get_extension()
 	if debug:
 		prints("Debug: texture file path:", tex_filepath, "of type", file_type)
-	
+
 	var img: Image = Image.new()
 	img.load(tex_filepath)
 	return img
@@ -153,7 +153,7 @@ static func _create_obj(obj: String, mats: Dictionary) -> Mesh:
 
 	var mat_name: String = "default"
 	var count_mtl: int =0
-	
+
 	# Parse
 	var lines: PackedStringArray = obj.split("\n", false)
 	for line in lines:
@@ -234,12 +234,12 @@ static func _create_obj(obj: String, mats: Dictionary) -> Mesh:
 							if (point1.size() > 2):
 								face["vn"].append(point1[2])
 							faces[mat_name].append(face)
-	
+
 	# Make tri
 	for matgroup in faces.keys():
 		if debug:
 			prints("Creating surface for matgroup", matgroup, "with", str(faces[matgroup].size()), "faces")
-		
+
 		# Mesh Assembler
 		var st: SurfaceTool = SurfaceTool.new()
 		st.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -253,14 +253,14 @@ static func _create_obj(obj: String, mats: Dictionary) -> Mesh:
 				fan_v.append(vertices[face["v"][0]])
 				fan_v.append(vertices[face["v"][2]])
 				fan_v.append(vertices[face["v"][1]])
-				
+
 				# Normals
 				var fan_vn: PackedVector3Array = PackedVector3Array()
 				if (face["vn"].size() > 0):
 					fan_vn.append(normals[face["vn"][0]])
 					fan_vn.append(normals[face["vn"][2]])
 					fan_vn.append(normals[face["vn"][1]])
-				
+
 				# Textures
 				var fan_vt: PackedVector2Array = PackedVector2Array()
 				if (face["vt"].size() > 0):
@@ -270,11 +270,11 @@ static func _create_obj(obj: String, mats: Dictionary) -> Mesh:
 							var uv = uvs[f]
 							fan_vt.append(uv)
 				st.add_triangle_fan(fan_v, fan_vt, PackedColorArray(), PackedVector2Array(), fan_vn, [])
-		
+
 		st.index()
-		
+
 		mesh = st.commit(mesh)
-	
+
 	for k in mesh.get_surface_count():
 		var mat: Material = mesh.surface_get_material(k)
 		mat_name = ""
@@ -282,6 +282,6 @@ static func _create_obj(obj: String, mats: Dictionary) -> Mesh:
 			if (mats[m] == mat):
 				mat_name = m
 		mesh.surface_set_name(k, mat_name)
-	
+
 	# Finish
 	return mesh
