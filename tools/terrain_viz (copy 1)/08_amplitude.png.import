@@ -2,12 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c0uiaqoqat366"
-valid=false
+uid="uid://enolotygku4e"
+path="res://.godot/imported/08_amplitude.png-cb2275db6adbd59288cf305a3b448feb.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
-source_file="res://tools/terrain_viz/10_base_height_no_roughness.png"
+source_file="res://tools/terrain_viz (copy 1)/08_amplitude.png"
+dest_files=["res://.godot/imported/08_amplitude.png-cb2275db6adbd59288cf305a3b448feb.ctex"]
 
 [params]
 

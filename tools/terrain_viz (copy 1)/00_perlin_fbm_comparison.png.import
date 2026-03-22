@@ -2,12 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c0uiaqoqat366"
-valid=false
+uid="uid://de1qqnirx04od"
+path="res://.godot/imported/00_perlin_fbm_comparison.png-ed12847eaa025ec8dbb9f6a48bea6a2e.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
-source_file="res://tools/terrain_viz/10_base_height_no_roughness.png"
+source_file="res://tools/terrain_viz (copy 1)/00_perlin_fbm_comparison.png"
+dest_files=["res://.godot/imported/00_perlin_fbm_comparison.png-ed12847eaa025ec8dbb9f6a48bea6a2e.ctex"]
 
 [params]
 

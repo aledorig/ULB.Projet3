@@ -2,12 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c0uiaqoqat366"
-valid=false
+uid="uid://bc0pwyac3g6bx"
+path="res://.godot/imported/13_terrain_shaded.png-af13674904671762d054ec3d06485a60.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
-source_file="res://tools/terrain_viz/10_base_height_no_roughness.png"
+source_file="res://tools/terrain_viz (copy 1)/13_terrain_shaded.png"
+dest_files=["res://.godot/imported/13_terrain_shaded.png-af13674904671762d054ec3d06485a60.ctex"]
 
 [params]
 

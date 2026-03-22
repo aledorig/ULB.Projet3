@@ -2,12 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c0uiaqoqat366"
-valid=false
+uid="uid://0r5bha0mnl4u"
+path="res://.godot/imported/07_base_elevation.png-a0843aef673d8926766e56051d2126b6.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
-source_file="res://tools/terrain_viz/10_base_height_no_roughness.png"
+source_file="res://tools/terrain_viz (copy 1)/07_base_elevation.png"
+dest_files=["res://.godot/imported/07_base_elevation.png-a0843aef673d8926766e56051d2126b6.ctex"]
 
 [params]
 

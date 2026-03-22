@@ -26,12 +26,17 @@ func _sync_ui_from_settings() -> void:
 	max_speed_label.text = str(int(GameSettingsAutoload.max_speed))
 
 
-func _unhandled_input(_event: InputEvent) -> void:
+func _unhandled_input(event: InputEvent) -> void:
 	if Input.is_action_just_pressed("toggle_menu"):
 		if visible:
 			_close_menu()
 		else:
 			_open_menu()
+
+	# F1 – ouvre la scène d'explication du bruit de Perlin (fonctionne hors menu)
+	if event is InputEventKey and event.pressed \
+			and (event as InputEventKey).keycode == KEY_F1 and not visible:
+		get_tree().change_scene_to_file("res://scenes/main/noise_explainer.tscn")
 
 
 func _open_menu() -> void:

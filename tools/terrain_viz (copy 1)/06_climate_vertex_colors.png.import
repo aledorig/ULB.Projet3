@@ -2,12 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c0uiaqoqat366"
-valid=false
+uid="uid://c8u28kfqaixjr"
+path="res://.godot/imported/06_climate_vertex_colors.png-1d10fc95a84aee7e3e3e808ddc213700.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
-source_file="res://tools/terrain_viz/10_base_height_no_roughness.png"
+source_file="res://tools/terrain_viz (copy 1)/06_climate_vertex_colors.png"
+dest_files=["res://.godot/imported/06_climate_vertex_colors.png-1d10fc95a84aee7e3e3e808ddc213700.ctex"]
 
 [params]
 

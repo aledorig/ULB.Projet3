@@ -9,7 +9,7 @@ var yaw_input: float = 0.0
 
 
 func _ready() -> void:
-	var chunk_manager: ChunkManager = get_node("/root/TerrainWorld")
+	var chunk_manager: ChunkManager = get_node_or_null("/root/TerrainWorld")
 	if chunk_manager:
 		if not chunk_manager.is_node_ready():
 			await chunk_manager.ready

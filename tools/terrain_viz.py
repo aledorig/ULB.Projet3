@@ -529,9 +529,9 @@ def save_terrain_shaded(height, temp_raw, moist_raw, path):
 
 def main():
 	p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-	p.add_argument("--seed",       type=int,   default=12345,  help="World seed (default: 12345)")
-	p.add_argument("--size",       type=int,   default=512,    help="Image resolution in pixels (default: 512)")
-	p.add_argument("--world-span", type=float, default=10000,  help="World units covered (default: 10000)")
+	p.add_argument("--seed",       type=int,   default=1010,  help="World seed (default: 12345)")
+	p.add_argument("--size",       type=int,   default=256,    help="Image resolution in pixels (default: 512)")
+	p.add_argument("--world-span", type=float, default=2000,  help="World units covered (default: 10000)")
 	p.add_argument("--octaves",    type=int,   default=6,      help="Noise octaves (default: 6)")
 	p.add_argument("--out-dir",    type=str,   default=None,   help="Output directory (default: tools/terrain_viz/)")
 	args = p.parse_args()

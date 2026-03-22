@@ -2,12 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c0uiaqoqat366"
-valid=false
+uid="uid://d038jcqju5w03"
+path="res://.godot/imported/11_final_height.png-f4f78b6c7352323743c8cec506e81606.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
-source_file="res://tools/terrain_viz/10_base_height_no_roughness.png"
+source_file="res://tools/terrain_viz (copy 1)/11_final_height.png"
+dest_files=["res://.godot/imported/11_final_height.png-f4f78b6c7352323743c8cec506e81606.ctex"]
 
 [params]
 

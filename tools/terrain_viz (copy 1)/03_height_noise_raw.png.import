@@ -2,12 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c0uiaqoqat366"
-valid=false
+uid="uid://cs82jniea0x4a"
+path="res://.godot/imported/03_height_noise_raw.png-0ef9c11cb4f468d6cb7391cd5d59d155.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
-source_file="res://tools/terrain_viz/10_base_height_no_roughness.png"
+source_file="res://tools/terrain_viz (copy 1)/03_height_noise_raw.png"
+dest_files=["res://.godot/imported/03_height_noise_raw.png-0ef9c11cb4f468d6cb7391cd5d59d155.ctex"]
 
 [params]
 

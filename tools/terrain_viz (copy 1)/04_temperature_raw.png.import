@@ -2,12 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c0uiaqoqat366"
-valid=false
+uid="uid://ceklh6ljx5cpw"
+path="res://.godot/imported/04_temperature_raw.png-38ad96ceeae62b7b55213ed20c47ddf7.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
-source_file="res://tools/terrain_viz/10_base_height_no_roughness.png"
+source_file="res://tools/terrain_viz (copy 1)/04_temperature_raw.png"
+dest_files=["res://.godot/imported/04_temperature_raw.png-38ad96ceeae62b7b55213ed20c47ddf7.ctex"]
 
 [params]
 

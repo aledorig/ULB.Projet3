@@ -2,12 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c0uiaqoqat366"
-valid=false
+uid="uid://bxc08molb3tfq"
+path="res://.godot/imported/01_continentalness.png-82748488dc00413b3286f7934cb37bf3.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
-source_file="res://tools/terrain_viz/10_base_height_no_roughness.png"
+source_file="res://tools/terrain_viz (copy 1)/01_continentalness.png"
+dest_files=["res://.godot/imported/01_continentalness.png-82748488dc00413b3286f7934cb37bf3.ctex"]
 
 [params]
 

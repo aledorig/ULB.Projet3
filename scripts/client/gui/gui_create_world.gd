@@ -13,8 +13,6 @@ extends Control
 @onready var vertex_spacing_label: Label = %VertexSpacingValue
 @onready var worker_threads_slider: HSlider = %WorkerThreadsSlider
 @onready var worker_threads_label: Label = %WorkerThreadsValue
-@onready var refresh_seed: Control = %RefreshSeed
-
 var advanced_visible: bool = false
 
 
