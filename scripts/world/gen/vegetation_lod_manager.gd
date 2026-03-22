@@ -25,7 +25,11 @@ static func get_foliage_lod(distance: float) -> int:
 
 
 func rebuild_queue(loaded_chunks: Dictionary, camera_chunk: Vector2i) -> void:
+	if GameSettingsAutoload.generation_step < ChunkMeshBuilder.STEP_FINAL:
+		return
+
 	_queue.clear()
+
 	for chunk_pos: Vector2i in loaded_chunks.keys():
 		var chunk_instance: ChunkInstance = loaded_chunks[chunk_pos]
 		if chunk_instance.unload_queued:
@@ -49,6 +53,9 @@ func process_queue(
 		vegetation_mgr: VegetationManager,
 		_max_updates: int = 1,
 ) -> void:
+	if GameSettingsAutoload.generation_step < ChunkMeshBuilder.STEP_FINAL:
+		return
+
 	# apply completed result from background thread
 	if _lod_result_ready and _lod_thread != null:
 		_lod_thread.wait_to_finish()
