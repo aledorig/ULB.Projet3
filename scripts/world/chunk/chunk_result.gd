@@ -3,6 +3,7 @@ extends RefCounted
 
 var chunk_pos: Vector2i
 var mesh_data: ArrayMesh
+var mesh_steps: Array = [] # length STEP_COUNT when populated
 var success: bool = false
 var error_message: String = ""
 var generation_time_ms: float = 0.0

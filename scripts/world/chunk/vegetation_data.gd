@@ -17,6 +17,7 @@ func _init() -> void:
 	foliage_variant_ids.resize(TerrainConfig.FOLIAGE_TYPES_PER_CHUNK)
 	foliage_counts.resize(TerrainConfig.FOLIAGE_TYPES_PER_CHUNK)
 	foliage_transforms.resize(TerrainConfig.FOLIAGE_TYPES_PER_CHUNK)
+
 	for i in range(TerrainConfig.FOLIAGE_TYPES_PER_CHUNK):
 		foliage_variant_ids[i] = 0
 		foliage_counts[i] = 0

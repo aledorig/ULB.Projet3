@@ -80,7 +80,7 @@ func _on_play_pressed() -> void:
 		GameSettingsAutoload.seed = int(temp_seed)
 	else:
 		push_warning("Invalid seed: '%s' -> using default" % temp_seed)
-		GameSettingsAutoload.seed = GameSettings.DEFAULT_SEED
+		GameSettingsAutoload.seed = IGameSettings.DEFAULT_SEED
 
 	GameSettingsAutoload.octave = int(octave_slider.value)
 	GameSettingsAutoload.render_distance = int(render_distance_slider.value)

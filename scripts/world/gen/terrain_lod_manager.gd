@@ -1,8 +1,5 @@
 class_name TerrainLodManager
 extends RefCounted
-## Manages terrain mesh LOD transitions via a single background thread
-## Same pattern as VegetationLodManager: queue → background regen → atomic swap
-## Old mesh stays visible until new one is ready
 
 var _queue: Array[Vector2i] = []
 
@@ -28,7 +25,11 @@ static func get_max_octaves(mesh_lod: int) -> int:
 
 
 func rebuild_queue(loaded_chunks: Dictionary, camera_chunk: Vector2i) -> void:
+	if GameSettingsAutoload.generation_step < ChunkMeshBuilder.STEP_FINAL:
+		return # step mode active, skip LOD transitions
+
 	_queue.clear()
+
 	for chunk_pos: Vector2i in loaded_chunks.keys():
 		var chunk_instance: ChunkInstance = loaded_chunks[chunk_pos]
 		if chunk_instance.unload_queued:
@@ -46,7 +47,7 @@ func process_queue(
 		vertex_spacing: float,
 		terrain_material: ShaderMaterial,
 ) -> void:
-	# 1. Apply completed result from background thread
+	# apply completed result from background thread
 	if _lod_result_ready and _lod_thread != null:
 		_lod_thread.wait_to_finish()
 		_lod_thread = null
@@ -59,20 +60,22 @@ func process_queue(
 			var chunk_pos: Vector2i = result.chunk_pos
 			if loaded_chunks.has(chunk_pos):
 				var chunk_instance: ChunkInstance = loaded_chunks[chunk_pos]
+
 				if not chunk_instance.unload_queued:
-					# Swap mesh atomically — old mesh replaced, no gap
+					# swap mesh atomically
 					var new_mesh: ArrayMesh = result.mesh_data
+
 					if new_mesh.get_surface_count() > 0:
 						new_mesh.surface_set_material(0, terrain_material)
-					chunk_instance.mesh_instance.mesh = new_mesh
+					chunk_instance.mesh_node.mesh = new_mesh
 
-					# If collision existed on old mesh, remove and let it be recreated
+					# if collision existed on old mesh, remove and let it be recreated
 					if chunk_instance.has_collision:
 						_remove_collision(chunk_instance)
 
 					chunk_instance.mesh_lod = result.new_mesh_lod
 
-	# 2. Submit new work if thread is idle
+	# submit new work if thread is idle
 	if _lod_thread != null:
 		return # still busy
 
@@ -91,7 +94,7 @@ func process_queue(
 		if new_mesh_lod == chunk_instance.mesh_lod:
 			continue
 
-		# Start background thread
+		# start background thread
 		_lod_thread = Thread.new()
 		_lod_thread.start(
 			_regenerate_mesh.bind(
@@ -114,7 +117,6 @@ func _regenerate_mesh(
 		chunk_pos: Vector2i,
 		new_mesh_lod: int,
 ) -> void:
-	# Runs on background thread — own TerrainGenerator, no shared state
 	var terrain_gen := TerrainGenerator.new(gen_seed, octave)
 	var lod_mesh_size: int = get_mesh_size(new_mesh_lod)
 	var mesh_builder := ChunkMeshBuilder.new(chunk_size, vertex_spacing, terrain_gen, lod_mesh_size)
@@ -129,7 +131,7 @@ func _regenerate_mesh(
 
 
 func _remove_collision(chunk_instance: ChunkInstance) -> void:
-	# Remove old StaticBody3D so it can be recreated from the new mesh
+	# remove old StaticBody3D so it can be recreated from the new mesh
 	for child in chunk_instance.node.get_children():
 		if child is StaticBody3D:
 			child.queue_free()

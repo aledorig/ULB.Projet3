@@ -275,12 +275,12 @@ class TC:
 
 # ── TerrainGenerator (vectorized) ────────────────────────────────────────────
 
-def _smoothstep(e0, e1, x):
+def smoothstep(e0, e1, x):
 	t = np.clip((x - e0) / (e1 - e0), 0.0, 1.0)
 	return t * t * (3.0 - 2.0 * t)
 
 
-def _shape_noise(n):
+def shape_noise(n):
 	return np.abs(n) ** 1.8 * np.sign(n)
 
 
@@ -333,11 +333,11 @@ class TerrainGenerator:
 		temp    = simplex(self.temperature_noise,    TC.TEMPERATURE_FREQ)
 		moist   = simplex(self.moisture_noise,       TC.MOISTURE_FREQ)
 
-		base       = _compute_base(cont)
-		amplitude  = _compute_amplitude(cont, peaks)
-		shaped     = _shape_noise(h_noise)
+		base       = compute_base(cont)
+		amplitude  = compute_amplitude(cont, peaks)
+		shaped     = shape_noise(h_noise)
 		base_h     = base + (shaped * amplitude * (1.0 + depth * 0.6)) + surface
-		alt_factor = _smoothstep(TC.ROUGHNESS_ALT_LOW, TC.ROUGHNESS_ALT_HIGH, base_h)
+		alt_factor = smoothstep(TC.ROUGHNESS_ALT_LOW, TC.ROUGHNESS_ALT_HIGH, base_h)
 		height     = base_h + roughness * TC.ROUGHNESS_AMP * alt_factor
 
 		return {
@@ -355,15 +355,15 @@ class TerrainGenerator:
 		}
 
 
-def _compute_base(cont):
-	sea_land     = np.interp(_smoothstep(-0.5, -0.15, cont), [0, 1], [TC.OCEAN_BASE, TC.LAND_BASE])
-	inland_boost = _smoothstep(-0.15, 0.2, cont) * TC.INLAND_BOOST
+def compute_base(cont):
+	sea_land     = np.interp(smoothstep(-0.5, -0.15, cont), [0, 1], [TC.OCEAN_BASE, TC.LAND_BASE])
+	inland_boost = smoothstep(-0.15, 0.2, cont) * TC.INLAND_BOOST
 	return sea_land + inland_boost
 
 
-def _compute_amplitude(cont, peaks):
-	land_factor = _smoothstep(-0.5, -0.15, cont)
-	return (np.interp(_smoothstep(-0.8, 0.2, peaks), [0, 1], [TC.MIN_AMPLITUDE, TC.MAX_AMPLITUDE])
+def compute_amplitude(cont, peaks):
+	land_factor = smoothstep(-0.5, -0.15, cont)
+	return (np.interp(smoothstep(-0.8, 0.2, peaks), [0, 1], [TC.MIN_AMPLITUDE, TC.MAX_AMPLITUDE])
 	        * np.interp(land_factor, [0, 1], [0.3, 1.0]))
 
 

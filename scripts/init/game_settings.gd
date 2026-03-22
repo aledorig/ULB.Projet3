@@ -1,6 +1,6 @@
 extends Node
 
-class_name GameSettings
+class_name IGameSettings
 
 signal runtime_settings_changed
 
@@ -20,6 +20,11 @@ var cache_max_size: int = 256
 var render_distance: int = 8:
 	set(value):
 		render_distance = value
+		runtime_settings_changed.emit()
+
+var generation_step: int = ChunkMeshBuilder.STEP_FINAL:
+	set(value):
+		generation_step = clampi(value, 0, ChunkMeshBuilder.STEP_FINAL)
 		runtime_settings_changed.emit()
 
 var max_speed: float = 50.0:

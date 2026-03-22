@@ -2,7 +2,7 @@ class_name ChunkRequest
 extends RefCounted
 
 var chunk_pos: Vector2i
-var priority: float ## Distance from camera (lower = higher priority)
+var priority: float # distance from camera (lower = higher priority)
 var timestamp: int
 var grass_lod: int = 0
 var foliage_lod: int = 0

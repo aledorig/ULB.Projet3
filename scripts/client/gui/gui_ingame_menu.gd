@@ -6,6 +6,8 @@ extends Control
 @onready var render_distance_label: Label = %RenderDistanceValue
 @onready var max_speed_slider: HSlider = %MaxSpeedSlider
 @onready var max_speed_label: Label = %MaxSpeedValue
+@onready var generation_step_slider: HSlider = %GenerationStepSlider
+@onready var generation_step_label: Label = %GenerationStepValue
 
 var settings_visible: bool = false
 
@@ -17,6 +19,7 @@ func _ready() -> void:
 	_sync_ui_from_settings()
 	render_distance_slider.value_changed.connect(_on_render_distance_changed)
 	max_speed_slider.value_changed.connect(_on_max_speed_changed)
+	generation_step_slider.value_changed.connect(_on_generation_step_changed)
 
 
 func _sync_ui_from_settings() -> void:
@@ -24,6 +27,9 @@ func _sync_ui_from_settings() -> void:
 	render_distance_label.text = str(GameSettingsAutoload.render_distance)
 	max_speed_slider.value = GameSettingsAutoload.max_speed
 	max_speed_label.text = str(int(GameSettingsAutoload.max_speed))
+	var step: int = GameSettingsAutoload.generation_step
+	generation_step_slider.value = step
+	generation_step_label.text = str(step)
 
 
 func _unhandled_input(_event: InputEvent) -> void:
@@ -74,3 +80,9 @@ func _on_render_distance_changed(value: float) -> void:
 func _on_max_speed_changed(value: float) -> void:
 	max_speed_label.text = str(int(value))
 	GameSettingsAutoload.max_speed = value
+
+
+func _on_generation_step_changed(value: float) -> void:
+	var step: int = int(value)
+	generation_step_label.text = str(step)
+	GameSettingsAutoload.generation_step = step

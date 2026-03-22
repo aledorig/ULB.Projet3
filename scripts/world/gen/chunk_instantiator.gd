@@ -4,6 +4,7 @@ extends RefCounted
 var chunk_size: int
 var vertex_spacing: float
 var terrain_material: ShaderMaterial
+var debug_material: StandardMaterial3D
 var vegetation_mgr: VegetationManager
 
 const COLLISION_DISTANCE: int = 3
@@ -19,6 +20,9 @@ func _init(
 	vertex_spacing = p_vertex_spacing
 	terrain_material = p_terrain_material
 	vegetation_mgr = p_vegetation_mgr
+	debug_material = StandardMaterial3D.new()
+	debug_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	debug_material.vertex_color_use_as_albedo = true
 
 
 func instantiate(
@@ -28,6 +32,7 @@ func instantiate(
 		chunk_scene: PackedScene,
 ) -> ChunkInstance:
 	var chunk_node: Node3D
+
 	if chunk_scene:
 		chunk_node = chunk_scene.instantiate()
 	else:
@@ -35,10 +40,7 @@ func instantiate(
 
 	parent.add_child(chunk_node)
 
-	var mesh_instance = _find_or_create_mesh_instance(chunk_node)
-	mesh_instance.mesh = result.mesh_data
-	if result.mesh_data.get_surface_count() > 0:
-		result.mesh_data.surface_set_material(0, terrain_material)
+	var mesh_node = _find_or_create_mesh_instance(chunk_node)
 
 	var chunk_world_size = (chunk_size - 1) * vertex_spacing
 	chunk_node.position = Vector3(
@@ -47,31 +49,57 @@ func instantiate(
 		result.chunk_pos.y * chunk_world_size,
 	)
 
-	var chunk_instance = ChunkInstance.new(chunk_node, mesh_instance, result.chunk_pos)
+	var chunk_instance = ChunkInstance.new(chunk_node, mesh_node, result.chunk_pos)
 
-	# Only create collision for nearby chunks (create_trimesh_shape is expensive)
+	# store all step meshes and apply material per step
+	# steps 0..STEP_FINAL-1  -> flat unshaded vertex colors
+	# step STEP_FINAL        -> terrain shader
+
+	chunk_instance.mesh_instance = result.mesh_steps
+	for i in range(result.mesh_steps.size()):
+		var step_mesh: ArrayMesh = result.mesh_steps[i]
+		if step_mesh.get_surface_count() > 0:
+			if i < ChunkMeshBuilder.STEP_FINAL:
+				step_mesh.surface_set_material(0, debug_material)
+			else:
+				step_mesh.surface_set_material(0, terrain_material)
+
+	chunk_instance.show_step(GameSettingsAutoload.generation_step)
+
+	# only create collision for nearby chunks (create_trimesh_shape is expensive)
 	var distance: float = (result.chunk_pos - camera_chunk).length()
 	if distance <= COLLISION_DISTANCE:
 		_add_collision(chunk_instance)
 
-	# Grass
+	# grass
 	chunk_instance.grass_instance = vegetation_mgr.create_grass(chunk_node, result.vegetation)
 	chunk_instance.grass_lod = VegetationLodManager.get_grass_lod(distance)
 
-	# Trees
+	# trees
 	chunk_instance.tree_instance = vegetation_mgr.create_tree(chunk_node, result.vegetation)
 
-	# Foliage
+	# foliage
 	chunk_instance.foliage_instances = vegetation_mgr.create_foliage(chunk_node, result.vegetation)
 	chunk_instance.foliage_lod = VegetationLodManager.get_foliage_lod(distance)
+
+	# hide vegetation when not on the final (full render) step
+	var is_final: bool = (GameSettingsAutoload.generation_step == ChunkMeshBuilder.STEP_FINAL)
+
+	if chunk_instance.grass_instance:
+		chunk_instance.grass_instance.visible = is_final
+	if chunk_instance.tree_instance:
+		chunk_instance.tree_instance.visible = is_final
+	for fi in chunk_instance.foliage_instances:
+		if fi:
+			fi.visible = is_final
 
 	return chunk_instance
 
 
 func ensure_collision(chunk_instance: ChunkInstance) -> bool:
-	## Returns true if a new collision was created (expensive)
 	if chunk_instance.has_collision:
 		return false
+
 	_add_collision(chunk_instance)
 	return true
 
@@ -79,7 +107,7 @@ func ensure_collision(chunk_instance: ChunkInstance) -> bool:
 func _add_collision(chunk_instance: ChunkInstance) -> void:
 	var static_body = StaticBody3D.new()
 	var collision_shape = CollisionShape3D.new()
-	collision_shape.shape = chunk_instance.mesh_instance.mesh.create_trimesh_shape()
+	collision_shape.shape = chunk_instance.mesh_node.mesh.create_trimesh_shape()
 	static_body.add_child(collision_shape)
 	chunk_instance.node.add_child(static_body)
 	chunk_instance.has_collision = true

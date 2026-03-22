@@ -3,6 +3,18 @@ extends RefCounted
 
 const OVERLAP: int = 1
 
+const STEP_COUNT: int = 7
+const STEP_FINAL: int = 6
+const STEP_NAMES: Array[String] = [
+	"Continental Base",
+	"+ Shaped Noise",
+	"+ Depth Modulation",
+	"+ Surface Detail",
+	"+ Roughness",
+	"Climate Colors",
+	"Full Render",
+]
+
 var chunk_size: int
 var vertex_spacing: float
 var terrain_gen: TerrainGenerator
@@ -159,3 +171,111 @@ func _build_mesh(
 	var mesh := ArrayMesh.new()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	return mesh
+
+
+func build_chunk_mesh_all_steps(chunk_position: Vector2) -> Array:
+	var extended_size: int = mesh_size + 2 * OVERLAP
+	var total_verts: int = extended_size * extended_size
+
+	var chunk_world_size: float = (chunk_size - 1) * vertex_spacing
+	var origin_x: float = chunk_position.x * chunk_world_size - OVERLAP * lod_spacing
+	var origin_z: float = chunk_position.y * chunk_world_size - OVERLAP * lod_spacing
+
+	var grids: Dictionary = terrain_gen.get_all_grids_batch(
+		origin_x,
+		origin_z,
+		extended_size,
+		extended_size,
+		lod_spacing,
+		max_octaves,
+		height_freq,
+	)
+
+	var cont_grid: PackedFloat32Array = grids.cont
+	var peaks_grid: PackedFloat32Array = grids.peaks
+	var noise_grid: PackedFloat32Array = grids.noise
+	var depth_grid: PackedFloat32Array = grids.depth
+	var surface_grid: PackedFloat32Array = grids.surface
+	var roughness_grid: PackedFloat32Array = grids.roughness
+	var temp_grid: PackedFloat32Array = grids.temp
+	var moist_grid: PackedFloat32Array = grids.moist
+
+	var v0 := PackedVector3Array()
+	v0.resize(total_verts)
+	var v1 := PackedVector3Array()
+	v1.resize(total_verts)
+	var v2 := PackedVector3Array()
+	v2.resize(total_verts)
+	var v3 := PackedVector3Array()
+	v3.resize(total_verts)
+	var v4 := PackedVector3Array()
+	v4.resize(total_verts)
+
+	var c0 := PackedColorArray()
+	c0.resize(total_verts)
+	var c1 := PackedColorArray()
+	c1.resize(total_verts)
+	var c2 := PackedColorArray()
+	c2.resize(total_verts)
+	var c3 := PackedColorArray()
+	c3.resize(total_verts)
+	var c4 := PackedColorArray()
+	c4.resize(total_verts)
+	var c5 := PackedColorArray()
+	c5.resize(total_verts)
+
+	var ox: float = OVERLAP * lod_spacing
+	var h_range: float = TerrainConfig.MAX_AMPLITUDE * 2.0
+
+	for idx in range(total_verts):
+		var cont: float = cont_grid[idx]
+		var peaks: float = peaks_grid[idx]
+		var base: float = terrain_gen.compute_base(cont)
+		var amplitude: float = terrain_gen.compute_amplitude(cont, peaks)
+		var shaped: float = TerrainGenerator.shape_noise(noise_grid[idx])
+
+		var h1: float = base + shaped * amplitude
+		var h2: float = base + shaped * amplitude * (1.0 + depth_grid[idx] * 0.6)
+		var h3: float = h2 + surface_grid[idx]
+		var alt_factor: float = TerrainGenerator.smoothstep(
+			TerrainConfig.ROUGHNESS_ALT_LOW,
+			TerrainConfig.ROUGHNESS_ALT_HIGH,
+			h3,
+		)
+		var h4: float = h3 + roughness_grid[idx] * TerrainConfig.ROUGHNESS_AMP * alt_factor
+
+		var lx: float = (idx % extended_size) * lod_spacing - ox
+		var lz: float = (idx / extended_size) * lod_spacing - ox
+
+		v0[idx] = Vector3(lx, base, lz)
+		v1[idx] = Vector3(lx, h1, lz)
+		v2[idx] = Vector3(lx, h2, lz)
+		v3[idx] = Vector3(lx, h3, lz)
+		v4[idx] = Vector3(lx, h4, lz)
+
+		c0[idx] = Color.from_hsv(0.0, 0.0, clampf((base - TerrainConfig.OCEAN_BASE) / h_range, 0.0, 1.0))
+		c1[idx] = Color.from_hsv(0.0, 0.0, clampf((h1 - TerrainConfig.OCEAN_BASE) / h_range, 0.0, 1.0))
+		c2[idx] = Color.from_hsv(0.0, 0.0, clampf((h2 - TerrainConfig.OCEAN_BASE) / h_range, 0.0, 1.0))
+		c3[idx] = Color.from_hsv(0.0, 0.0, clampf((h3 - TerrainConfig.OCEAN_BASE) / h_range, 0.0, 1.0))
+		c4[idx] = Color.from_hsv(0.0, 0.0, clampf((h4 - TerrainConfig.OCEAN_BASE) / h_range, 0.0, 1.0))
+
+		var temp_01: float = clampf(temp_grid[idx] * 0.5 + 0.5, 0.0, 1.0)
+		var moist_01: float = clampf(moist_grid[idx] * 0.5 + 0.5, 0.0, 1.0)
+		var cont_01: float = clampf(cont * 0.5 + 0.5, 0.0, 1.0)
+		c5[idx] = Color(temp_01, moist_01, cont_01)
+
+	var n0: PackedVector3Array = _calculate_normals_from_heights(v0)
+	var n1: PackedVector3Array = _calculate_normals_from_heights(v1)
+	var n2: PackedVector3Array = _calculate_normals_from_heights(v2)
+	var n3: PackedVector3Array = _calculate_normals_from_heights(v3)
+	var n4: PackedVector3Array = _calculate_normals_from_heights(v4)
+
+	return [
+		_build_mesh(v0, c0, n0), # 0: Continental Base
+		_build_mesh(v1, c1, n1), # 1: + Shaped Noise
+		_build_mesh(v2, c2, n2), # 2: + Depth Modulation
+		_build_mesh(v3, c3, n3), # 3: + Surface Detail
+		_build_mesh(v4, c4, n4), # 4: + Roughness
+		_build_mesh(v4, c5, n4), # 5: Climate Colors (flat material)
+		_build_mesh(v4, c5, n4), # 6: Full Render (terrain shader)
+	]

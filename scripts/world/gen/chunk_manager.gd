@@ -35,6 +35,7 @@ var instantiator: ChunkInstantiator
 var camera: Camera3D
 var material_manager: TerrainMaterialManager
 var terrain_material: ShaderMaterial
+var water_node: Node
 
 var chunks_generated_this_frame: int = 0
 var last_camera_chunk: Vector2i = Vector2i.ZERO
@@ -65,6 +66,10 @@ func _ready() -> void:
 	veg_lod_mgr = VegetationLodManager.new()
 	terrain_lod_mgr = TerrainLodManager.new()
 	instantiator = ChunkInstantiator.new(chunk_size, vertex_spacing, terrain_material, vegetation_mgr)
+
+	water_node = get_node_or_null("Water")
+	if water_node:
+		water_node.visible = (GameSettingsAutoload.generation_step == ChunkMeshBuilder.STEP_FINAL)
 
 	GameSettingsAutoload.runtime_settings_changed.connect(_on_settings_changed)
 	update_chunks(true)
@@ -282,6 +287,7 @@ func _generate_chunk_data(request: ChunkRequest, terrain_gen: TerrainGenerator) 
 	else:
 		var mesh_builder = ChunkMeshBuilder.new(chunk_size, vertex_spacing, terrain_gen, lod_mesh_size)
 		result.mesh_data = mesh_builder.build_chunk_mesh(request.chunk_pos)
+		result.mesh_steps = mesh_builder.build_chunk_mesh_all_steps(request.chunk_pos)
 
 	result.success = true
 
@@ -293,6 +299,7 @@ func _generate_chunk_data(request: ChunkRequest, terrain_gen: TerrainGenerator) 
 		p_seed,
 		request.chunk_pos,
 	)
+
 	var veg_all: Dictionary = veg_placer.generate_all(
 		request.chunk_pos,
 		request.grass_lod,
@@ -447,7 +454,7 @@ func get_height_at(world_pos: Vector3) -> float:
 		return 0.0
 
 	var chunk_instance: ChunkInstance = loaded_chunks[chunk_pos]
-	var mesh_inst: MeshInstance3D = chunk_instance.mesh_instance
+	var mesh_inst: MeshInstance3D = chunk_instance.mesh_node
 
 	if mesh_inst.has_method("get_height_at"):
 		return mesh_inst.get_height_at(world_pos.x, world_pos.z)
@@ -509,6 +516,14 @@ func _on_settings_changed() -> void:
 
 	if render_distance != old_distance:
 		update_chunks(true)
+
+	var step := GameSettingsAutoload.generation_step
+
+	for chunk_instance: ChunkInstance in loaded_chunks.values():
+		chunk_instance.show_step(step)
+
+	if water_node:
+		water_node.visible = (step == ChunkMeshBuilder.STEP_FINAL)
 
 
 func _exit_tree() -> void:
