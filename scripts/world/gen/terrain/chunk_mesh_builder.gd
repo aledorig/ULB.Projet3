@@ -40,14 +40,14 @@ static func get_or_build_index_buffer(p_mesh_size: int, p_overlap: int) -> Packe
 	for z in range(p_overlap, p_mesh_size + p_overlap - 1):
 		for x in range(p_overlap, p_mesh_size + p_overlap - 1):
 			var tl: int = z * extended_size + x
-			var tr: int = tl + 1
+			var top_right: int = tl + 1
 			var bl: int = tl + extended_size
 			var br: int = bl + 1
 
 			indices[write_idx] = tl
-			indices[write_idx + 1] = tr
+			indices[write_idx + 1] = top_right
 			indices[write_idx + 2] = bl
-			indices[write_idx + 3] = tr
+			indices[write_idx + 3] = top_right
 			indices[write_idx + 4] = br
 			indices[write_idx + 5] = bl
 			write_idx += 6
@@ -245,7 +245,7 @@ func build_chunk_mesh_all_steps(chunk_position: Vector2) -> Array:
 		var h4: float = h3 + roughness_grid[idx] * TerrainConfig.ROUGHNESS_AMP * alt_factor
 
 		var lx: float = (idx % extended_size) * lod_spacing - ox
-		var lz: float = (idx / extended_size) * lod_spacing - ox
+		var lz: float = float(idx / extended_size) * lod_spacing - ox
 
 		v0[idx] = Vector3(lx, base, lz)
 		v1[idx] = Vector3(lx, h1, lz)

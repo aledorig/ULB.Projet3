@@ -7,6 +7,7 @@ signal runtime_settings_changed
 const DEFAULT_SEED := 732647346203746
 
 # Pre-game settings (set before world loads)
+@warning_ignore("shadowed_variable_base_class")
 var seed: int = DEFAULT_SEED
 var octave: int = 4
 var chunk_size: int = 40

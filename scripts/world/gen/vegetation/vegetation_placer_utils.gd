@@ -95,7 +95,7 @@ static func pick_variant(chunk_pos: Vector2i, total: int, salt: int) -> int:
 static func pick_variant_set(chunk_pos: Vector2i, total: int, pick_count: int, salt: int) -> PackedInt32Array:
 	var result := PackedInt32Array()
 	var base: int = pick_variant(chunk_pos, total, salt)
-	var step: int = maxi(total / pick_count, 1)
+	var step: int = maxi(int(total / pick_count), 1)
 	for i in range(pick_count):
 		result.append((base + i * step) % total)
 	return result

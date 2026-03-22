@@ -62,7 +62,7 @@ func _process(delta: float) -> void:
 	text = ""
 	text += "Boundless Horizons v0.2\n"
 	text += "%d fps (avg %.0f) %.1fms\n" % [Engine.get_frames_per_second(), avg_fps, frame_ms]
-	text += "Draw: %d  Prims: %dk\n" % [draw_calls, primitives / 1000]
+	text += "Draw: %d  Prims: %dk\n" % [draw_calls, primitives / 1000.0]
 	text += "\n"
 	text += "XYZ: %.1f / %.1f / %.1f\n" % [pos.x, pos.y, pos.z]
 	text += "Chunk: %d %d, %d L, %d P\n" % [chunk_pos.x, chunk_pos.y, chunk_stats.loaded_chunks, chunk_stats.pending_chunks]

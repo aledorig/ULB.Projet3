@@ -39,6 +39,7 @@ var water_node: Node
 
 var chunks_generated_this_frame: int = 0
 var last_camera_chunk: Vector2i = Vector2i.ZERO
+var _last_culled_count: int = 0
 
 # Debug logging
 var _log_timer: float = 0.0
@@ -135,6 +136,8 @@ func _process(_delta: float) -> void:
 		)
 		t0 = t1
 
+	_update_frustum_culling()
+
 	veg_lod_mgr.process_queue(
 		loaded_chunks,
 		last_camera_chunk,
@@ -171,7 +174,7 @@ func _process(_delta: float) -> void:
 		initial_chunks_ready.emit()
 
 	if profiling:
-		var fps: int = Engine.get_frames_per_second()
+		var fps: int = int(Engine.get_frames_per_second())
 		var frame_ms: float = 1000.0 / maxf(fps, 1)
 		var draw_calls: int = int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))
 		var primitives: int = int(Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME))
@@ -198,8 +201,10 @@ func _process(_delta: float) -> void:
 			],
 		)
 		print(
-			"[PROFILE] loaded=%d pending=%d unload_queue=%d cached=%d" % [
+			"[PROFILE] loaded=%d (visible=%d culled=%d) pending=%d unload_queue=%d cached=%d" % [
 				loaded_chunks.size(),
+				loaded_chunks.size() - _last_culled_count,
+				_last_culled_count,
 				pending_chunks.size(),
 				chunks_queued_for_unload.size(),
 				mesh_cache.size(),
@@ -280,18 +285,28 @@ func _generate_chunk_data(request: ChunkRequest, terrain_gen: TerrainGenerator) 
 	var result = ChunkResult.new(request.chunk_pos)
 	var start_time = Time.get_ticks_usec()
 
-	# Mesh (use cache for LOD 0 only)
+	# mesh (use cache for LOD 0 only)
 	var lod_mesh_size: int = TerrainLodManager.get_mesh_size(request.mesh_lod)
 	if enable_mesh_caching and request.mesh_lod == 0 and mesh_cache.has(request.chunk_pos):
 		result.mesh_data = mesh_cache.get_mesh(request.chunk_pos)
+		# wrap cached mesh so show_step() finds it at index STEP_FINAL
+		result.mesh_steps.resize(ChunkMeshBuilder.STEP_COUNT)
+		result.mesh_steps[ChunkMeshBuilder.STEP_FINAL] = result.mesh_data
 	else:
 		var mesh_builder = ChunkMeshBuilder.new(chunk_size, vertex_spacing, terrain_gen, lod_mesh_size)
 		result.mesh_data = mesh_builder.build_chunk_mesh(request.chunk_pos)
-		result.mesh_steps = mesh_builder.build_chunk_mesh_all_steps(request.chunk_pos)
+
+		if GameSettingsAutoload.generation_step < ChunkMeshBuilder.STEP_FINAL:
+			# step mode: build all 7 meshes for the debug visualizer
+			result.mesh_steps = mesh_builder.build_chunk_mesh_all_steps(request.chunk_pos)
+		else:
+			# normal gameplay: skip the 7-mesh build and reuse the single mesh at STEP_FINAL
+			result.mesh_steps.resize(ChunkMeshBuilder.STEP_COUNT)
+			result.mesh_steps[ChunkMeshBuilder.STEP_FINAL] = result.mesh_data
 
 	result.success = true
 
-	# All vegetation: one shared grid, one call
+	# all vegetation (one shared grid, one call)
 	var veg_placer = VegetationPlacer.new(
 		terrain_gen,
 		chunk_size,
@@ -317,6 +332,7 @@ func _generate_chunk_data(request: ChunkRequest, terrain_gen: TerrainGenerator) 
 
 	var foliage: Dictionary = veg_all.foliage
 	result.vegetation.foliage_variant_ids = foliage.variant_ids
+
 	for i in range(foliage.transforms.size()):
 		result.vegetation.foliage_transforms[i] = foliage.transforms[i]
 	for i in range(foliage.counts.size()):
@@ -325,8 +341,7 @@ func _generate_chunk_data(request: ChunkRequest, terrain_gen: TerrainGenerator) 
 	var elapsed_ms: float = (Time.get_ticks_usec() - start_time) / 1000.0
 	result.generation_time_ms = elapsed_ms
 
-	# Debug logging
-	# (skip far chunks with no vegetation detail)
+	# debug logging (skip far chunks with no vegetation detail)
 	if request.foliage_lod < 2 or request.grass_lod < 2:
 		var veg: VegetationData = result.vegetation
 		var foliage_total: int = 0
@@ -428,6 +443,48 @@ func _process_unload_queue() -> void:
 		chunks_queued_for_unload.erase(chunk_pos)
 
 
+func _update_frustum_culling() -> void:
+	var frustum: Array[Plane] = camera.get_frustum()
+	var chunk_world_size: float = (chunk_size - 1) * vertex_spacing
+	var culled: int = 0
+
+	for chunk_instance: ChunkInstance in loaded_chunks.values():
+		var origin := chunk_instance.node.position
+		var aabb := AABB(
+			Vector3(
+				origin.x,
+				TerrainConfig.ABS_MIN_HEIGHT,
+				origin.z,
+			),
+			Vector3(
+				chunk_world_size,
+				TerrainConfig.ABS_MAX_HEIGHT - TerrainConfig.ABS_MIN_HEIGHT,
+				chunk_world_size,
+			),
+		)
+
+		var in_frustum := _is_aabb_in_frustum(aabb, frustum)
+		chunk_instance.node.visible = in_frustum
+		if not in_frustum:
+			culled += 1
+
+	_last_culled_count = culled
+
+
+static func _is_aabb_in_frustum(aabb: AABB, planes: Array[Plane]) -> bool:
+	for plane: Plane in planes:
+		# if all 8 corners are outside this plane, AABB is fully outside frustum
+		var all_outside := true
+		for i in 8:
+			if not plane.is_point_over(aabb.get_endpoint(i)):
+				all_outside = false
+				break
+
+		if all_outside:
+			return false
+	return true
+
+
 func world_to_chunk(world_pos: Vector3) -> Vector2i:
 	var chunk_world_size: float = (chunk_size - 1) * vertex_spacing
 	return Vector2i(
@@ -474,7 +531,7 @@ func get_stats() -> Dictionary:
 
 
 func _print_frame_stats() -> void:
-	var fps: int = Engine.get_frames_per_second()
+	var fps: int = int(Engine.get_frames_per_second())
 	var draw_calls: int = int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))
 	var primitives: int = int(Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME))
 	var mem_mb: float = Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0
@@ -499,8 +556,10 @@ func _print_frame_stats() -> void:
 
 	print("[STATS] fps=%d draw=%d prims=%d mem=%.0fMB obj=%d" % [fps, draw_calls, primitives, mem_mb, objects])
 	print(
-		"[STATS] chunks=%d mmi=%d | grass=%d trees=%d foliage=%d" % [
+		"[STATS] chunks=%d (visible=%d culled=%d) mmi=%d | grass=%d trees=%d foliage=%d" % [
 			loaded_chunks.size(),
+			loaded_chunks.size() - _last_culled_count,
+			_last_culled_count,
 			total_mmi,
 			total_grass,
 			total_trees,

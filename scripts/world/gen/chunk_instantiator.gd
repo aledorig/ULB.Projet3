@@ -58,11 +58,12 @@ func instantiate(
 	chunk_instance.mesh_instance = result.mesh_steps
 	for i in range(result.mesh_steps.size()):
 		var step_mesh: ArrayMesh = result.mesh_steps[i]
-		if step_mesh.get_surface_count() > 0:
-			if i < ChunkMeshBuilder.STEP_FINAL:
-				step_mesh.surface_set_material(0, debug_material)
-			else:
-				step_mesh.surface_set_material(0, terrain_material)
+		if step_mesh == null or step_mesh.get_surface_count() == 0:
+			continue
+		if i < ChunkMeshBuilder.STEP_FINAL:
+			step_mesh.surface_set_material(0, debug_material)
+		else:
+			step_mesh.surface_set_material(0, terrain_material)
 
 	chunk_instance.show_step(GameSettingsAutoload.generation_step)
 
