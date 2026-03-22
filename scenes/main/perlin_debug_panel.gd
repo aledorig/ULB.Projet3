@@ -4,8 +4,6 @@ extends Control
 @onready var vector_preview: Node = get_node("MarginContainer/VBoxContainer/Scroll/HBoxContainer/VectorPreview")
 @onready var preview_3d: Node = get_node("VP3D")
 @onready var settings_panel: Node = get_node("SettingsPanel")
-@onready var preview_scroll: HSlider = get_node("MarginContainer/VBoxContainer/PreviewScroll")
-
 @export var chunk_size: int = GameSettingsAutoload.chunk_size
 @export var vertex_spacing: float = GameSettingsAutoload.vertex_spacing
 @export var chunk_pos: Vector2i = Vector2i.ZERO
@@ -49,9 +47,6 @@ func _connect_signals() -> void:
 	if settings_panel.has_signal("octaves_changed"):
 		settings_panel.octaves_changed.connect(_on_octaves_changed)
 
-	if preview_scroll.value_changed.is_connected(_on_preview_scroll_value_changed) == false:
-		preview_scroll.value_changed.connect(_on_preview_scroll_value_changed)
-
 
 func _render_all() -> void:
 	if preview_2d.has_method("render_preview"):
@@ -76,6 +71,5 @@ func _on_octaves_changed(value: int) -> void:
 	_render_all()
 
 
-func _on_preview_scroll_value_changed(value: float) -> void:
-	var scroll := get_node("MarginContainer/VBoxContainer/Scroll") as ScrollContainer
-	scroll.scroll_horizontal = int(value)
+func _on_button_pressed() -> void:
+	get_tree().change_scene_to_file("res://scenes/main/gui_main_menu.tscn")
