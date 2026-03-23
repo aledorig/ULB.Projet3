@@ -295,14 +295,7 @@ func _generate_chunk_data(request: ChunkRequest, terrain_gen: TerrainGenerator) 
 	else:
 		var mesh_builder = ChunkMeshBuilder.new(chunk_size, vertex_spacing, terrain_gen, lod_mesh_size)
 		result.mesh_data = mesh_builder.build_chunk_mesh(request.chunk_pos)
-
-		if GameSettingsAutoload.generation_step < ChunkMeshBuilder.STEP_FINAL:
-			# step mode: build all 7 meshes for the debug visualizer
-			result.mesh_steps = mesh_builder.build_chunk_mesh_all_steps(request.chunk_pos)
-		else:
-			# normal gameplay: skip the 7-mesh build and reuse the single mesh at STEP_FINAL
-			result.mesh_steps.resize(ChunkMeshBuilder.STEP_COUNT)
-			result.mesh_steps[ChunkMeshBuilder.STEP_FINAL] = result.mesh_data
+		result.mesh_steps = mesh_builder.build_chunk_mesh_all_steps(request.chunk_pos)
 
 	result.success = true
 
