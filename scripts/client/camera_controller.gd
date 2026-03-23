@@ -17,7 +17,7 @@ var _camera: Camera3D = null
 var _ship_yaw_offset: float = 0.0
 var _last_parent_yaw: float = 0.0
 
-const IDLE_DELAY: float = 1.0
+const IDLE_DELAY: float = 20.0
 const RETURN_SPEED: float = 3.0
 const SHIP_LAG_SPEED: float = 4.0
 const DEFAULT_PITCH: float = -0.15
