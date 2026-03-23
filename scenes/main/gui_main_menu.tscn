@@ -51,11 +51,18 @@ grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxTexture_ekxnf")
 
 [node name="CenterContainer" type="CenterContainer" parent="." unique_id=1777721159]
-layout_mode = 0
-offset_left = 392.0
-offset_top = 128.0
-offset_right = 755.0
-offset_bottom = 535.0
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -181.5
+offset_top = -213.0
+offset_right = 181.5
+offset_bottom = 213.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer" unique_id=796126437]
 custom_minimum_size = Vector2(300, 0)

@@ -93,10 +93,18 @@ skeleton = NodePath("../../..")
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="VP3D/Root3D" unique_id=1027592570]
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=1272456298]
-layout_mode = 0
-offset_left = 8.0
-offset_right = 1153.0
-offset_bottom = 642.0
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -572.5
+offset_top = -321.0
+offset_right = 572.5
+offset_bottom = 321.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_constants/margin_left = 50
 theme_override_constants/margin_top = 120
 theme_override_constants/margin_right = 50
@@ -107,6 +115,7 @@ layout_mode = 2
 theme_override_constants/separation = 100
 
 [node name="Scroll" type="ScrollContainer" parent="MarginContainer/VBoxContainer" unique_id=956687721]
+clip_contents = false
 custom_minimum_size = Vector2(0, 400)
 layout_mode = 2
 size_flags_vertical = 3
@@ -143,12 +152,11 @@ expand_mode = 1
 script = ExtResource("5_mn0bg")
 
 [node name="SettingsPanel" type="Panel" parent="." unique_id=281385373]
-custom_minimum_size = Vector2(315, 315)
 layout_mode = 0
 offset_left = -1.0
 offset_top = -2.0
 offset_right = 374.0
-offset_bottom = 258.0
+offset_bottom = 314.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_mexpt")
 script = ExtResource("2_o05ww")
 
@@ -158,7 +166,7 @@ offset_left = 380.0
 offset_top = -29.0
 offset_right = 593.0
 offset_bottom = 94.0
-text = "Ouvrir/fermé options"
+text = "Show settings"
 
 [node name="Sliders" type="VBoxContainer" parent="SettingsPanel" unique_id=22968168]
 layout_mode = 0

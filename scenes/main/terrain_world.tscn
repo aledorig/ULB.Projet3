@@ -93,6 +93,7 @@ environment = SubResource("Environment_4p0at")
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1959937083]
 
 [node name="DebugInfo" type="Label" parent="CanvasLayer" unique_id=373791141]
+visible = false
 z_index = 2
 script = ExtResource("4_qld23")
 
@@ -222,26 +223,24 @@ theme_override_fonts/font = ExtResource("7_qs0if")
 text = "50"
 horizontal_alignment = 2
 
-[node name="GenerationStepRow" type="HBoxContainer" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel" unique_id=3001000001]
+[node name="GenerationStepRow" type="HBoxContainer" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel" unique_id=-1293967295]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel/GenerationStepRow" unique_id=3001000002]
+[node name="Label" type="Label" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel/GenerationStepRow" unique_id=-1293967294]
 custom_minimum_size = Vector2(130, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.85, 0.85, 0.85, 1)
 theme_override_fonts/font = ExtResource("7_qs0if")
 text = "Gen Step"
 
-[node name="GenerationStepSlider" type="HSlider" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel/GenerationStepRow" unique_id=3001000003]
+[node name="GenerationStepSlider" type="HSlider" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel/GenerationStepRow" unique_id=-1293967293]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-min_value = 0.0
 max_value = 6.0
-step = 1.0
 value = 6.0
 
-[node name="GenerationStepValue" type="Label" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel/GenerationStepRow" unique_id=3001000004]
+[node name="GenerationStepValue" type="Label" parent="CanvasLayer/IngameMenu/CenterContainer/VBox/SettingsPanel/GenerationStepRow" unique_id=-1293967292]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(30, 0)
 layout_mode = 2

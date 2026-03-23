@@ -41,9 +41,9 @@ func _on_toggle_button_pressed() -> void:
 	_update_panel_color(sliders.visible)
 
 	if sliders.visible:
-		toggle_button.text = "hide sliders"
+		toggle_button.text = "Hide settings"
 	else:
-		toggle_button.text = "show sliders"
+		toggle_button.text = "Show settings"
 
 
 func _on_seed_value_changed(value: float) -> void:
