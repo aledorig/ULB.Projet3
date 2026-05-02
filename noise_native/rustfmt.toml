@@ -1,0 +1,28 @@
+edition = "2021"
+
+max_width = 100
+hard_tabs = false
+tab_spaces = 4
+newline_style = "Unix"
+
+reorder_imports = true
+reorder_modules = true
+imports_granularity = "Item"
+group_imports = "StdExternalCrate"
+
+trailing_comma = "Vertical"
+
+use_small_heuristics = "Default"
+format_code_in_doc_comments = true
+wrap_comments = true
+comment_width = 100
+
+noise_native/.clippy.toml (new file):
+
+too-many-arguments-threshold = 7
+cognitive-complexity-threshold = 15
+too-many-lines-threshold = 100
+enum-variant-name-threshold = 3
+type-complexity-threshold = 250
+
+avoid-breaking-exported-api = false

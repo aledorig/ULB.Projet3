@@ -1,0 +1,51 @@
+[package]
+name = "noise_native"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+godot = { version = "0.5", features = ["api-4-6", "experimental-threads"] }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = "symbols"
+panic = "abort"
+
+[lints.rust]
+unsafe_code = "warn"
+unreachable_pub = "warn"
+
+[lints.clippy]
+cloned_instead_of_copied = "warn"
+flat_map_option = "warn"
+inefficient_to_string = "warn"
+manual_let_else = "warn"
+manual_ok_or = "warn"
+manual_string_new = "warn"
+map_unwrap_or = "warn"
+semicolon_if_nothing_returned = "warn"
+uninlined_format_args = "warn"
+unnested_or_patterns = "warn"
+fn_params_excessive_bools = "warn"
+needless_pass_by_value = "warn"
+trivially_copy_pass_by_ref = "warn"
+unused_self = "warn"
+redundant_closure_for_method_calls = "warn"
+redundant_clone = "warn"
+too_many_arguments = "warn"
+too_many_lines = "warn"
+cognitive_complexity = "warn"
+enum_variant_names = "warn"
+type_complexity = "warn"
+dbg_macro = "warn"
+empty_drop = "warn"
+exit = "warn"
+get_unwrap = "warn"
+rc_buffer = "warn"
+rc_mutex = "warn"
+rest_pat_in_fully_bound_structs = "warn"

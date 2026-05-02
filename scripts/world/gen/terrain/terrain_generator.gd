@@ -19,15 +19,15 @@ func _init(p_seed: int = GameSettingsAutoload.seed, p_octaves: int = GameSetting
 	var rng := RandomNumberGenerator.new()
 	rng.seed = p_seed
 
-	height_noise = OctaveNoise.new(rng, p_octaves)
-	depth_noise = OctaveNoise.new(rng, p_octaves)
-	surface_noise = SimplexNoise.new(rng)
+	height_noise = NoiseFactory.make_octave(rng, p_octaves)
+	depth_noise = NoiseFactory.make_octave(rng, p_octaves)
+	surface_noise = NoiseFactory.make_simplex(rng)
 
-	continentalness_noise = OctaveNoise.new(rng, p_octaves)
-	peaks_noise = OctaveNoise.new(rng, p_octaves)
-	temperature_noise = SimplexNoise.new(rng)
-	moisture_noise = SimplexNoise.new(rng)
-	roughness_noise = OctaveNoise.new(rng, p_octaves)
+	continentalness_noise = NoiseFactory.make_octave(rng, p_octaves)
+	peaks_noise = NoiseFactory.make_octave(rng, p_octaves)
+	temperature_noise = NoiseFactory.make_simplex(rng)
+	moisture_noise = NoiseFactory.make_simplex(rng)
+	roughness_noise = NoiseFactory.make_octave(rng, p_octaves)
 
 
 static func smoothstep(edge0: float, edge1: float, x: float) -> float:
@@ -151,7 +151,7 @@ func get_all_grids_batch(
 
 	var cont_grid := PackedFloat32Array()
 	cont_grid.resize(total_verts)
-	continentalness_noise.generate_octaves(
+	cont_grid = continentalness_noise.generate_octaves(
 		cont_grid,
 		origin_x * inv_spacing,
 		origin_z * inv_spacing,
@@ -164,7 +164,7 @@ func get_all_grids_batch(
 
 	var peaks_grid := PackedFloat32Array()
 	peaks_grid.resize(total_verts)
-	peaks_noise.generate_octaves(
+	peaks_grid = peaks_noise.generate_octaves(
 		peaks_grid,
 		origin_x * inv_spacing,
 		origin_z * inv_spacing,
@@ -177,7 +177,7 @@ func get_all_grids_batch(
 
 	var noise_grid := PackedFloat32Array()
 	noise_grid.resize(total_verts)
-	height_noise.generate_octaves(
+	noise_grid = height_noise.generate_octaves(
 		noise_grid,
 		origin_x * inv_spacing,
 		origin_z * inv_spacing,
@@ -190,7 +190,7 @@ func get_all_grids_batch(
 
 	var depth_grid := PackedFloat32Array()
 	depth_grid.resize(total_verts)
-	depth_noise.generate_octaves(
+	depth_grid = depth_noise.generate_octaves(
 		depth_grid,
 		origin_x * inv_spacing,
 		origin_z * inv_spacing,
@@ -203,7 +203,7 @@ func get_all_grids_batch(
 
 	var surface_grid := PackedFloat32Array()
 	surface_grid.resize(total_verts)
-	surface_noise.add(
+	surface_grid = surface_noise.add(
 		surface_grid,
 		origin_x * inv_spacing,
 		origin_z * inv_spacing,
@@ -216,7 +216,7 @@ func get_all_grids_batch(
 
 	var roughness_grid := PackedFloat32Array()
 	roughness_grid.resize(total_verts)
-	roughness_noise.generate_octaves(
+	roughness_grid = roughness_noise.generate_octaves(
 		roughness_grid,
 		origin_x * inv_spacing,
 		origin_z * inv_spacing,
@@ -229,7 +229,7 @@ func get_all_grids_batch(
 
 	var temp_grid := PackedFloat32Array()
 	temp_grid.resize(total_verts)
-	temperature_noise.add(
+	temp_grid = temperature_noise.add(
 		temp_grid,
 		origin_x * inv_spacing,
 		origin_z * inv_spacing,
@@ -242,7 +242,7 @@ func get_all_grids_batch(
 
 	var moist_grid := PackedFloat32Array()
 	moist_grid.resize(total_verts)
-	moisture_noise.add(
+	moist_grid = moisture_noise.add(
 		moist_grid,
 		origin_x * inv_spacing,
 		origin_z * inv_spacing,
@@ -281,7 +281,7 @@ func get_vertex_data_batch(
 
 	var cont_grid: PackedFloat32Array = PackedFloat32Array()
 	cont_grid.resize(total_verts)
-	continentalness_noise.generate_octaves(
+	cont_grid = continentalness_noise.generate_octaves(
 		cont_grid,
 		origin_x * inv_spacing,
 		origin_z * inv_spacing,
@@ -294,7 +294,7 @@ func get_vertex_data_batch(
 
 	var peaks_grid: PackedFloat32Array = PackedFloat32Array()
 	peaks_grid.resize(total_verts)
-	peaks_noise.generate_octaves(
+	peaks_grid = peaks_noise.generate_octaves(
 		peaks_grid,
 		origin_x * inv_spacing,
 		origin_z * inv_spacing,
@@ -307,7 +307,7 @@ func get_vertex_data_batch(
 
 	var noise_grid: PackedFloat32Array = PackedFloat32Array()
 	noise_grid.resize(total_verts)
-	height_noise.generate_octaves(
+	noise_grid = height_noise.generate_octaves(
 		noise_grid,
 		origin_x * inv_spacing,
 		origin_z * inv_spacing,
@@ -320,7 +320,7 @@ func get_vertex_data_batch(
 
 	var depth_grid: PackedFloat32Array = PackedFloat32Array()
 	depth_grid.resize(total_verts)
-	depth_noise.generate_octaves(
+	depth_grid = depth_noise.generate_octaves(
 		depth_grid,
 		origin_x * inv_spacing,
 		origin_z * inv_spacing,
@@ -333,7 +333,7 @@ func get_vertex_data_batch(
 
 	var surface_grid: PackedFloat32Array = PackedFloat32Array()
 	surface_grid.resize(total_verts)
-	surface_noise.add(
+	surface_grid = surface_noise.add(
 		surface_grid,
 		origin_x * inv_spacing,
 		origin_z * inv_spacing,
@@ -346,7 +346,7 @@ func get_vertex_data_batch(
 
 	var roughness_grid: PackedFloat32Array = PackedFloat32Array()
 	roughness_grid.resize(total_verts)
-	roughness_noise.generate_octaves(
+	roughness_grid = roughness_noise.generate_octaves(
 		roughness_grid,
 		origin_x * inv_spacing,
 		origin_z * inv_spacing,
@@ -359,7 +359,7 @@ func get_vertex_data_batch(
 
 	var temp_grid: PackedFloat32Array = PackedFloat32Array()
 	temp_grid.resize(total_verts)
-	temperature_noise.add(
+	temp_grid = temperature_noise.add(
 		temp_grid,
 		origin_x * inv_spacing,
 		origin_z * inv_spacing,
@@ -372,7 +372,7 @@ func get_vertex_data_batch(
 
 	var moist_grid: PackedFloat32Array = PackedFloat32Array()
 	moist_grid.resize(total_verts)
-	moisture_noise.add(
+	moist_grid = moisture_noise.add(
 		moist_grid,
 		origin_x * inv_spacing,
 		origin_z * inv_spacing,
