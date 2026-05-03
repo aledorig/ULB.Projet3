@@ -1,13 +1,8 @@
 use godot::prelude::*;
 
+use crate::common::GRAD_X;
+use crate::common::GRAD_Z;
 use crate::perlin::perlin_2d;
-
-const GRAD_X: [f32; 16] = [
-    1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, -1.0, 0.0,
-];
-const GRAD_Z: [f32; 16] = [
-    0.0, 0.0, 0.0, 0.0, 1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 0.0, 1.0, 0.0, -1.0,
-];
 
 const MAX_OCTAVES: usize = 16;
 
@@ -41,7 +36,13 @@ impl IRefCounted for OctaveNoise {
 impl OctaveNoise {
     #[func]
     #[allow(clippy::needless_pass_by_value)]
-    pub fn setup(&mut self, offsets_x: PackedFloat32Array, offsets_z: PackedFloat32Array, perms: PackedInt32Array, octave_count: i32) {
+    pub fn setup(
+        &mut self,
+        offsets_x: PackedFloat32Array,
+        offsets_z: PackedFloat32Array,
+        perms: PackedInt32Array,
+        octave_count: i32,
+    ) {
         self.octave_count = (octave_count as usize).min(MAX_OCTAVES);
         self.layers.clear();
 
@@ -82,6 +83,22 @@ impl OctaveNoise {
 
     #[allow(clippy::too_many_arguments)]
     #[func]
+    /// Generates octave noise over a given grid.
+    ///
+    /// # Arguments
+    ///
+    /// - `out`: The output array to store the noise values.
+    /// - `x_off`: The x offset of the grid.
+    /// - `z_off`: The z offset of the grid.
+    /// - `x_size`: The width of the grid.
+    /// - `z_size`: The height of the grid.
+    /// - `x_scale`: The x scale of the grid.
+    /// - `z_scale`: The z scale of the grid.
+    /// - `max_octaves`: The maximum number of octaves to generate.
+    ///
+    /// # Returns
+    ///
+    /// The output array with the generated noise values.
     pub fn generate_octaves(
         &self,
         mut out: PackedFloat32Array,
@@ -112,9 +129,12 @@ impl OctaveNoise {
             let mut idx = 0usize;
 
             for gz in 0..z_size as usize {
-                let mut real_z = z_off * z_scale * frequency + gz as f32 * z_scale * frequency + layer.z_offset;
+                let mut real_z =
+                    z_off * z_scale * frequency + gz as f32 * z_scale * frequency + layer.z_offset;
                 let mut zi = real_z as i32;
-                if real_z < zi as f32 { zi -= 1; }
+                if real_z < zi as f32 {
+                    zi -= 1;
+                }
 
                 let z0 = (zi & 255) as usize;
 
@@ -122,9 +142,13 @@ impl OctaveNoise {
                 let fz = real_z * real_z * real_z * (real_z * (real_z * 6.0 - 15.0) + 10.0);
 
                 for gx in 0..x_size as usize {
-                    let mut real_x = x_off * x_scale * frequency + gx as f32 * x_scale * frequency + layer.x_offset;
+                    let mut real_x = x_off * x_scale * frequency
+                        + gx as f32 * x_scale * frequency
+                        + layer.x_offset;
                     let mut xi = real_x as i32;
-                    if real_x < xi as f32 { xi -= 1; }
+                    if real_x < xi as f32 {
+                        xi -= 1;
+                    }
 
                     let x0 = (xi & 255) as usize;
 

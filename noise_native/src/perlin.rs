@@ -1,5 +1,8 @@
 use godot::prelude::*;
 
+use crate::common::GRAD_X;
+use crate::common::GRAD_Z;
+
 #[derive(GodotClass)]
 #[class(base = RefCounted, rename = PerlinNoise)]
 pub(crate) struct PerlinNoise {
@@ -40,8 +43,24 @@ impl PerlinNoise {
         perlin_2d(&self.perm, x + self.x_offset, z + self.z_offset)
     }
 
-    #[allow(clippy::too_many_arguments)] // mirrors GDScript API signature
+    #[allow(clippy::too_many_arguments)]
     #[func]
+    /// Populates a noise array with Perlin noise values over a given grid.
+    ///
+    /// # Arguments
+    ///
+    /// - `out`: The output array to store the noise values.
+    /// - `x_offset_param`: The x offset of the grid.
+    /// - `z_offset_param`: The z offset of the grid.
+    /// - `x_size`: The width of the grid.
+    /// - `z_size`: The height of the grid.
+    /// - `x_scale`: The x scale of the grid.
+    /// - `z_scale`: The z scale of the grid.
+    /// - `noise_scale`: The noise scale factor.
+    ///
+    /// # Returns
+    ///
+    /// The output array with the populated noise values.
     pub fn populate_noise_array(
         &self,
         mut out: PackedFloat32Array,
@@ -55,13 +74,6 @@ impl PerlinNoise {
     ) -> PackedFloat32Array {
         let inv_scale = 1.0 / noise_scale;
         let perm = &self.perm;
-
-        const GRAD_X: [f32; 16] = [
-            1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, -1.0, 0.0,
-        ];
-        const GRAD_Z: [f32; 16] = [
-            0.0, 0.0, 0.0, 0.0, 1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 0.0, 1.0, 0.0, -1.0,
-        ];
 
         let slice = out.as_mut_slice();
         let mut idx = 0usize;
@@ -115,14 +127,18 @@ impl PerlinNoise {
     }
 }
 
+/// Computes a 2D Perlin noise value at a given point.
+///
+/// # Arguments
+///
+/// - `perm`: The permutation array used for noise generation.
+/// - `x`: The x coordinate of the point.
+/// - `z`: The z coordinate of the point.
+///
+/// # Returns
+///
+/// The computed Perlin noise value at the given point.
 pub(crate) fn perlin_2d(perm: &[u8; 512], x: f32, z: f32) -> f32 {
-    const GRAD_X: [f32; 16] = [
-        1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, -1.0, 0.0,
-    ];
-    const GRAD_Z: [f32; 16] = [
-        0.0, 0.0, 0.0, 0.0, 1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 0.0, 1.0, 0.0, -1.0,
-    ];
-
     let mut xi = x as i32;
     if x < xi as f32 {
         xi -= 1;

@@ -1,10 +1,9 @@
 use godot::prelude::*;
 
-const GRAD_X: [f32; 12] = [1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 0.0, 0.0, 0.0, 0.0];
-const GRAD_Z: [f32; 12] = [1.0, 1.0, -1.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0, -1.0, 1.0, -1.0];
-
-const F2: f32 = 0.366_025_4; // 0.5 * (sqrt(3) - 1)
-const G2: f32 = 0.211_324_87; // (3 - sqrt(3)) / 6
+use crate::common::F2;
+use crate::common::G2;
+use crate::common::GRAD_X;
+use crate::common::GRAD_Z;
 
 #[derive(GodotClass)]
 #[class(base = RefCounted, rename = SimplexNoise)]
@@ -31,10 +30,11 @@ impl IRefCounted for SimplexNoise {
 #[allow(unreachable_pub)]
 impl SimplexNoise {
     #[func]
-    #[allow(clippy::needless_pass_by_value)] // gdext #[func] requires owned Packed* types
+    #[allow(clippy::needless_pass_by_value)]
     pub fn setup(&mut self, x_offset: f32, z_offset: f32, perm_array: PackedInt32Array) {
         self.x_offset = x_offset;
         self.z_offset = z_offset;
+
         for i in 0..512 {
             self.perm[i] = (perm_array.get(i).unwrap_or(0) & 0xFF) as u8;
         }
@@ -70,10 +70,22 @@ impl SimplexNoise {
                 idx += 1;
             }
         }
+
         out
     }
 }
 
+/// Computes the 2D simplex noise value for a given position.
+///
+/// # Arguments
+///
+/// * `perm` - The permutation table used for noise generation.
+/// * `x` - The x-coordinate of the position.
+/// * `z` - The z-coordinate of the position.
+///
+/// # Returns
+///
+/// The computed simplex noise value.
 pub(crate) fn simplex_2d(perm: &[u8; 512], x: f32, z: f32) -> f32 {
     let s = (x + z) * F2;
     let i = fast_floor(x + s);
@@ -105,7 +117,11 @@ pub(crate) fn simplex_2d(perm: &[u8; 512], x: f32, z: f32) -> f32 {
 
 fn fast_floor(v: f32) -> i32 {
     let i = v as i32;
-    if v < i as f32 { i - 1 } else { i }
+    if v < i as f32 {
+        i - 1
+    } else {
+        i
+    }
 }
 
 fn corner(x: f32, z: f32, gi: usize) -> f32 {

@@ -2,6 +2,7 @@
 
 use godot::prelude::*;
 
+mod common;
 mod octave;
 mod perlin;
 mod simplex;
