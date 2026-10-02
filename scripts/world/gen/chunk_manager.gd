@@ -71,7 +71,7 @@ func _ready() -> void:
 
 	GameSettingsAutoload.runtime_settings_changed.connect(_on_settings_changed)
 	update_chunks(true)
-	initial_chunks_ready.connect(_on_initial_chunks_ready)
+  
 	initial_chunks_ready.connect(_on_initial_chunks_ready)
 
 
